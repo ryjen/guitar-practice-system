@@ -30,7 +30,7 @@ Practice:
 - listen for vowel changes
 - avoid constant full-range movement
 
-### Parked-filter mode
+### Half-cocked mode
 
 Hold the wah in a resonant middle position and use it like a fixed filter.
 
@@ -55,7 +55,7 @@ Practice:
 
 1. Dry riff, no wah
 2. Accent wah only
-3. Parked-filter variation
+3. Half-cocked variation
 4. Slow sweep over sustained version
 5. Call-response variation
 6. Record the best fragment
@@ -71,5 +71,5 @@ Practice:
 ## Prompt seed
 
 ```text
-Generate a 20-minute expressive wah session for alternative rock guitar. Focus on accent wah, parked-filter tone, slow sweeps, and call-response phrasing. Avoid funk clichés. Include a backing-track structure and one MIDI bassline scaffold.
+Generate a 20-minute expressive wah session for alternative rock guitar. Focus on accent wah, half-cocked tone, slow sweeps, and call-response phrasing. Avoid funk clichés. Include a backing-track structure and one MIDI bassline scaffold.
 ```
