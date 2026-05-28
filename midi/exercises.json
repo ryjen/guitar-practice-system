@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "exercises": [
+    {
+      "id": "muted_16th_warmup",
+      "title": "Muted 16th Warmup",
+      "purpose": "Right-hand timing, muting, relaxed subdivision control",
+      "bpm": 80,
+      "bars": 8,
+      "feel": "straight sixteenths",
+      "practice_notes": [
+        "Mute strings with fretting hand",
+        "Keep wrist relaxed",
+        "Accent beat 2 and 4 for the first pass",
+        "Move accents to off-beat sixteenths for variation"
+      ]
+    },
+    {
+      "id": "wah_accent_groove",
+      "title": "Wah Accent Groove",
+      "purpose": "Coordinate wah motion with rhythmic accents",
+      "bpm": 92,
+      "bars": 8,
+      "feel": "funk rock sixteenth groove",
+      "practice_notes": [
+        "Use muted strums first",
+        "Open the wah only on accented notes",
+        "Keep the foot motion smaller than feels dramatic",
+        "Record one pass and listen for timing drift"
+      ]
+    },
+    {
+      "id": "u2_delay_pulse",
+      "title": "U2-Style Delay Pulse",
+      "purpose": "Practice dotted-eighth style rhythmic placement without relying on effects",
+      "bpm": 104,
+      "bars": 8,
+      "feel": "eighth-note arpeggio with dotted-eighth implication",
+      "practice_notes": [
+        "Use clean tone first",
+        "Add delay only after the picking pattern is stable",
+        "Let notes ring without rushing the next attack",
+        "Try palm muting for dynamic control"
+      ]
+    },
+    {
+      "id": "minor_pentatonic_call_response",
+      "title": "Minor Pentatonic Call and Response",
+      "purpose": "Build phrasing discipline and leave space",
+      "bpm": 88,
+      "bars": 12,
+      "feel": "call-response phrase cue",
+      "practice_notes": [
+        "Play only during the call bars at first",
+        "Answer with shorter phrases than the cue",
+        "Repeat one motif before varying it",
+        "Do not fill every gap"
+      ]
+    },
+    {
+      "id": "bend_intonation_drone",
+      "title": "Bend Intonation Drone",
+      "purpose": "Practice bending to stable target pitches against a drone",
+      "bpm": 72,
+      "bars": 8,
+      "feel": "slow drone with target cues",
+      "practice_notes": [
+        "Sing or hear the target before bending",
+        "Bend slowly into pitch, then release cleanly",
+        "Use tuner only after listening first",
+        "Stop if the fretting hand gets tense"
+      ]
+    }
+  ]
+}
