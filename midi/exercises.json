@@ -1,5 +1,10 @@
 {
-  "version": 1,
+  "schema_version": 1,
+  "policy": "source-first",
+  "generated_artifacts": {
+    "default_location": "generated/",
+    "commit_by_default": false
+  },
   "exercises": [
     {
       "id": "muted_16th_warmup",
@@ -21,7 +26,7 @@
       "purpose": "Coordinate wah motion with rhythmic accents",
       "bpm": 92,
       "bars": 8,
-      "feel": "funk rock sixteenth groove",
+      "feel": "wah accent groove",
       "practice_notes": [
         "Use muted strums first",
         "Open the wah only on accented notes",
@@ -70,6 +75,32 @@
         "Use tuner only after listening first",
         "Stop if the fretting hand gets tense"
       ]
+    }
+  ],
+  "source_specs": [
+    {
+      "id": "post-punk-e-minor-bass-scaffold",
+      "source": "examples/midi-scaffold-example.md",
+      "style_lane": "post-punk driving bass",
+      "key": "E minor",
+      "bpm": 142,
+      "status": "source-spec"
+    },
+    {
+      "id": "u2-wah-delay-session",
+      "source": "examples/u2-wah-delay-session.md",
+      "style_lane": "U2 / rhythmic delay",
+      "key": "D major / B minor color",
+      "bpm": 104,
+      "status": "source-spec"
+    },
+    {
+      "id": "ebow-ambient-session",
+      "source": "examples/ebow-ambient-session.md",
+      "style_lane": "ambient / E-Bow",
+      "key": "A minor",
+      "bpm": 72,
+      "status": "source-spec"
     }
   ]
 }
