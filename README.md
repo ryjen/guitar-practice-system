@@ -1,123 +1,157 @@
 # Guitar Practice System
 
-Status: **early design / planning**
+Status: **early design / practice-material generation**
 
-A structured guitar practice and learning system for tracking practice, organizing material, generating exercises, reviewing progress, and eventually supporting AI-assisted coaching.
+A source-first guitar practice-material generation system for turning styles, techniques, references, moods, and weak spots into concrete things to play.
 
-This repo starts as a documentation-first project. The goal is to define the practice model, data boundaries, workflows, and roadmap before committing to a specific app stack.
+This is **not primarily a practice tracker**. Tracking may exist as lightweight notes, but the center of the project is generation:
 
-## Goals
+- MIDI scaffolds
+- backing-track structures
+- rhythm and bassline prompts
+- wah / delay / E-Bow exercises
+- GarageBand drummer specs
+- Guitar Pro / MuseScore starting points
+- song-section practice briefs
+- style-specific session prompts
 
-- Track practice sessions, drills, songs, repertoire, and review notes
-- Structure learning around technique, rhythm, ear training, theory, songs, and creative exploration
-- Generate focused exercises and backing/practice material
-- Review progress over time using lightweight metrics and qualitative notes
-- Support future AI-assisted coaching without leaking unnecessary personal data
-- Keep the system simple enough to use consistently
+## Core idea
 
-## Non-goals, for now
+Most practice systems drift toward productivity mechanics: streaks, dashboards, analytics, and habit tracking. This project intentionally avoids that center of gravity.
 
-- Replacing a real teacher
-- Building a full DAW
-- Building a social network
-- Optimizing for gamification before the practice model is validated
-- Locking into a single app framework before workflows are understood
+The useful question is:
 
-## Use cases
+> Given a style, technique, mood, reference, or weakness, what playable material should I generate next?
 
-- Log a practice session with duration, focus areas, tempo, notes, and confidence
-- Maintain a repertoire list with songs, sections, difficulty, tuning, capo, key, and status
-- Track technique drills such as bends, alternate picking, chord transitions, muting, slides, wah control, and timing
-- Generate warmups and exercises for a target style or weakness
-- Review progress weekly and identify neglected areas
-- Build practice plans from available time, goals, and recent history
-- Export prompts, MIDI ideas, tabs, or backing-track specs for tools like GarageBand, Guitar Pro, MuseScore, or Flow
+## Primary goals
 
-## Architecture overview
+- Generate useful guitar practice sessions quickly
+- Create reusable prompts and templates for practice material
+- Support MIDI, song-form, rhythm, and backing-track scaffolds
+- Make generated material portable to GarageBand, Guitar Pro, MuseScore, Flow, or a DAW
+- Focus on expressive alternative / post-punk / ambient rock vocabulary
+- Support wah, delay, E-Bow, drones, hooks, bassline-led grooves, and arrangement practice
+
+## Secondary goals
+
+- Capture lightweight notes about what was useful
+- Preserve useful generated material for reuse
+- Keep references, cues, and prompts organized
+- Allow optional review without turning the project into analytics software
+
+## Non-goals
+
+- Habit tracking
+- Streak tracking
+- Quantified progress dashboards
+- Replacing a teacher
+- Building a DAW
+- Building a full notation editor
+- Building a social/gamified practice platform
+- Over-modeling every practice session
+
+## Workflow
 
 ```mermaid
 flowchart TD
-    User[Player] --> UI[Practice Interface]
-    UI --> PracticeLog[Practice Log]
-    UI --> Library[Song and Exercise Library]
-    UI --> Planner[Practice Planner]
-
-    PracticeLog --> Progress[Progress Review]
-    Library --> Planner
-    Progress --> Planner
-
-    Planner --> SessionPlan[Session Plan]
-    SessionPlan --> User
-
-    AI[AI Assistant / Coach] --> Planner
-    AI --> ExerciseGen[Exercise Generator]
-    AI --> Review[Review Summaries]
-
-    PracticeLog --> AIContext[Curated AI Context]
-    Library --> AIContext
-    AIContext --> AI
-
-    ExerciseGen --> Library
+    A[Choose style / technique / reference] --> B[Create session brief]
+    B --> C[Generate practice material]
+    C --> D[Create backing structure or MIDI scaffold]
+    D --> E[Move into GarageBand / Guitar Pro / MuseScore / Flow]
+    E --> F[Practice / record / experiment]
+    F --> G[Optional lightweight note]
+    G --> H[Generate next variation]
+    H --> C
 ```
 
-See [`docs/architecture.md`](docs/architecture.md) for the initial system model.
+See [`docs/practice-material-workflow.md`](docs/practice-material-workflow.md) and [`diagrams/practice-material-workflow.mmd`](diagrams/practice-material-workflow.mmd).
 
-## Initial repository structure
+## Repository map
 
 ```text
-.
-├── README.md
-└── docs
-    ├── architecture.md
-    ├── decisions
-    │   └── ADR-0001-project-direction.md
-    ├── planning
-    │   └── roadmap.md
-    └── use-cases.md
+docs/
+  planning/project-plan.md
+  system-overview.md
+  practice-material-workflow.md
+  style-map.md
+  wah-and-expression.md
+  ebow-and-sustain.md
+  garageband-drummer-workflow.md
+  midi-and-tab-workflow.md
+  lightweight-review.md
+
+prompts/
+  session-generator.md
+  backing-track-generator.md
+  midi-scaffold-generator.md
+  rhythm-groove-generator.md
+  arrangement-expander.md
+  guitar-pro-musescore-generator.md
+  youtube-playlist-builder.md
+
+templates/
+  session-brief.md
+  song-structure.md
+  backing-track-spec.md
+  midi-sketch-spec.md
+  garageband-drummer-spec.md
+  lightweight-review.md
+
+examples/
+  u2-wah-delay-session.md
+  post-punk-driving-bass-session.md
+  ebow-ambient-session.md
+  garageband-drummer-example.md
+  midi-scaffold-example.md
+
+midi/
+  exercises.json
+  basslines/
+  drum-cues/
+  chord-vamps/
+  song-forms/
+
+tabs/
+  README.md
 ```
 
-## Suggested roadmap
+## Artifact policy
 
-1. Define the practice domain model and core workflows
-2. Create a lightweight local data format for sessions, songs, drills, and reviews
-3. Build a minimal CLI or notebook workflow for logging and weekly review
-4. Add generated practice plans and exercise prompts
-5. Add integrations for MIDI, tab, backing tracks, or playlist references
-6. Add AI-assisted review and coaching with explicit privacy boundaries
-7. Consider a web/mobile app once the workflow proves useful
+Specs are canonical. Generated files are disposable until promoted.
 
-## Local development
+- Keep source specs in Markdown or JSON
+- Put bulk generated artifacts under `generated/`
+- Keep `generated/` ignored by default
+- Promote only curated MIDI or notation artifacts into `midi/curated/` or `tabs/`
+- Pair promoted artifacts with a short source note explaining musical intent
 
-No application runtime has been selected yet.
+## Good first use cases
 
-Possible early options:
+- Generate a 30-minute U2-style rhythmic delay and wah session
+- Build a post-punk bassline-led backing structure
+- Create an E-Bow drone and counterline exercise
+- Convert a reference track into actionable traits without copying it
+- Draft GarageBand drummer settings for verse / chorus / bridge sections
+- Generate a MIDI scaffold spec for a DAW import
 
-- Markdown + YAML/JSON files for zero-friction tracking
-- Python scripts or notebooks for analysis and generation
-- SQLite for local-first structured storage
-- A small web app later if the data model stabilizes
+## Local usage
 
-Placeholder commands:
+No runtime is required yet. Start with prompts and specs.
 
 ```bash
-# clone the repo
-git clone https://github.com/ryjen/guitar-practice-system.git
-cd guitar-practice-system
+# browse source docs
+find docs prompts templates examples -type f | sort
 
-# docs-first project for now
-find docs -type f -maxdepth 3
+# generated exports should stay local unless curated
+mkdir -p generated
 ```
 
 ## Design principles
 
-- Practice-first, not tool-first
-- Low-friction capture beats perfect modeling
-- Prefer local-first/private-by-default storage
-- Make AI context explicit and reviewable
-- Track enough data to improve, not enough to become a chore
-- Separate repertoire, exercises, sessions, and reviews
-- Support creative exploration as well as skill acquisition
-
-## Current status
-
-This project is in the planning phase. The next useful step is to define the MVP data schema and pick the smallest runnable workflow for logging practice and reviewing progress.
+- Practice-material-first, not tracker-first
+- Musical intent before gear settings
+- Source specs before generated artifacts
+- Fragments before full songs
+- Human-curated references only
+- Lightweight review, not analytics drift
+- DAW-neutral model with GarageBand as the first worked example
