@@ -1,119 +1,168 @@
 # Guitar Practice System
 
-Status: **early design / practice-material generation**
+**Status:** early design / practice-material generation
 
-A source-first guitar practice-material generation system for turning styles, techniques, references, moods, and weak spots into concrete things to play.
+A source-first system for generating playable guitar practice material from styles, techniques, references, moods, and weak spots.
 
-This is **not primarily a practice tracker**. Tracking may exist as lightweight notes, but the center of the project is generation:
+The project is intentionally **practice-material-first**, not tracker-first. The core question is not “how do I measure every session?” It is:
 
-- MIDI scaffolds
-- backing-track structures
-- rhythm and bassline prompts
-- wah / delay / E-Bow exercises
-- GarageBand drummer specs
-- Guitar Pro / MuseScore starting points
-- song-section practice briefs
-- style-specific session prompts
+> Given a style, technique, mood, reference, or weakness, what should I generate and play next?
 
-## Core idea
+## Overview
 
-Most practice systems drift toward productivity mechanics: streaks, dashboards, analytics, and habit tracking. This project intentionally avoids that center of gravity.
+Most practice tools drift toward streaks, dashboards, habit metrics, and quantified progress. Those can be useful, but they are secondary here.
 
-The useful question is:
+This repository focuses on producing concrete musical material:
 
-> Given a style, technique, mood, reference, or weakness, what playable material should I generate next?
+- Session briefs
+- MIDI scaffold specs
+- Bassline-led grooves
+- Drum cue structures
+- Wah, delay, and E-Bow exercises
+- GarageBand drummer settings
+- Guitar Pro / MuseScore / Flow starting points
+- Arrangement prompts and song-section maps
+- Reusable prompts for generating new practice variations
 
-## Primary goals
+The intended workflow is lightweight: generate something playable, move it into a DAW or notation tool, practice it, optionally capture what worked, then generate the next variation.
 
-- Generate useful guitar practice sessions quickly
-- Create reusable prompts and templates for practice material
-- Support MIDI, song-form, rhythm, and backing-track scaffolds
-- Make generated material portable to GarageBand, Guitar Pro, MuseScore, Flow, or a DAW
-- Focus on expressive alternative / post-punk / ambient rock vocabulary
-- Support wah, delay, E-Bow, drones, hooks, bassline-led grooves, and arrangement practice
+## Goals
 
-## Secondary goals
-
-- Capture lightweight notes about what was useful
-- Preserve useful generated material for reuse
-- Keep references, cues, and prompts organized
-- Allow optional review without turning the project into analytics software
+- Generate useful practice sessions quickly
+- Turn musical references into actionable traits without copying them
+- Support expressive alternative, post-punk, ambient rock, and U2-adjacent vocabulary
+- Create reusable source specs before committing generated artifacts
+- Make generated material portable across GarageBand, Guitar Pro, MuseScore, Flow, and DAWs
+- Support MIDI, tab, rhythm, arrangement, bassline, and backing-track scaffolds
+- Keep optional review lightweight and musically useful
 
 ## Non-goals
 
-- Habit tracking
-- Streak tracking
-- Quantified progress dashboards
-- Replacing a teacher
-- Building a DAW
-- Building a full notation editor
-- Building a social/gamified practice platform
-- Over-modeling every practice session
+This is not intended to become:
 
-## Workflow
+- A habit tracker
+- A streak app
+- A quantified progress dashboard
+- A DAW
+- A full notation editor
+- A social or gamified learning platform
+- A replacement for a teacher
+- A system that over-models every practice session
+
+Tracking can exist as a thin optional layer, but it should not dominate the design.
+
+## Core workflow
 
 ```mermaid
 flowchart TD
-    A[Choose style / technique / reference] --> B[Create session brief]
+    A[Choose style, technique, reference, or weakness] --> B[Create session brief]
     B --> C[Generate practice material]
     C --> D[Create backing structure or MIDI scaffold]
-    D --> E[Move into GarageBand / Guitar Pro / MuseScore / Flow]
-    E --> F[Practice / record / experiment]
+    D --> E[Move into GarageBand, Guitar Pro, MuseScore, Flow, or DAW]
+    E --> F[Practice, record, experiment]
     F --> G[Optional lightweight note]
     G --> H[Generate next variation]
     H --> C
 ```
 
-See [`docs/practice-material-workflow.md`](docs/practice-material-workflow.md) and [`diagrams/practice-material-workflow.mmd`](diagrams/practice-material-workflow.mmd).
+See [`docs/practice-material-workflow.md`](docs/practice-material-workflow.md) for the fuller workflow model.
 
-## Repository map
+## Example use cases
 
-```text
-docs/
-  planning/project-plan.md
-  system-overview.md
-  practice-material-workflow.md
-  style-map.md
-  wah-and-expression.md
-  ebow-and-sustain.md
-  garageband-drummer-workflow.md
-  midi-and-tab-workflow.md
-  lightweight-review.md
+### Generate a focused practice session
 
-prompts/
-  session-generator.md
-  backing-track-generator.md
-  midi-scaffold-generator.md
-  rhythm-groove-generator.md
-  arrangement-expander.md
-  guitar-pro-musescore-generator.md
-  youtube-playlist-builder.md
+Create a 30-minute session around a specific technique or sound, such as:
 
-templates/
-  session-brief.md
-  song-structure.md
-  backing-track-spec.md
-  midi-sketch-spec.md
-  garageband-drummer-spec.md
-  lightweight-review.md
+- Rhythmic wah comping
+- Dotted-eighth delay hooks
+- E-Bow drones and counterlines
+- Post-punk bassline-led vamps
+- Ambient swells over modal harmony
 
-examples/
-  u2-wah-delay-session.md
-  post-punk-driving-bass-session.md
-  ebow-ambient-session.md
-  garageband-drummer-example.md
-  midi-scaffold-example.md
+### Build backing material
 
-midi/
-  exercises.json
-  basslines/
-  drum-cues/
-  chord-vamps/
-  song-forms/
+Generate a song-form scaffold that can become a GarageBand, DAW, or notation project:
 
-tabs/
-  README.md
+- Intro / verse / chorus / bridge structure
+- Drum intensity cues
+- Bassline movement
+- Chord vamp options
+- Dynamic arrangement notes
+
+### Convert references into traits
+
+Use reference artists or songs as input without treating them as material to clone:
+
+- Groove feel
+- Space and density
+- Effects vocabulary
+- Section contrast
+- Call-and-response patterns
+- Hook placement
+
+### Preserve useful generated material
+
+Keep source specs canonical, then promote only the material worth reusing.
+
+Generated output should be disposable by default. Curated artifacts should carry enough source context to explain why they matter musically.
+
+## Quick start
+
+No runtime is required yet. The current system starts with prompts, templates, examples, and source specs.
+
+```bash
+# Clone the repository
+git clone https://github.com/ryjen/guitar-practice-system.git
+cd guitar-practice-system
+
+# Browse the source material
+find docs prompts templates examples -type f | sort
+
+# Keep disposable generated exports local unless curated
+mkdir -p generated
 ```
+
+Suggested first pass:
+
+1. Pick a style or technique from the docs
+2. Start from a session or backing-track prompt
+3. Generate a short playable sketch
+4. Move the result into GarageBand, Guitar Pro, MuseScore, Flow, or a DAW
+5. Save only the useful source spec or curated artifact
+
+## Concepts
+
+### Source-first generation
+
+Markdown and JSON specs are the stable source of truth. Rendered MIDI, exported notation, and DAW files are outputs, not the canonical design.
+
+### Musical intent before settings
+
+Gear settings are useful only when they serve the musical goal. A wah or delay exercise should start with feel, role, timing, and arrangement purpose before pedal parameters.
+
+### Fragments before full songs
+
+The system should prefer small reusable fragments over fully composed pieces:
+
+- A groove
+- A transition
+- A hook
+- A drone bed
+- A call-and-response phrase
+- A verse/chorus contrast pattern
+
+Fragments are easier to practice, mutate, and recombine.
+
+### Lightweight review
+
+Review should answer practical questions:
+
+- Was this playable?
+- Did it produce a useful sound?
+- What should be varied next?
+- Should this be promoted, discarded, or regenerated?
+
+It should not become analytics drift.
 
 ## Artifact policy
 
@@ -122,36 +171,49 @@ Specs are canonical. Generated files are disposable until promoted.
 - Keep source specs in Markdown or JSON
 - Put bulk generated artifacts under `generated/`
 - Keep `generated/` ignored by default
-- Promote only curated MIDI or notation artifacts into `midi/curated/` or `tabs/`
-- Pair promoted artifacts with a short source note explaining musical intent
+- Promote only curated MIDI or notation artifacts into stable project paths
+- Pair promoted artifacts with a short note explaining musical intent
+- Prefer small, reusable exercises over large opaque exports
 
-## Good first use cases
+## Roadmap
 
-- Generate a 30-minute U2-style rhythmic delay and wah session
-- Build a post-punk bassline-led backing structure
-- Create an E-Bow drone and counterline exercise
-- Convert a reference track into actionable traits without copying it
-- Draft GarageBand drummer settings for verse / chorus / bridge sections
-- Generate a MIDI scaffold spec for a DAW import
+### Near term
 
-## Local usage
+- Expand prompt coverage for session generation, backing tracks, MIDI scaffolds, and arrangement variants
+- Add more worked examples for wah, delay, E-Bow, post-punk bass, and ambient textures
+- Define a consistent schema for MIDI scaffold specs
+- Create a small curated set of reusable practice fragments
 
-No runtime is required yet. Start with prompts and specs.
+### Later
 
-```bash
-# browse source docs
-find docs prompts templates examples -type f | sort
-
-# generated exports should stay local unless curated
-mkdir -p generated
-```
+- Add generation scripts for MIDI and notation artifacts
+- Add optional lightweight review capture
+- Build a small evaluation corpus for generated material quality
+- Explore AI-assisted coaching loops without making tracking the center of the system
+- Improve portability across GarageBand, Guitar Pro, MuseScore, Flow, and DAWs
 
 ## Design principles
 
-- Practice-material-first, not tracker-first
-- Musical intent before gear settings
-- Source specs before generated artifacts
-- Fragments before full songs
-- Human-curated references only
-- Lightweight review, not analytics drift
-- DAW-neutral model with GarageBand as the first worked example
+- Practice material over productivity mechanics
+- Source specs over generated artifacts
+- Musical intent over tooling novelty
+- DAW-neutral structure with GarageBand as the first worked example
+- Human-curated references, not blind style cloning
+- Optional review, not progress-dashboard gravity
+- Small playable units before complete arrangements
+
+## Contributing
+
+This project is early and opinionated. Useful contributions should improve the quality, portability, or repeatability of generated practice material.
+
+Good contribution areas include:
+
+- New session prompts
+- Better scaffold schemas
+- Worked examples
+- MIDI generation experiments
+- GarageBand / Guitar Pro / MuseScore workflows
+- Practice-material evaluation criteria
+- Clearer artifact promotion rules
+
+Avoid contributions that push the project toward streak tracking, gamification, or dashboard-heavy analytics unless they are clearly optional and subordinate to practice-material generation.
