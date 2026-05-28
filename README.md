@@ -6,6 +6,8 @@ A selfish guitar practice system for developing my own style, sound, rhythm, voc
 
 This repository is not trying to be a universal guitar-learning platform. It is a working system for helping me generate things I actually want to play: grooves, exercises, MIDI scaffolds, backing structures, arrangement cues, and style-specific practice sessions.
 
+The main focus is the wah / slide / E-Bow direction: atmospheric, expressive, rhythm-aware guitar built around movement, sustain, texture, and feel. Jazz vocabulary is welcome here, but as a source of harmony, rhythm, phrasing, and voice-leading ideas that can feed that core sound.
+
 The core question is:
 
 > What should I generate, play, mutate, record, or revisit next to move my sound forward?
@@ -20,7 +22,7 @@ It exists to help me turn musical intent into concrete material:
 - MIDI scaffold specs
 - Bassline-led grooves
 - Drum cue structures
-- Wah, delay, and E-Bow exercises
+- Wah, slide, delay, and E-Bow exercises
 - GarageBand drummer settings
 - Guitar Pro / MuseScore / Flow starting points
 - Arrangement prompts and song-section maps
@@ -35,8 +37,10 @@ The intended loop is simple: generate something playable, move it into a DAW or 
 - Generate useful practice sessions quickly
 - Create reusable source specs before committing generated artifacts
 - Make generated material portable across GarageBand, Guitar Pro, MuseScore, Flow, and DAWs
+- Center the wah / slide / E-Bow style: atmospheric, expressive, textural, and rhythm-aware
 - Support expressive alternative, post-punk, ambient rock, and U2-adjacent vocabulary
-- Explore wah, delay, E-Bow, drones, hooks, bassline-led grooves, and atmospheric textures
+- Add jazz vocabulary where it helps: richer harmony, substitutions, comping ideas, phrasing, swing feel, chord melody fragments, and voice-leading
+- Explore wah, slide, delay, E-Bow, drones, hooks, bassline-led grooves, and atmospheric textures
 - Keep notes lightweight and useful when they help the next session
 
 ## Core workflow
@@ -62,12 +66,14 @@ See [`docs/practice-material-workflow.md`](docs/practice-material-workflow.md) f
 Create a 30-minute session around a specific technique, feel, or sound:
 
 - Rhythmic wah comping
+- Slide phrases over droning harmony
 - Dotted-eighth delay hooks
 - E-Bow drones and counterlines
 - Post-punk bassline-led vamps
 - Ambient swells over modal harmony
 - Muted sixteenth-note rhythm work
 - Hook writing over a simple two-chord bed
+- Jazz-flavoured chord movement under an atmospheric lead texture
 
 ### Build backing material
 
@@ -77,8 +83,9 @@ Generate a song-form scaffold that can become a GarageBand, DAW, or notation pro
 - Drum intensity cues
 - Bassline movement
 - Chord vamp options
+- Modal or jazz-leaning harmonic colour
 - Dynamic arrangement notes
-- Cue points for guitar hooks, swells, fills, or texture changes
+- Cue points for guitar hooks, swells, slides, fills, or texture changes
 
 ### Convert references into traits
 
@@ -91,6 +98,7 @@ Use reference artists or songs as directional input:
 - Call-and-response patterns
 - Hook placement
 - Bassline and rhythm-guitar relationship
+- Harmony, substitutions, and voice-leading ideas worth stealing as practice inputs
 
 The point is not to clone references. The point is to extract useful traits and turn them into playable material.
 
@@ -128,9 +136,15 @@ Suggested first pass:
 
 Markdown and JSON specs are the stable source of truth. Rendered MIDI, exported notation, and DAW files are outputs, not the canonical design.
 
+### Core style first
+
+The center of gravity is wah / slide / E-Bow guitar: expressive motion, sustain, texture, rhythmic placement, and atmospheric arrangement.
+
+Jazz belongs in the system when it strengthens that center of gravity. That means using jazz as vocabulary, not as a separate academic lane: better chord movement, better comping, better phrasing, better voice-leading, and more interesting tension/release.
+
 ### Musical intent before settings
 
-Gear settings matter, but only in service of the part. A wah or delay exercise should start with feel, role, timing, motion, and arrangement purpose before pedal parameters.
+Gear settings matter, but only in service of the part. A wah, slide, delay, or E-Bow exercise should start with feel, role, timing, motion, and arrangement purpose before pedal parameters.
 
 ### Fragments before full songs
 
@@ -141,6 +155,8 @@ The system works best when it generates small reusable fragments:
 - A hook
 - A drone bed
 - A rhythmic cell
+- A slide phrase
+- A chord movement
 - A call-and-response phrase
 - A verse/chorus contrast pattern
 
@@ -171,9 +187,10 @@ Specs are canonical. Generated files are disposable until promoted.
 ### Near term
 
 - Expand prompt coverage for session generation, backing tracks, MIDI scaffolds, and arrangement variants
-- Add more worked examples for wah, delay, E-Bow, post-punk bass, and ambient textures
+- Add more worked examples for wah, slide, delay, E-Bow, post-punk bass, and ambient textures
 - Define a consistent schema for MIDI scaffold specs
 - Create a small curated set of reusable practice fragments
+- Add jazz-colour exercises that support the core sound rather than pulling the system into a separate jazz-practice track
 
 ### Later
 
@@ -186,6 +203,8 @@ Specs are canonical. Generated files are disposable until promoted.
 ## Design principles
 
 - My sound first
+- Wah / slide / E-Bow as the center of gravity
+- Jazz as vocabulary, not a competing curriculum
 - Rhythm and feel before complexity
 - Practice material over productivity mechanics
 - Source specs over generated artifacts
