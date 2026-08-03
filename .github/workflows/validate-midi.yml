@@ -1,0 +1,41 @@
+name: Validate MIDI
+
+on:
+  pull_request:
+    paths:
+      - "backing-tracks/**"
+      - "scripts/midi_workflow.py"
+      - "tests/test_midi_workflow.py"
+      - ".github/workflows/validate-midi.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "backing-tracks/**"
+      - "scripts/midi_workflow.py"
+      - "tests/test_midi_workflow.py"
+      - ".github/workflows/validate-midi.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-midi-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Generate and validate example
+        run: |
+          python scripts/midi_workflow.py generate \
+            backing-tracks/slide-slow-blues/manifest.json \
+            generated/backing-tracks/slide-slow-blues-a-60.mid
