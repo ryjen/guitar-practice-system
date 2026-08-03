@@ -1,0 +1,109 @@
+{
+  "id": "slide-slow-blues-a-60",
+  "title": "Slow Blues-Rock Slide Practice",
+  "purpose": "Expose slide intonation, muting, sustain, and phrase placement over a sparse harmonic bed.",
+  "linked_techniques": [
+    "slide-foundations"
+  ],
+  "linked_songs": [],
+  "key_signature": "A",
+  "tempo_bpm": 60,
+  "meter": [
+    4,
+    4
+  ],
+  "feel": "slow straight-eighth blues-rock",
+  "count_in_bars": 1,
+  "loop": {
+    "start_marker": "PRACTICE-A",
+    "end_marker": "END"
+  },
+  "sections": [
+    {
+      "name": "PRACTICE-A",
+      "bars": 12,
+      "chords": [
+        "A7",
+        "A7",
+        "A7",
+        "A7",
+        "D7",
+        "D7",
+        "A7",
+        "A7",
+        "E7",
+        "D7",
+        "A7",
+        "E7"
+      ]
+    },
+    {
+      "name": "PRACTICE-B",
+      "bars": 12,
+      "chords": [
+        "A7",
+        "D7",
+        "A7",
+        "A7",
+        "D7",
+        "D7",
+        "A7",
+        "A7",
+        "E7",
+        "D7",
+        "A7",
+        "E7"
+      ]
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Drums",
+      "role": "drums",
+      "channel": 9,
+      "velocity": 78,
+      "instrument_intent": "restrained kit; kick and snare define pulse without filling guitar space"
+    },
+    {
+      "name": "Bass",
+      "role": "bass",
+      "channel": 0,
+      "program": 33,
+      "velocity": 76,
+      "instrument_intent": "round electric bass alternating root and fifth"
+    },
+    {
+      "name": "Keys",
+      "role": "keys",
+      "channel": 1,
+      "program": 4,
+      "velocity": 56,
+      "instrument_intent": "soft electric-piano whole-bar voicings"
+    }
+  ],
+  "variants": {
+    "tempo_bpm": [
+      50,
+      60,
+      72
+    ],
+    "keys": [
+      "A",
+      "D",
+      "E"
+    ],
+    "density": [
+      "drums-bass",
+      "full"
+    ]
+  },
+  "provenance": {
+    "type": "original",
+    "notes": "Original twelve-bar practice arrangement using common blues harmony."
+  },
+  "outputs": {
+    "midi": "generated/backing-tracks/slide-slow-blues-a-60.mid",
+    "audio": null,
+    "daw_project": null
+  }
+}
