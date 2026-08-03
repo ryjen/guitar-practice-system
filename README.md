@@ -2,226 +2,209 @@
 
 **Status:** early design / personal practice-material generation
 
-A selfish guitar practice system for developing my own style, sound, rhythm, vocabulary, and writing instincts.
+A personal, technique-centred guitar practice and backing-track system for developing my own style, sound, rhythm, vocabulary, and writing instincts.
 
-This repository is not trying to be a universal guitar-learning platform. It is a working system for helping me generate things I actually want to play: grooves, exercises, MIDI scaffolds, backing structures, arrangement cues, and style-specific practice sessions.
+This repository is not trying to be a universal guitar-learning platform. It is a working system for helping me generate things I actually want to play: technique exercises, grooves, MIDI scaffolds, backing structures, arrangement cues, song use cases, and style-specific practice sessions.
 
-The main focus is the wah / slide / E-Bow direction: atmospheric, expressive, rhythm-aware guitar built around movement, sustain, texture, and feel. Jazz vocabulary is welcome here, but as a source of harmony, rhythm, phrasing, and voice-leading ideas that can feed that core sound.
+The main focus is the wah / slide / E-Bow direction: atmospheric, expressive, rhythm-aware guitar built around movement, sustain, texture, and feel. Country picking and jazz vocabulary are optional branches that feed the same core sound through articulation, harmony, rhythm, phrasing, and voice leading.
 
 The core question is:
 
-> What should I generate, play, mutate, record, or revisit next to move my sound forward?
+> What technique should I develop, and what song, gear setup, or backing track will make it musical and testable?
 
-## Overview
+## Model
 
-This is a personal practice-material workbench.
+The system has four connected layers:
 
-It exists to help me turn musical intent into concrete material:
+1. **Techniques** — the primary progression, practice, and assessment layer
+2. **Songs / repertoire** — musical use cases for one or more techniques
+3. **Gear / signal chains** — repeatable setups that support a sound or technique
+4. **Backing tracks / production** — portable accompaniment for practice, improvisation, recording, and composition
 
-- Session briefs
-- MIDI scaffold specs
-- Bassline-led grooves
-- Drum cue structures
-- Wah, slide, delay, and E-Bow exercises
-- GarageBand drummer settings
-- Guitar Pro / MuseScore / Flow starting points
-- Arrangement prompts and song-section maps
-- Reusable prompts for generating new practice variations
+```mermaid
+flowchart TD
+    T[Technique] --> S[Song use case]
+    T --> B[Backing track]
+    T --> G[Gear setup]
+    S --> E[Recording evidence]
+    B --> E
+    G --> E
+    E --> T
+```
 
-The intended loop is simple: generate something playable, move it into a DAW or notation tool, practice it, record or sketch with it, keep what works, and generate the next variation.
+See [`docs/architecture/layered-practice-model.md`](docs/architecture/layered-practice-model.md) for ownership, relationships, state, and a worked example.
 
 ## Goals
 
 - Develop my own guitar style and sound
-- Build stronger rhythm, groove, timing, and arrangement instincts
-- Generate useful practice sessions quickly
+- Make technique development the centre of the practice system
+- Build focused paths for slide, wah, and E-Bow
+- Branch into country picking when useful without creating a competing curriculum
+- Treat songs as technique use cases rather than the primary organizational model
+- Keep gear inventory and signal-chain presets separate from learning progress
+- Build stronger rhythm, groove, timing, articulation, phrasing, and arrangement instincts
+- Generate reusable multi-instrument MIDI backing tracks for DAW import
 - Create reusable source specs before committing generated artifacts
-- Make generated material portable across GarageBand, Guitar Pro, MuseScore, Flow, and DAWs
-- Center the wah / slide / E-Bow style: atmospheric, expressive, textural, and rhythm-aware
-- Support expressive alternative, post-punk, ambient rock, and U2-adjacent vocabulary
-- Add jazz vocabulary where it helps: richer harmony, substitutions, comping ideas, phrasing, swing feel, chord melody fragments, and voice-leading
-- Explore wah, slide, delay, E-Bow, drones, hooks, bassline-led grooves, and atmospheric textures
-- Keep notes lightweight and useful when they help the next session
+- Keep generated material portable across GarageBand, Guitar Pro, MuseScore, Flow, and other DAWs
 
 ## Core workflow
 
 ```mermaid
 flowchart TD
-    A[Choose sound, style, rhythm, technique, or reference] --> B[Create session brief]
-    B --> C[Generate practice material]
-    C --> D[Create backing structure or MIDI scaffold]
-    D --> E[Move into GarageBand, Guitar Pro, MuseScore, Flow, or DAW]
-    E --> F[Practice, record, experiment]
-    F --> G[Keep useful notes or artifacts]
-    G --> H[Generate next variation]
-    H --> C
+    A[Choose technique or audible problem] --> B[Select exercise or song use case]
+    B --> C[Select gear setup]
+    C --> D[Create or choose backing track]
+    D --> E[Practice and record]
+    E --> F[Review timing, intonation, articulation, dynamics, and tension]
+    F --> G[Choose the largest audible defect]
+    G --> A
 ```
 
-See [`docs/practice-material-workflow.md`](docs/practice-material-workflow.md) for the fuller workflow model.
+See [`docs/practice-material-workflow.md`](docs/practice-material-workflow.md) for the fuller material-generation workflow.
 
 ## Example use cases
 
-### Generate a focused practice session
+### Develop a technique
 
-Create a 30-minute session around a specific technique, feel, or sound:
+Create a focused progression around:
 
-- Rhythmic wah comping
-- Slide phrases over droning harmony
-- Dotted-eighth delay hooks
-- E-Bow drones and counterlines
-- Post-punk bassline-led vamps
-- Ambient swells over modal harmony
+- Slide intonation, vibrato, and muting
+- Rhythmic or expressive wah control
+- E-Bow activation, string changes, drones, and counterlines
+- Hybrid picking and country articulation
+- Bend intonation and vibrato
 - Muted sixteenth-note rhythm work
-- Hook writing over a simple two-chord bed
-- Jazz-flavoured chord movement under an atmospheric lead texture
+
+### Use songs as validation
+
+Map sections of a song to the techniques they exercise. Track song arrangement and performance separately from technique mastery. A full recorded take validates transitions, endurance, recovery, and musical context.
 
 ### Build backing material
 
-Generate a song-form scaffold that can become a GarageBand, DAW, or notation project:
+Generate a portable arrangement scaffold with:
 
-- Intro / verse / chorus / bridge structure
-- Drum intensity cues
-- Bassline movement
-- Chord vamp options
-- Modal or jazz-leaning harmonic colour
-- Dynamic arrangement notes
-- Cue points for guitar hooks, swells, slides, fills, or texture changes
+- Key, tempo, meter, feel, and form
+- Drum, bass, keyboard, and optional complementary instrument parts
+- Section and loop markers
+- Technique-specific space and cues
+- Type 1 MIDI with separately named tracks for DAW import
+- Rendered-audio or DAW refinements as non-canonical outputs
 
-### Convert references into traits
+### Capture gear setups
 
-Use reference artists or songs as directional input:
+Document intent-driven setups for:
 
-- Groove feel
-- Space and density
-- Effects vocabulary
-- Section contrast
-- Call-and-response patterns
-- Hook placement
-- Bassline and rhythm-guitar relationship
-- Harmony, substitutions, and voice-leading ideas worth stealing as practice inputs
+- Slide
+- Wah
+- E-Bow
+- Country clean
+- Hard-rock rhythm
+- Recording and direct monitoring
 
-The point is not to clone references. The point is to extract useful traits and turn them into playable material.
-
-### Preserve what works
-
-Generated output is disposable by default. The useful things are the source specs, prompts, exercises, and curated fragments that help me get back to a sound later.
+Exact knob positions are secondary to signal-chain intent, sensitive parameter ranges, gain staging, and noise behaviour.
 
 ## Quick start
 
 No runtime is required yet. The current system starts with prompts, templates, examples, and source specs.
 
 ```bash
-# Clone the repository
 git clone https://github.com/ryjen/guitar-practice-system.git
 cd guitar-practice-system
 
-# Browse the source material
 find docs prompts templates examples -type f | sort
-
-# Keep disposable generated exports local unless curated
 mkdir -p generated
 ```
 
 Suggested first pass:
 
-1. Pick a sound, rhythm problem, technique, or reference
-2. Start from a session or backing-track prompt
-3. Generate a short playable sketch
-4. Move the result into GarageBand, Guitar Pro, MuseScore, Flow, or a DAW
-5. Keep only the useful source spec, note, or curated artifact
+1. Copy [`templates/technique.md`](templates/technique.md) and define a technique
+2. Link a song section with [`templates/song-use-case.md`](templates/song-use-case.md)
+3. Capture the setup with [`templates/gear-setup.md`](templates/gear-setup.md)
+4. Specify accompaniment with [`templates/backing-track.md`](templates/backing-track.md)
+5. Practice and record a short baseline
+6. Keep only the notes and promoted artifacts that help the next session
 
 ## Concepts
 
 ### Source-first generation
 
-Markdown and JSON specs are the stable source of truth. Rendered MIDI, exported notation, and DAW files are outputs, not the canonical design.
+Markdown and small manifests are the stable source of truth. Rendered MIDI, exported notation, audio, and DAW files are outputs, not the canonical design.
+
+### Technique first
+
+Techniques own progression and quality gates. Exercises should exist because they address an audible musical problem or support a concrete musical use case.
 
 ### Core style first
 
-The center of gravity is wah / slide / E-Bow guitar: expressive motion, sustain, texture, rhythmic placement, and atmospheric arrangement.
+The centre of gravity is wah / slide / E-Bow guitar: expressive motion, sustain, texture, rhythmic placement, and atmospheric arrangement.
 
-Jazz belongs in the system when it strengthens that center of gravity. That means using jazz as vocabulary, not as a separate academic lane: better chord movement, better comping, better phrasing, better voice-leading, and more interesting tension/release.
+Country picking and jazz belong when they strengthen that centre of gravity. They are vocabulary branches, not separate mandatory curricula.
 
 ### Musical intent before settings
 
-Gear settings matter, but only in service of the part. A wah, slide, delay, or E-Bow exercise should start with feel, role, timing, motion, and arrangement purpose before pedal parameters.
+Gear settings matter only in service of the part. Start with feel, role, timing, motion, and arrangement purpose before pedal or plugin parameters.
 
 ### Fragments before full songs
 
-The system works best when it generates small reusable fragments:
+The system works best when it generates small reusable fragments: grooves, transitions, hooks, drone beds, rhythmic cells, slide phrases, chord movements, and call-and-response ideas. Songs then provide arrangement and performance use cases for those fragments and techniques.
 
-- A groove
-- A transition
-- A hook
-- A drone bed
-- A rhythmic cell
-- A slide phrase
-- A chord movement
-- A call-and-response phrase
-- A verse/chorus contrast pattern
+### Review as actionable memory
 
-Fragments are easier to practice, mutate, recombine, and turn into songs later.
-
-### Review as memory, not measurement
-
-Review exists to help the next session. Useful questions are:
+Review exists to choose the next practice target:
 
 - Was this playable?
+- Was timing, intonation, articulation, and muting credible?
 - Did it sound like something I want more of?
-- What should change next?
-- Should this be promoted, discarded, or regenerated?
+- What was the largest audible defect?
+- Should this be maintained, changed, discarded, or regenerated?
 
 ## Artifact policy
 
 Specs are canonical. Generated files are disposable until promoted.
 
-- Keep source specs in Markdown or JSON
+- Keep source specs in Markdown or small machine-readable manifests
 - Put bulk generated artifacts under `generated/`
 - Keep `generated/` ignored by default
-- Promote only curated MIDI or notation artifacts into stable project paths
-- Pair promoted artifacts with a short note explaining the sound, rhythm, or musical intent
-- Prefer small, reusable exercises over large opaque exports
+- Promote only curated MIDI, notation, or audio artifacts into stable project paths
+- Pair promoted artifacts with a short note explaining musical intent and provenance
+- Prefer small, reusable exercises and arrangements over large opaque exports
+- Do not store unauthorized complete tablature
 
 ## Roadmap
 
 ### Near term
 
-- Expand prompt coverage for session generation, backing tracks, MIDI scaffolds, and arrangement variants
-- Add more worked examples for wah, slide, delay, E-Bow, post-punk bass, and ambient textures
-- Define a consistent schema for MIDI scaffold specs
-- Create a small curated set of reusable practice fragments
-- Add jazz-colour exercises that support the core sound rather than pulling the system into a separate jazz-practice track
+- Complete the layered templates and worked examples
+- Build focused technique paths for slide, wah, E-Bow, and country picking
+- Define a consistent schema for backing-track and MIDI scaffold specs
+- Generate one portable multi-track MIDI backing track and verify DAW import
+- Add baseline recordings, quality gates, and regression checks
+- Inventory current gear and capture repeatable technique-specific setups
 
 ### Later
 
-- Add generation scripts for MIDI and notation artifacts
-- Add lightweight review capture where it helps memory and reuse
-- Build a small evaluation corpus for generated material quality
+- Add deterministic MIDI and notation generation scripts
+- Add lightweight validation for metadata and generated MIDI
+- Build a curated set of reusable practice fragments and arrangements
 - Explore AI-assisted coaching loops around sound, rhythm, and arrangement
 - Improve portability across GarageBand, Guitar Pro, MuseScore, Flow, and DAWs
 
 ## Design principles
 
-- My sound first
-- Wah / slide / E-Bow as the center of gravity
-- Jazz as vocabulary, not a competing curriculum
+- Technique is the primary learning layer
+- Songs are musical use cases
+- Gear is operational context, not progress
+- Backing tracks are first-class portable assets
+- Wah / slide / E-Bow remain the centre of gravity
+- Country and jazz are optional vocabulary branches
 - Rhythm and feel before complexity
-- Practice material over productivity mechanics
 - Source specs over generated artifacts
 - Musical intent over tooling novelty
 - Small playable units before complete arrangements
-- DAW-neutral structure with GarageBand as the first worked example
+- DAW-neutral sources with practical DAW-specific import notes
 
 ## Contributing
 
 This is a personal repository. Contributions, issues, or suggestions only make sense if they help the system produce better practice material for my style, sound, rhythm, or workflow.
 
-Useful areas include:
-
-- Better prompts
-- Better scaffold schemas
-- Worked examples
-- MIDI generation experiments
-- GarageBand / Guitar Pro / MuseScore workflows
-- Practice-material evaluation criteria
-- Clearer artifact promotion rules
+Useful areas include better prompts, scaffold schemas, worked examples, MIDI generation experiments, DAW workflows, practice-material evaluation criteria, and clearer artifact-promotion rules.
