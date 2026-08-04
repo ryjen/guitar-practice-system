@@ -3,8 +3,14 @@
 - **ID:** `rhythm-<slug>`
 - **Intent or feel:**
 - **Meter:**
-- **Tempo or range:**
+- **Suggested tempo or range:**
 - **Pulse level:**
+
+## Identity boundary
+
+This document owns reusable meter, grouping, groove intent, phrase behaviour, and space rules. A song, backing track, exercise, or session normally owns the actual tempo, notes, instrumentation, and arrangement.
+
+Treat the tempo above as guidance unless a particular range is intrinsic to the feel.
 
 ## Grouping and subdivision
 
@@ -26,7 +32,7 @@ Grouping is required for odd or additive meters. Meter alone is not enough.
 
 ## Harmonic and phrase rhythm
 
-- **Chord-change rate:**
+- **Default chord-change rate:**
 - **Phrase length:**
 - **Pickup:**
 - **Cadence placement:**
@@ -34,19 +40,24 @@ Grouping is required for odd or additive meters. Meter alone is not enough.
 
 ## Space
 
+Space is part of the rhythm definition when it shapes the reusable groove or phrase. Session-specific phrasing constraints may override or extend these defaults.
+
 - **Required empty beats or bars:**
 - **Minimum rest between phrases:**
 - **Delayed-entry rule:**
 - **Early-release rule:**
 - **Response window:**
+- **What should the silence accomplish?:**
 
 ## Variants
 
 - Easier grouping or pulse:
-- Slower variant:
+- Slower practice realization:
 - Displacement variant:
 - Alternate accent grouping:
 - Related pulse transformation:
+
+An alternate tempo alone usually remains a realization. Create a new ID when grouping, pulse interpretation, groove identity, or space behaviour changes materially.
 
 ## Relationships
 
@@ -59,5 +70,6 @@ Grouping is required for odd or additive meters. Meter alone is not enough.
 
 - Timing success cue:
 - Groove success cue:
+- Space success cue:
 - Common failure modes:
 - Notes:
