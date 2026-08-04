@@ -39,6 +39,8 @@ Song use cases do not own:
 Genre is a first-class discovery and catalog dimension. The initial top-level genres are:
 
 - `80s-rock`
+- `alt-rock`
+- `blues`
 - `country`
 - `jazz`
 
@@ -47,6 +49,8 @@ Styles and substyles sit beneath a genre rather than replacing it. Examples:
 | Genre | Example styles / substyles |
 |---|---|
 | `80s-rock` | hard rock, glam metal, arena rock, melodic rock, shred, new wave guitar |
+| `alt-rock` | grunge, post-grunge, indie rock, shoegaze, noise rock, post-punk revival |
+| `blues` | Delta, Chicago, Texas, electric blues, blues-rock, jump blues |
 | `country` | country-rock, Bakersfield, classic country, western swing, chicken picking, modern country |
 | `jazz` | blues-jazz, swing, bebop, modal, jazz-rock/fusion, chord melody |
 
@@ -154,7 +158,7 @@ Store these as technique references or vocabulary tags so the repository can fin
 
 AI may search for and rank candidate songs or passages using one or more constraints:
 
-- genre, initially including 80s rock, country, and jazz
+- genre, initially including 80s rock, alt-rock, blues, country, and jazz
 - style or substyle
 - technique or combination of techniques
 - available gear or signal-chain capability
@@ -187,7 +191,7 @@ AI must not:
 
 Suggested workflow:
 
-1. Accept a discovery query, such as `find an intermediate 80s-rock song that exercises rhythmic wah` or `find a country or jazz example for chord-tone targeting`.
+1. Accept a discovery query, such as `find an intermediate alt-rock song that exercises rhythmic texture`, `find a blues example for slide phrasing`, or `find a country or jazz example for chord-tone targeting`.
 2. Search and produce three to five candidates.
 3. Verify attribution, arrangement/version, genre/style, technique evidence, and source availability.
 4. Compare candidates against current technique priorities, gear, and active-work capacity.
