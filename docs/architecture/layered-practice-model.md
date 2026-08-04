@@ -76,10 +76,11 @@ Exact settings are secondary to intent. Presets should describe what the setup i
 
 Backing tracks are first-class practice and composition assets. Their canonical source should be portable and reproducible where practical.
 
-A backing track owns:
+A backing track owns its realization of:
 
 - Key, mode, tempo, meter, feel, and form
-- Chord progression and harmonic rhythm
+- Referenced chord progression and rhythm definitions
+- Chosen voicings and harmonic rhythm
 - Instrument roles
 - Loop and section markers
 - Difficulty variants
@@ -89,6 +90,26 @@ A backing track owns:
 
 MIDI plus a small metadata manifest is preferred over a DAW-project-only source of truth. DAW projects remain valid refinement and mixing artifacts.
 
+## Musical dimensions
+
+The layers above establish ownership and lifecycle. Musical dimensions are optional reusable coordinates applied to a technique, exercise, song section, backing track, or session:
+
+- Harmony, modes, progressions, and key traversal
+- Rhythm, meter, grouping, groove, and harmonic rhythm
+- Fretboard navigation such as CAGED, 3NPS, horizontal, intervallic, and triad views
+- Interval and contextual ear training
+- Genre vocabulary layers
+- Phrasing, dynamics, articulation, sustain, and **space**
+- Warmup and session-preparation constraints
+
+Dimensions do not compete with technique ownership. They describe how the current musical task should be realized and reviewed. Missing optional dimensions are unconstrained, not incomplete.
+
+See:
+
+- [`musical-dimensions.md`](musical-dimensions.md) for the full model
+- [`reference-conventions.md`](reference-conventions.md) for stable identifiers and identity/realization boundaries
+- [`../../templates/practice-session.md`](../../templates/practice-session.md) for composing dimensions into a bounded session
+
 ## Cross-layer relationships
 
 | Source | Relationship | Target |
@@ -96,11 +117,13 @@ MIDI plus a small metadata manifest is preferred over a DAW-project-only source 
 | Technique | exercised by | Song section |
 | Technique | practised over | Backing track |
 | Technique | supported by | Gear setup |
+| Practice session | composes | Technique and selected musical dimensions |
+| Progression or rhythm | realized by | Song, backing track, exercise, or session |
 | Song | uses | Backing track or arrangement |
 | Song | suggests | Gear setup |
-| Evidence | evaluates | Technique or song |
+| Evidence | evaluates | Technique, song, or session target |
 
-References should be explicit identifiers or relative links. Shared information should live in one layer and be referenced rather than copied.
+References should be explicit identifiers or relative links. Shared information should live in one layer or reusable dimension document and be referenced rather than copied.
 
 ## Progress and evidence ownership
 
@@ -125,6 +148,8 @@ Songs use a separate delivery state:
 
 Evidence is lightweight metadata pointing to recordings stored outside Git when files are large. The repository should record date, context, tempo, setup, observations, and the next audible problem to address.
 
+Expression evidence should include only relevant dimensions, but space must be explicit whenever phrasing or arrangement is assessed: rests, delayed entries, early releases, decay, response windows, density, and register reserved for other parts.
+
 ## Worked example
 
 ### Technique
@@ -145,9 +170,13 @@ Standard-tuned guitar, comfortable medium-action setup, glass or metal slide, cl
 
 Slow 6/8 progression in E at 62 BPM with drums, bass, organ pad, and section markers. The track leaves space for a slide melody and supports looped two-bar intonation drills.
 
+### Musical dimensions
+
+The session may reference a reusable 6/8 rhythm, an E-centred progression, a low-fatigue slide warmup, wide-but-controlled vibrato, delayed phrase entries, and full sustained-note decay before the response phrase.
+
 ### Evidence
 
-A baseline recording captures pitch accuracy, muting noise, vibrato width, timing, and physical tension. The next session targets the largest audible defect.
+A baseline recording captures pitch accuracy, muting noise, vibrato width, timing, dynamics, space, and physical tension. The next session targets the largest audible defect.
 
 ## Constraints
 
@@ -156,3 +185,5 @@ A baseline recording captures pitch accuracy, muting noise, vibrato width, timin
 - Generated audio and DAW projects are outputs unless deliberately promoted.
 - Do not store unauthorized complete tablature.
 - Technique work should connect to an audible musical purpose.
+- Do not rename existing stable IDs solely to adopt a new prefix convention.
+- Space is intentional musical data, not an omitted event.
