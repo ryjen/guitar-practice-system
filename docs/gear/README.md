@@ -26,8 +26,6 @@ Gear does not own:
 
 ## Requirement levels
 
-Every component reference uses one of these levels:
-
 | Level | Meaning |
 |---|---|
 | Required | The setup cannot perform its stated function without this capability. |
@@ -35,42 +33,79 @@ Every component reference uses one of these levels:
 | Optional | Adds colour, convenience, or a production variant. |
 | Avoid during diagnosis | Can conceal the defect currently being evaluated. |
 
-A requirement describes a capability, not a brand. For example, `continuous filter pedal` is a capability; a particular wah model is an inventory item that may satisfy it.
+Requirements describe capabilities rather than brands.
 
-## Inventory
+## Current inventory
 
-Record owned or reliably available equipment before adding purchase candidates. Unknown values stay explicitly unknown rather than being inferred.
+Unknown model details remain explicitly unconfirmed rather than inferred.
 
-| ID | Category | Item | Capabilities | Constraints / condition | Status |
-|---|---|---|---|---|---|
-| `guitar-primary` | Guitar | Not yet recorded | pickup configuration unknown | tuning, strings, action, and setup pending | inventory required |
-| `amp-primary` | Amp / modeler | Not yet recorded | clean and driven capability unknown | output and monitoring path pending | inventory required |
-| `interface-primary` | Interface | Not yet recorded | input count and headroom unknown | DAW/monitoring routing pending | inventory required |
-| `wah-primary` | Accessory / pedal | Not yet recorded | continuous filter sweep required for wah path | bypass type, sweep range, noise, and power pending | inventory required |
-| `ebow-primary` | Accessory | Not yet recorded | normal/harmonic mode capability pending | battery and activation behaviour pending | inventory required |
-| `slide-primary` | Accessory | Not yet recorded | material, length, internal diameter pending | finger fit and weight pending | inventory required |
+### Guitars and bass
 
-Do not recommend replacements from this table alone. First record the actual item and an observed limitation against a technique or recording task.
+| ID | Instrument | Configuration | Strings / setup notes | Primary uses |
+|---|---|---|---|---|
+| `guitar-prs-se-custom-blue` | Blue PRS SE Custom | Dual-coil humbuckers with Les Paul-like and Strat-like switching/voicing | Usually D'Addario or Ernie Ball .010 set | Main versatile electric; rock, slide, wah, E-Bow |
+| `guitar-gretsch-hollowbody` | Gretsch hollow-body, exact model unconfirmed (`A55` or similar) | Stock pickups | Flatwound strings | Clean, roots, E-Bow, ambient and country-adjacent textures |
+| `guitar-fender-strat-white` | White Fender Stratocaster | Custom Tex-Mex pickups | Usually D'Addario or Ernie Ball .010 set | Country clean, wah, slide, clean and edge-of-breakup work |
+| `guitar-kramer-striker` | Kramer Striker | Quad-core pickup configuration; Floyd Rose tremolo | Usually D'Addario or Ernie Ball .010 set | Hard-rock rhythm and lead, tremolo use |
+| `guitar-takamine-nylon` | Takamine electric-acoustic classical | Acoustic-electric | Nylon strings | Classical, fingerstyle, and nylon acoustic layers |
+| `guitar-fender-acoustic-steel` | Fender acoustic-electric, exact model unconfirmed | Acoustic-electric | Steel strings | Acoustic rhythm, songwriting, and backing-track layers |
+| `bass-squier` | Fender Squier bass | Exact model and pickup configuration unconfirmed | String type/gauge unconfirmed | Bass parts and backing-track production |
 
-## Inventory record
+### Amplification
 
-For each item, capture only useful operational data:
+| ID | Item | Role | Notes |
+|---|---|---|---|
+| `amp-fender-deluxe-reverb` | Fender Deluxe Reverb | Main guitar amplifier | Primary clean and edge-of-breakup platform |
+| `amp-fender-bassman` | Fender Bassman, exact model unconfirmed | Bass amplifier | Primary bass amplification |
+| `amp-fender-practice-25` | Smaller Fender 25-watt practice amp, exact model unconfirmed | Low-volume practice | Portable/quiet practice option |
 
-- stable ID and human-readable name
-- category and ownership/availability
-- capabilities it provides
-- physical or software version where behaviour depends on it
-- current condition
-- known noise, reliability, latency, or compatibility constraints
-- maintenance state
-- linked setup IDs
-- purchase date or price only when useful for warranty, replacement, or budgeting
+### Pedals and accessories
 
-Avoid copying complete manufacturer specifications that do not affect the practice system.
+The pedals were supplied in amp-to-guitar order. The resulting normal guitar-to-amp chain is:
+
+```text
+guitar
+  -> Boss compressor
+  -> Vox wah
+  -> Boss noise suppressor
+  -> Boss Blues Driver
+  -> Boss chorus
+  -> Boss digital delay
+  -> Boss looper
+  -> amplifier
+```
+
+This records the current physical order, not a universal recommendation. Technique-specific setups may bypass pedals or test alternate placement deliberately.
+
+| ID | Item | Capabilities / notes |
+|---|---|---|
+| `pedal-boss-compressor` | Boss compressor | Dynamic control; use lightly after dry diagnostics |
+| `pedal-vox-wah` | Vox wah | Continuous filter control for wah path |
+| `pedal-boss-noise-suppressor` | Boss noise suppressor | Current placement after wah and before drive; bypass during sustain diagnostics |
+| `pedal-boss-blues-driver` | Boss Blues Driver | Edge-of-breakup and driven gain |
+| `pedal-boss-chorus` | Boss chorus, exact model unconfirmed | Modulation and layered textures |
+| `pedal-boss-digital-delay` | Boss digital delay, exact model unconfirmed | Delay and spatial support |
+| `pedal-boss-looper` | Boss compact looper, exact model unconfirmed | End-of-chain practice loops and layered parts |
+| `accessory-ebow-1990s` | Standard 1990s E-Bow | Normal/harmonic sustain modes; check battery before recording |
+| `slide-brass` | Brass slide | Heavier attack and sustain |
+| `slide-glass` | Glass slide | Smoother/lighter response |
+| `slide-ring` | Small ring slide | Mixed fretting/slide use |
+| `pick-dunlop-teardrop-060` | Dunlop teardrop 0.60 mm picks | Primary flatpick |
+
+### Recording and monitoring
+
+| ID | Item | Notes |
+|---|---|---|
+| `interface-focusrite` | Focusrite mid-range preamp/audio interface, exact model unconfirmed | Primary instrument/microphone input and DAW interface |
+| `mic-live` | Live microphone, exact model unconfirmed | Amp/acoustic capture and audio-to-MIDI experiments where supported |
+| `daw-garageband` | GarageBand | Fast arrangement and MIDI workflow |
+| `daw-reaper` | REAPER | Flexible recording, editing, routing, and backing-track workflow |
+| `monitor-studio` | Studio monitors, exact model unconfirmed | Main speaker monitoring |
+| `headphones-shure` | Shure headphones, exact model unconfirmed | Headphone monitoring |
 
 ## Setup record
 
-Use `templates/gear-setup.md` for a concrete setup. A setup should include:
+Use `templates/gear-setup.md` for a concrete setup. A setup includes:
 
 - musical and diagnostic intent
 - techniques and use cases supported
@@ -78,7 +113,7 @@ Use `templates/gear-setup.md` for a concrete setup. A setup should include:
 - ordered signal chain
 - gain/headroom checkpoints
 - instrument state
-- effects that must be bypassed during diagnosis
+- effects bypassed during diagnosis
 - minimal, preferred, and recording variants
 - troubleshooting observations
 
@@ -88,10 +123,9 @@ Evaluate the chain from source to monitoring:
 
 ```text
 guitar output
-  -> dynamic/filter/gain pedals
-  -> amp or amp model
-  -> time/modulation effects
-  -> interface input
+  -> compressor / wah / noise control / gain
+  -> modulation / delay / looper
+  -> amp or interface
   -> DAW channel/bus
   -> monitor/headphone output
 ```
@@ -99,39 +133,36 @@ guitar output
 At each stage:
 
 1. Establish a representative loudest performance, not only an average note.
-2. Leave headroom for resonant peaks, bends, harmonic-mode blooms, and stacked effects.
+2. Leave headroom for wah peaks, bends, E-Bow harmonic blooms, and stacked effects.
 3. Compare bypassed and engaged level where the effect is not intended as a boost.
 4. Diagnose clipping at the earliest stage where it occurs.
 5. Record intentional boosts rather than normalizing them away.
 
-Exact numerical targets depend on analog and digital equipment. The invariant is that no unintentional stage clips and the final monitoring level remains safe.
-
 ## Noise-management order
 
-Diagnose noise before adding a gate:
+Diagnose noise before increasing suppression:
 
 1. Guitar controls, pickup selection, and orientation.
 2. Cable and connector integrity.
 3. Pedal power and grounding.
-4. Gain accumulation and high-frequency boosts.
-5. Interface input mode and level.
-6. USB/computer/monitor ground paths.
-7. Plugin or bus gain.
-8. Environmental interference.
+4. Compressor, wah, and gain accumulation.
+5. Noise-suppressor threshold and release.
+6. Amplifier or interface input level.
+7. USB/computer/monitor ground paths.
+8. Plugin or bus gain.
+9. Environmental interference.
 
-A noise gate is a last-mile control. It must not truncate E-Bow activation, slide sustain, wah tails, or deliberately quiet dynamics.
+The noise suppressor must not truncate E-Bow activation, slide sustain, wah tails, or quiet dynamics.
 
 ## Safety
 
 - Set monitoring level from the loudest expected resonant or feedback condition.
-- Treat wah toe peaks, E-Bow harmonic blooms, compressor makeup gain, and high-gain feedback as peak-level cases.
+- Treat wah toe peaks, E-Bow harmonic blooms, compressor makeup gain, and high-gain feedback as peak cases.
 - Lower gain before troubleshooting unexpected feedback.
 - Do not perform cable or power changes at unsafe amplifier/output levels.
-- Capture hearing-comfort observations in the setup when a configuration produces narrow, aggressive resonances.
+- Record hearing-comfort concerns when a setup produces narrow, aggressive resonances.
 
 ## Cross-layer links
-
-Techniques, songs, and backing tracks reference stable setup IDs; they do not duplicate signal-chain details.
 
 ```text
 technique -> gear setup
@@ -140,11 +171,11 @@ backing track -> monitoring/recording setup
 gear setup -> inventory items and capabilities
 ```
 
-A setup may support several techniques. A technique may reference several setups, such as diagnostic, minimal, and recording variants.
+A setup may support several techniques. A technique may reference diagnostic, minimal, musical, and recording variants.
 
-## Change policy
+## Change and purchase policy
 
-Create a new setup version when the musical intent or chain topology changes materially. Small knob adjustments belong in evidence notes unless they reveal a repeatable operating range.
+Create a new setup version when musical intent or chain topology changes materially. Small knob adjustments belong in evidence notes unless they reveal a repeatable operating range.
 
 A purchase candidate belongs in the repository only after documenting:
 
