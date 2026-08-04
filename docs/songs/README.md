@@ -19,6 +19,7 @@ Song use cases own:
 - section boundaries and practice slices
 - technique references
 - prerequisites and difficulty
+- genre, style, and arrangement context
 - tuning, capo, and tempo context
 - gear-setup references
 - backing-track references
@@ -32,6 +33,24 @@ Song use cases do not own:
 - duplicated signal-chain settings
 - backing-track MIDI or arrangement source
 - complete unauthorized notation or tablature
+
+## Genre and style taxonomy
+
+Genre is a first-class discovery and catalog dimension. The initial top-level genres are:
+
+- `80s-rock`
+- `country`
+- `jazz`
+
+Styles and substyles sit beneath a genre rather than replacing it. Examples:
+
+| Genre | Example styles / substyles |
+|---|---|
+| `80s-rock` | hard rock, glam metal, arena rock, melodic rock, shred, new wave guitar |
+| `country` | country-rock, Bakersfield, classic country, western swing, chicken picking, modern country |
+| `jazz` | blues-jazz, swing, bebop, modal, jazz-rock/fusion, chord melody |
+
+A song may have one primary genre and multiple secondary genre/style tags. Taxonomy values should remain small, stable, and human-reviewed; AI may suggest tags but must not create new canonical categories automatically.
 
 ## Lifecycle
 
@@ -65,7 +84,9 @@ Each record should include:
 - stable ID
 - title and artist/composer attribution
 - musical role
-- style and arrangement reference
+- primary genre
+- secondary genre/style tags
+- arrangement/version reference
 - tuning, capo, meter, and approximate target tempo
 - prerequisite techniques
 - gear setup IDs
@@ -124,6 +145,8 @@ Songs may expose reusable vocabulary such as:
 - hybrid-picked double-stops
 - chord-tone fills
 - open-string articulation
+- jazz comping and voice leading
+- chord-melody movement
 
 Store these as technique references or vocabulary tags so the repository can find several use cases for the same transferable skill.
 
@@ -131,19 +154,20 @@ Store these as technique references or vocabulary tags so the repository can fin
 
 AI may search for and rank candidate songs or passages using one or more constraints:
 
-- technique or combination of techniques
+- genre, initially including 80s rock, country, and jazz
 - style or substyle
-- genre
+- technique or combination of techniques
 - available gear or signal-chain capability
 - instrument type or tuning
 - tempo range
 - difficulty and prerequisites
-- arrangement role such as rhythm, lead, slide, texture, or accompaniment
+- arrangement role such as rhythm, lead, slide, texture, comping, or accompaniment
 - available licensed learning material
 
 The discovery result is advisory. It should return a small ranked set with:
 
 - why each candidate matches
+- primary genre and relevant style tags
 - which sections likely demonstrate the requested technique
 - confidence and uncertainty
 - required or preferred gear capabilities
@@ -159,12 +183,13 @@ AI must not:
 - infer exact gear from recorded tone as fact
 - recommend purchases before checking the current inventory and setup alternatives
 - fill active-work slots automatically
+- create or rename canonical genre categories without review
 
 Suggested workflow:
 
-1. Accept a discovery query, such as `find a moderate-tempo roots-rock song using slide and sparse wah`.
+1. Accept a discovery query, such as `find an intermediate 80s-rock song that exercises rhythmic wah` or `find a country or jazz example for chord-tone targeting`.
 2. Search and produce three to five candidates.
-3. Verify attribution, arrangement/version, technique evidence, and source availability.
+3. Verify attribution, arrangement/version, genre/style, technique evidence, and source availability.
 4. Compare candidates against current technique priorities, gear, and active-work capacity.
 5. Present the ranking for human selection.
 6. Create a `candidate` record only after approval.
