@@ -1,75 +1,180 @@
-# Songs as Technique Use Cases
+# Song Use-Case Layer
 
-Songs motivate and validate technique work, but do not own technique progression. A song record maps concrete sections to reusable skills, gear setups, backing tracks, and evidence.
+## Purpose
+
+Songs and passages validate, motivate, and integrate technique work. They are not the primary curriculum and do not own technique progression.
+
+This layer answers questions such as:
+
+- Which technique does this section exercise?
+- Which gear setup and backing context support it?
+- What evidence shows the section or full song is playable?
+- Which completed songs need maintenance?
+
+## Boundaries
+
+Song use cases own:
+
+- song and passage identity
+- section boundaries and practice slices
+- technique references
+- prerequisites and difficulty
+- tuning, capo, and tempo context
+- gear-setup references
+- backing-track references
+- section and full-performance evidence
+- maintenance state
+- copyright-safe source references
+
+Song use cases do not own:
+
+- the definition or mastery state of a technique
+- duplicated signal-chain settings
+- backing-track MIDI or arrangement source
+- complete unauthorized notation or tablature
 
 ## Lifecycle
 
-1. Candidate
-2. Technique-mapped
-3. Sections learned
-4. Slow clean playthrough
-5. Target-tempo playthrough
-6. Recorded
-7. Maintenance rotation
+Use these states independently for each song:
 
-Song completion and technique mastery are independent. Completing one song does not prove a technique transfers; improving a technique does not require completing every linked song.
+1. `candidate`
+2. `mapped`
+3. `sections-in-progress`
+4. `slow-clean-playthrough`
+5. `target-tempo-playthrough`
+6. `recorded`
+7. `maintenance`
+8. `retired`
+
+A song may regress without changing the state of its linked techniques. Likewise, technique progress can continue even when a song is paused or retired.
 
 ## Active-work limit
 
-Default active repertoire limit: **three songs**.
+The default active limit is three songs or passages:
 
-- one rhythm-focused use case
-- one lead/phrasing use case
+- one rhythm or accompaniment use case
+- one melodic or lead use case
 - one optional branch or experimental use case
 
-Additional songs remain candidates or maintenance items until an active slot opens.
+This is configurable, but increasing it should be deliberate. Candidates do not count as active until a section is scheduled for practice.
 
-## Section mapping
+## Song record
 
-Each section records:
+Each record should include:
 
-- time range or structural label
-- techniques exercised
-- difficulty and prerequisites
-- tuning and working tempo
-- target tempo when known
+- stable ID
+- title and artist/composer attribution
+- musical role
+- style and arrangement reference
+- tuning, capo, meter, and approximate target tempo
+- prerequisite techniques
 - gear setup IDs
-- backing-track IDs
-- current state
-- largest audible defect
+- backing-track IDs or requirements
+- section map
 - evidence references
+- status and maintenance cadence
+- licensed notation/tab reference where applicable
 
-## Quality gates
+## Section-level mapping
 
-A section passes when it succeeds three consecutive times without stopping at the current target tempo and preserves the relevant technique gates.
+Map sections instead of treating the song as one task.
 
-A song reaches `recorded` only after one uninterrupted full-form take. Recovery from mistakes is part of the gate.
+| Section | Time/bar reference | Technique IDs | Difficulty | Target tempo | Dominant defect | Evidence state |
+|---|---|---|---|---|---|---|
+| Intro | | | | | | |
+| Verse | | | | | | |
+| Chorus | | | | | | |
+| Bridge | | | | | | |
+| Solo/lead | | | | | | |
+| Outro | | | | | | |
 
-## Musical vocabulary
+Section boundaries may use timestamps, rehearsal marks, or bar ranges from a licensed source. Avoid reproducing full copyrighted notation.
 
-Song records extract transferable vocabulary such as:
+## Completion gates
 
-- syncopated palm-muted rhythm
-- expressive bend and vibrato shapes
-- call-and-response phrasing
-- wah subdivision control
-- slide movement over chord changes
+A section is ready when:
+
+- its structure and fingering are stable
+- it can be played three times consecutively without stopping
+- timing and articulation meet the linked technique gates
+- transitions into and out of the section are tested
+- one evidence recording exists
+
+A song reaches `recorded` when:
+
+- the complete structure is memorized or reliably followed
+- transitions are stable
+- one uninterrupted full take exists
+- mistakes do not derail recovery
+- tone and arrangement decisions are documented only where they affect repeatability
+
+Song completion does not imply technique mastery. The song demonstrates technique use in one musical context.
+
+## Musical vocabulary index
+
+Songs may expose reusable vocabulary such as:
+
+- syncopated rhythm
+- palm-muted accents
+- expressive bends
+- vibrato control
+- slide phrasing
+- rhythmic or parked wah
+- E-Bow drones and counterlines
 - hybrid-picked double-stops
-- E-Bow drones or counterlines
+- chord-tone fills
+- open-string articulation
 
-This vocabulary makes songs searchable by skill rather than only artist or genre.
+Store these as technique references or vocabulary tags so the repository can find several use cases for the same transferable skill.
+
+## Evidence
+
+Recommended evidence sequence:
+
+1. baseline section take
+2. first clean isolated section
+3. first joined transition
+4. slow full-form take
+5. target-tempo full take
+6. best retained take
+7. maintenance check
+
+Raw recordings remain outside Git unless an explicit storage policy says otherwise. Store stable references and concise observations.
+
+## Maintenance rotation
+
+Completed songs should not remain permanently active.
+
+Suggested cadence:
+
+- newly recorded: weekly for two to four weeks
+- stable repertoire: every two to four weeks
+- deeply retained: quarterly or before performance/recording
+
+A failed maintenance take should regress the affected section or dimension, not erase unrelated progress.
 
 ## Copyright boundary
 
-Do not store unauthorized complete tablature, notation, lyrics, or transcriptions. Store:
+Allowed repository content includes:
 
-- short analytical excerpts where legally permitted
-- fingering and technique observations
-- section/time references
-- harmonic and rhythmic analysis
+- song and artist attribution
+- short section/time references
+- harmonic and structural analysis
+- technique observations
+- original exercises
+- personal evidence notes
 - links or citations to licensed sources
-- original exercises derived from the underlying skill
 
-## Maintenance
+Do not commit unauthorized complete tablature, notation, lyrics, isolated stems, or reconstructed backing tracks that substantially reproduce a copyrighted recording.
 
-Recorded songs enter a two-to-four-week rotation. A maintenance take may be shorter when it targets a known regression, but a periodic full-form take remains required.
+## Selection policy
+
+Concrete song use cases are intentionally deferred. Add one only when:
+
+- a technique needs musical validation
+- the source and copyright boundary are clear
+- the song fits within the active-work limit
+- a section-level practice outcome is defined
+- adding it will not create a redundant backlog entry
+
+The catalog may remain empty until those conditions are met.
