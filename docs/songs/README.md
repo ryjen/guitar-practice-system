@@ -127,6 +127,50 @@ Songs may expose reusable vocabulary such as:
 
 Store these as technique references or vocabulary tags so the repository can find several use cases for the same transferable skill.
 
+## AI-assisted discovery
+
+AI may search for and rank candidate songs or passages using one or more constraints:
+
+- technique or combination of techniques
+- style or substyle
+- genre
+- available gear or signal-chain capability
+- instrument type or tuning
+- tempo range
+- difficulty and prerequisites
+- arrangement role such as rhythm, lead, slide, texture, or accompaniment
+- available licensed learning material
+
+The discovery result is advisory. It should return a small ranked set with:
+
+- why each candidate matches
+- which sections likely demonstrate the requested technique
+- confidence and uncertainty
+- required or preferred gear capabilities
+- expected difficulty and prerequisite gaps
+- source links for verification
+- copyright-safe learning-source availability
+
+AI must not:
+
+- add a candidate to the catalog without explicit approval
+- claim a technique appears in a song without a verifiable source or qualified uncertainty
+- copy complete tablature, notation, lyrics, or stems
+- infer exact gear from recorded tone as fact
+- recommend purchases before checking the current inventory and setup alternatives
+- fill active-work slots automatically
+
+Suggested workflow:
+
+1. Accept a discovery query, such as `find a moderate-tempo roots-rock song using slide and sparse wah`.
+2. Search and produce three to five candidates.
+3. Verify attribution, arrangement/version, technique evidence, and source availability.
+4. Compare candidates against current technique priorities, gear, and active-work capacity.
+5. Present the ranking for human selection.
+6. Create a `candidate` record only after approval.
+
+Discovery queries and rejected candidates need not be committed unless their rationale is useful for avoiding repeated searches.
+
 ## Evidence
 
 Recommended evidence sequence:
