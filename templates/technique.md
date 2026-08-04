@@ -20,6 +20,20 @@ Describe the audible musical problem or use case. Do not add exercises without a
 |---|---|---|---|
 | | | | |
 
+## Reusable musical-dimension references
+
+Reference shared definitions rather than copying them. Leave irrelevant dimensions unconstrained.
+
+- **Warmup IDs:**
+- **Progression IDs:**
+- **Rhythm / meter IDs:**
+- **Mode / tonal-context IDs:**
+- **Fretboard systems / regions:**
+- **Interval / ear targets:**
+- **Genre layers:**
+- **Expression targets:** phrasing, dynamics, articulation, sustain
+- **Space targets:** rests, delayed entries, early releases, decay, response windows, density, reserved register
+
 ## Progression
 
 ### Stage 1 — <foundation>
@@ -46,6 +60,7 @@ Describe the audible musical problem or use case. Do not add exercises without a
 
 - **Purpose:**
 - **Procedure:**
+- **Dimension overrides:** <session-specific key, tempo, grouping, voicing, or expression constraints>
 - **Stop condition:** <when fatigue, tension, or degraded quality makes repetition counterproductive>
 - **Progression:**
 
@@ -73,16 +88,18 @@ Define only relevant dimensions. Use audible or observable outcomes rather than 
 
 | Dimension | Gate |
 |---|---|
-| Timing | |
+| Timing / groove | |
 | Intonation | |
 | Articulation / muting | |
 | Dynamics | |
+| Phrasing | |
+| Space / density | <when relevant, silence and register space improve the phrase or arrangement rather than occurring accidentally> |
 | Physical tension | |
 | Repeatability | Three consecutive passes in at least two separate sessions, unless a different rule is justified. |
 | Musical context | At least two representative context recordings, unless a different rule is justified. |
 | <technique-specific> | |
 
-Tempo is evidence only when speed is part of the musical purpose. Do not trade intonation, timing, articulation, or relaxed motion for a higher number.
+Tempo is evidence only when speed is part of the musical purpose. Do not trade intonation, timing, articulation, expression, space, or relaxed motion for a higher number.
 
 ## Evidence
 
@@ -94,6 +111,7 @@ Evidence rules:
 
 - Link recordings or use stable local identifiers; do not commit large raw media by default.
 - Record what is audible rather than only how the take felt.
+- Note overplaying or ineffective silence whenever phrasing or arrangement is assessed.
 - Select one next target, preferably the largest audible defect.
 - Do not promote a state based on one best take.
 
