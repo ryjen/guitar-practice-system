@@ -7,7 +7,7 @@ on:
       - "docs/discovery/**"
       - "examples/discovery/**"
       - "scripts/discovery_catalog.py"
-      - "tests/test_discovery_catalog.py"
+      - "tests/test_discovery*.py"
       - ".github/workflows/validate-discovery.yml"
   push:
     branches:
@@ -17,7 +17,7 @@ on:
       - "docs/discovery/**"
       - "examples/discovery/**"
       - "scripts/discovery_catalog.py"
-      - "tests/test_discovery_catalog.py"
+      - "tests/test_discovery*.py"
       - ".github/workflows/validate-discovery.yml"
 
 permissions:
