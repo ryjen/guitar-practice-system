@@ -14,31 +14,37 @@ The core question is:
 
 ## Model
 
-The system has four connected layers:
+The system has four connected practice layers plus a cross-cutting Discovery capability:
 
 1. **Techniques** — the primary progression, practice, and assessment layer
 2. **Songs / repertoire** — musical use cases for one or more techniques
 3. **Gear / signal chains** — repeatable setups that support a sound or technique
 4. **Backing tracks / production** — portable accompaniment for practice, improvisation, recording, and composition
+5. **Discovery** — advisory search and ranking across the layers; it cannot mutate practice state without approval
 
 ```mermaid
 flowchart TD
-    T[Technique] --> S[Song use case]
-    T --> B[Backing track]
-    T --> G[Gear setup]
+    D[Discovery request] --> T[Technique]
+    D --> S[Song candidate]
+    D --> B[Backing track]
+    D --> G[Gear setup]
+    T --> S
+    T --> B
+    T --> G
     S --> E[Recording evidence]
     B --> E
     G --> E
     E --> T
 ```
 
-The layers establish ownership. Optional musical dimensions then describe how a technique or practice item is realized: harmony, rhythm, fretboard navigation, ear training, genre vocabulary, phrasing, dynamics, articulation, and **space**.
+The practice layers establish ownership. Optional musical dimensions then describe how a technique or practice item is realized: harmony, rhythm, fretboard navigation, ear training, genre vocabulary, phrasing, dynamics, articulation, and **space**.
 
 Architecture references:
 
 - [`docs/architecture/layered-practice-model.md`](docs/architecture/layered-practice-model.md) — ownership, relationships, progress, and evidence
 - [`docs/architecture/musical-dimensions.md`](docs/architecture/musical-dimensions.md) — composable musical and expressive coordinates
 - [`docs/architecture/reference-conventions.md`](docs/architecture/reference-conventions.md) — stable Markdown identifiers and identity/realization boundaries
+- [`docs/discovery/README.md`](docs/discovery/README.md) — provider-neutral discovery, approval, provenance, and adapter boundaries
 
 ## Goals
 
@@ -109,15 +115,28 @@ Document intent-driven setups for:
 
 Exact knob positions are secondary to signal-chain intent, sensitive parameter ranges, gain staging, and noise behaviour.
 
+### Discover existing material
+
+Search the repository catalog without changing songs, progress, schedules, or gear state:
+
+```bash
+python scripts/discovery_catalog.py search \
+  examples/discovery/slide-backing-track-request.json \
+  catalogs/discovery/repository.json
+```
+
+Provider output can be normalized through the same candidate contract before review.
+
 ## Quick start
 
-No runtime is required yet. The current system starts with prompts, templates, examples, and source specs.
+No runtime is required for the documentation workflow. Optional standard-library Python helpers validate and generate repository assets.
 
 ```bash
 git clone https://github.com/ryjen/guitar-practice-system.git
 cd guitar-practice-system
 
 find docs prompts templates examples -type f | sort
+python -m unittest discover -s tests -v
 mkdir -p generated
 ```
 
@@ -197,12 +216,13 @@ Specs are canonical. Generated files are disposable until promoted.
 - Generate one portable multi-track MIDI backing track and verify DAW import
 - Add baseline recordings, quality gates, and regression checks
 - Inventory current gear and capture repeatable technique-specific setups
+- Extend Discovery from the local catalog into adaptive session recommendations
 
 ### Later
 
-- Add deterministic MIDI and notation generation scripts
-- Add lightweight validation for metadata and generated MIDI
+- Add deterministic notation generation scripts
 - Build a curated set of reusable practice fragments and arrangements
+- Add optional external Discovery providers behind the same normalization boundary
 - Explore AI-assisted coaching loops around sound, rhythm, and arrangement
 - Improve portability across GarageBand, Guitar Pro, MuseScore, Flow, and DAWs
 
@@ -212,6 +232,7 @@ Specs are canonical. Generated files are disposable until promoted.
 - Songs are musical use cases
 - Gear is operational context, not progress
 - Backing tracks are first-class portable assets
+- Discovery is advisory and human-approved
 - Musical dimensions are optional constraints, not competing curricula
 - Space is intentional and explicit, not missing data
 - Wah / slide / E-Bow remain the centre of gravity
@@ -226,4 +247,4 @@ Specs are canonical. Generated files are disposable until promoted.
 
 This is a personal repository. Contributions, issues, or suggestions only make sense if they help the system produce better practice material for my style, sound, rhythm, or workflow.
 
-Useful areas include better prompts, scaffold schemas, worked examples, MIDI generation experiments, DAW workflows, practice-material evaluation criteria, and clearer artifact-promotion rules.
+Useful areas include better prompts, scaffold schemas, worked examples, MIDI generation experiments, DAW workflows, practice-material evaluation criteria, Discovery adapters, and clearer artifact-promotion rules.

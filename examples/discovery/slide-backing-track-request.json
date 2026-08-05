@@ -1,0 +1,33 @@
+{
+  "target_type": "backing-track",
+  "goal": "Find a sparse slow-blues backing track for standard-tuning slide phrasing",
+  "limit": 3,
+  "required_constraints": [
+    "genres",
+    "techniques",
+    "tuning"
+  ],
+  "constraints": {
+    "genres": [
+      "blues"
+    ],
+    "styles": [
+      "slow-blues"
+    ],
+    "techniques": [
+      "slide",
+      "phrasing"
+    ],
+    "tuning": "standard",
+    "meter": "4/4",
+    "tempo_bpm": {
+      "min": 50,
+      "max": 72
+    },
+    "difficulty": "intermediate",
+    "roles": [
+      "lead",
+      "improvisation"
+    ]
+  }
+}

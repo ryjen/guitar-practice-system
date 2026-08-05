@@ -1,0 +1,54 @@
+name: Validate Discovery
+
+on:
+  pull_request:
+    paths:
+      - "catalogs/discovery/**"
+      - "docs/discovery/**"
+      - "examples/discovery/**"
+      - "scripts/discovery_catalog.py"
+      - "tests/test_discovery*.py"
+      - ".github/workflows/validate-discovery.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "catalogs/discovery/**"
+      - "docs/discovery/**"
+      - "examples/discovery/**"
+      - "scripts/discovery_catalog.py"
+      - "tests/test_discovery*.py"
+      - ".github/workflows/validate-discovery.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-discovery-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Search repository catalog
+        run: |
+          python scripts/discovery_catalog.py search \
+            examples/discovery/slide-backing-track-request.json \
+            catalogs/discovery/repository.json \
+            > /tmp/discovery-result.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("/tmp/discovery-result.json").read_text())
+          assert result["status"] == "complete"
+          assert result["candidates"][0]["source_id"] == "slide-slow-blues-a-60"
+          PY

@@ -19,6 +19,15 @@ context + constraints + intent
 
 The provider may be a prompt-driven AI, local catalog search, external music service, personal practice history, or a manual source. The contract remains the same.
 
+## Implementations
+
+- [`prompts/song-discovery.md`](../../prompts/song-discovery.md) — prompt adapter for evidence-backed song discovery
+- [`local-catalog-adapter.md`](local-catalog-adapter.md) — deterministic repository catalog search and provider-output normalization
+- [`catalogs/discovery/repository.json`](../../catalogs/discovery/repository.json) — manually curated repository-owned candidates
+- [`examples/discovery/slide-backing-track-request.json`](../../examples/discovery/slide-backing-track-request.json) — executable request example
+
+The repository catalog contains no song candidates. Songs enter the catalog only after explicit approval.
+
 ## Supported target types
 
 - `song`
@@ -144,7 +153,7 @@ Future adapters may include Apple Music or Spotify metadata, YouTube lessons, li
 
 ## Song discovery
 
-Song discovery is the first use case. It accepts combinations such as:
+Song discovery accepts combinations such as:
 
 - intermediate `80s-rock` with rhythmic wah
 - `alt-rock` with layered textures and simple lead work

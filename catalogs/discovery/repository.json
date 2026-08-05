@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "id": "slide-foundations",
+      "target_type": "technique",
+      "title": "Slide Foundations",
+      "summary": "Standard-tuning slide fundamentals focused on pitch centre, muting, movement, vibrato, and musical phrasing.",
+      "genres": ["blues", "country"],
+      "styles": ["blues-rock", "roots-rock"],
+      "techniques": ["slide", "intonation", "muting", "vibrato", "phrasing"],
+      "tunings": ["standard"],
+      "difficulty": "foundational",
+      "roles": ["lead", "melody", "texture"],
+      "required_capabilities": ["secure slide fit", "stable pitch reference"],
+      "preferred_capabilities": ["clean or edge-of-breakup tone"],
+      "evidence": [
+        {
+          "state": "verified",
+          "source": "docs/techniques/slide-foundations.md",
+          "kind": "repository"
+        }
+      ],
+      "licensing": "original repository material",
+      "proposed_next_action": "Review the technique path and capture a baseline recording before changing progress state."
+    },
+    {
+      "id": "slide-diagnostic",
+      "target_type": "gear-setup",
+      "title": "Slide Diagnostic Setup",
+      "summary": "Dry, controlled setup intended to expose slide intonation, fret contact, muting, attack, and release defects.",
+      "genres": ["blues", "country"],
+      "styles": ["blues-rock", "roots-rock"],
+      "techniques": ["slide", "intonation", "muting"],
+      "gear_ids": ["slide-glass", "slide-brass", "amp-fender-deluxe-reverb"],
+      "tunings": ["standard"],
+      "roles": ["diagnostic", "lead"],
+      "required_capabilities": ["stable tuning", "clean amplification", "pitch reference"],
+      "evidence": [
+        {
+          "state": "verified",
+          "source": "docs/gear/technique-setups.md#slide-diagnostic",
+          "kind": "repository"
+        }
+      ],
+      "licensing": "original repository material"
+    },
+    {
+      "id": "wah-diagnostic",
+      "target_type": "gear-setup",
+      "title": "Wah Diagnostic Setup",
+      "summary": "Minimal wah chain for comparing parked positions, rhythmic movement, bypass level, and resonant peaks.",
+      "genres": ["80s-rock", "alt-rock", "blues"],
+      "styles": ["hard-rock", "alternative-rock", "blues-rock"],
+      "techniques": ["wah", "rhythmic-wah", "parked-wah", "phrase-shaping"],
+      "gear_ids": ["pedal-vox-wah", "amp-fender-deluxe-reverb"],
+      "roles": ["diagnostic", "rhythm", "lead"],
+      "required_capabilities": ["continuous wah sweep", "clean or mild gain"],
+      "evidence": [
+        {
+          "state": "verified",
+          "source": "docs/gear/technique-setups.md#wah-diagnostic",
+          "kind": "repository"
+        }
+      ],
+      "licensing": "original repository material"
+    },
+    {
+      "id": "ebow-diagnostic",
+      "target_type": "gear-setup",
+      "title": "E-Bow Diagnostic Setup",
+      "summary": "Dry E-Bow setup for activation timing, attack, release, bloom, sustain, transition, and noise assessment.",
+      "genres": ["alt-rock"],
+      "styles": ["ambient-rock", "shoegaze", "post-rock"],
+      "techniques": ["ebow", "sustain", "swells", "drones", "counterlines"],
+      "gear_ids": ["accessory-ebow-1990s", "amp-fender-deluxe-reverb"],
+      "roles": ["diagnostic", "texture", "melody"],
+      "required_capabilities": ["reliable ebow battery", "clean amplification"],
+      "evidence": [
+        {
+          "state": "verified",
+          "source": "docs/gear/technique-setups.md#ebow-diagnostic",
+          "kind": "repository"
+        }
+      ],
+      "licensing": "original repository material"
+    },
+    {
+      "id": "country-clean-diagnostic",
+      "target_type": "gear-setup",
+      "title": "Country Clean Diagnostic Setup",
+      "summary": "Clean setup that exposes hybrid-picking balance, separation, muting, alternating bass, and bend intonation.",
+      "genres": ["country"],
+      "styles": ["country-rock", "bakersfield", "chicken-picking"],
+      "techniques": ["hybrid-picking", "alternating-bass", "double-stops", "pedal-steel-bends"],
+      "gear_ids": ["guitar-fender-strat-white", "pedal-boss-compressor", "amp-fender-deluxe-reverb"],
+      "tunings": ["standard"],
+      "roles": ["diagnostic", "rhythm", "lead"],
+      "required_capabilities": ["clear pickup response", "clean amplification"],
+      "evidence": [
+        {
+          "state": "verified",
+          "source": "docs/gear/technique-setups.md#country-clean-diagnostic",
+          "kind": "repository"
+        }
+      ],
+      "licensing": "original repository material"
+    },
+    {
+      "id": "hard-rock-rhythm",
+      "target_type": "gear-setup",
+      "title": "Hard-Rock Rhythm Setup",
+      "summary": "Controlled-gain rhythm setup for tight palm muting and defined chord attacks.",
+      "genres": ["80s-rock"],
+      "styles": ["hard-rock", "glam-metal", "arena-rock"],
+      "techniques": ["palm-muting", "rhythm", "chord-articulation"],
+      "gear_ids": ["guitar-prs-se-custom-blue", "guitar-kramer-striker", "pedal-boss-blues-driver"],
+      "roles": ["rhythm"],
+      "required_capabilities": ["stable tuning", "controlled distortion"],
+      "evidence": [
+        {
+          "state": "verified",
+          "source": "docs/gear/technique-setups.md#hard-rock-rhythm",
+          "kind": "repository"
+        }
+      ],
+      "licensing": "original repository material"
+    },
+    {
+      "id": "slide-slow-blues-a-60",
+      "target_type": "backing-track",
+      "title": "Slow Blues-Rock Slide Practice in A",
+      "summary": "Original sparse Type 1 MIDI scaffold with drums, bass, and keys, leaving the guitar role open for slide phrasing.",
+      "genres": ["blues"],
+      "styles": ["slow-blues", "blues-rock"],
+      "techniques": ["slide", "intonation", "muting", "phrasing", "space"],
+      "tunings": ["standard"],
+      "meters": ["4/4"],
+      "tempo_bpm": 60,
+      "difficulty": "intermediate",
+      "roles": ["lead", "improvisation", "recording"],
+      "required_capabilities": ["midi-capable daw or player"],
+      "preferred_capabilities": ["separate drum, bass, and keys routing"],
+      "evidence": [
+        {
+          "state": "verified",
+          "source": "backing-tracks/slide-slow-blues/manifest.json",
+          "kind": "repository"
+        },
+        {
+          "state": "verified",
+          "source": "tests/test_midi_workflow.py",
+          "kind": "automated-test"
+        }
+      ],
+      "licensing": "original repository material",
+      "proposed_next_action": "Generate the MIDI file, import it into GarageBand or REAPER, and verify track names, markers, routing, and loop boundaries."
+    }
+  ]
+}
