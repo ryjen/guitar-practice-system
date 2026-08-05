@@ -70,14 +70,16 @@ def validate_request(request: dict[str, Any]) -> None:
     if not isinstance(request.get("goal"), str) or not request["goal"].strip():
         raise DiscoveryError("goal must be a non-empty string")
     limit = request.get("limit", 5)
-    if not isinstance(limit, int) or not 1 <= limit <= 20:
+    if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 20:
         raise DiscoveryError("limit must be between 1 and 20")
 
     constraints = request.get("constraints", {})
     if not isinstance(constraints, dict):
         raise DiscoveryError("constraints must be an object")
+    normalized_lists: dict[str, list[str]] = {}
     for field in LIST_FIELDS:
         values = strings(constraints.get(field), f"constraints.{field}")
+        normalized_lists[field] = values
         if field == "genres" and set(values) - CANONICAL_GENRES:
             raise DiscoveryError(f"unsupported canonical genres: {sorted(set(values) - CANONICAL_GENRES)}")
     for field in SCALAR_FIELDS:
@@ -88,7 +90,11 @@ def validate_request(request: dict[str, Any]) -> None:
         if not isinstance(tempo, dict):
             raise DiscoveryError("constraints.tempo_bpm must be an object")
         low, high = tempo.get("min", 20), tempo.get("max", 300)
-        if not isinstance(low, int) or not isinstance(high, int) or not 20 <= low <= high <= 300:
+        if (
+            isinstance(low, bool) or isinstance(high, bool)
+            or not isinstance(low, int) or not isinstance(high, int)
+            or not 20 <= low <= high <= 300
+        ):
             raise DiscoveryError("tempo_bpm must satisfy 20 <= min <= max <= 300")
 
     required = request.get("required_constraints", [])
@@ -97,6 +103,20 @@ def validate_request(request: dict[str, Any]) -> None:
     supported = set(LIST_FIELDS) | set(SCALAR_FIELDS) | {"tempo_bpm"}
     if set(required) - supported:
         raise DiscoveryError(f"unsupported required constraints: {sorted(set(required) - supported)}")
+    missing_required = []
+    for field in required:
+        if field in LIST_FIELDS and not normalized_lists[field]:
+            missing_required.append(field)
+        elif field in SCALAR_FIELDS:
+            value = constraints.get(field)
+            if not isinstance(value, str) or not value.strip():
+                missing_required.append(field)
+        elif field == "tempo_bpm" and field not in constraints:
+            missing_required.append(field)
+    if missing_required:
+        raise DiscoveryError(
+            f"required constraints need non-empty request values: {sorted(set(missing_required))}"
+        )
 
 
 def normalize_evidence(value: Any) -> list[dict[str, str]]:
@@ -166,7 +186,9 @@ def validate_catalog(catalog: dict[str, Any]) -> None:
         for field in ("tunings", "meters"):
             strings(item.get(field), f"catalog.{source_id}.{field}")
         if "tempo_bpm" in item and (
-            not isinstance(item["tempo_bpm"], int) or not 20 <= item["tempo_bpm"] <= 300
+            isinstance(item["tempo_bpm"], bool)
+            or not isinstance(item["tempo_bpm"], int)
+            or not 20 <= item["tempo_bpm"] <= 300
         ):
             raise DiscoveryError(f"catalog item {source_id!r} has invalid tempo_bpm")
 
@@ -201,7 +223,7 @@ def score_item(request: dict[str, Any], item: dict[str, Any]) -> tuple[int, dict
     tempo = constraints.get("tempo_bpm")
     if isinstance(tempo, dict):
         item_tempo = item.get("tempo_bpm")
-        if isinstance(item_tempo, int) and tempo.get("min", 20) <= item_tempo <= tempo.get("max", 300):
+        if isinstance(item_tempo, int) and not isinstance(item_tempo, bool) and tempo.get("min", 20) <= item_tempo <= tempo.get("max", 300):
             matched["tempo_bpm"], score = [str(item_tempo)], score + 15
         else:
             unmet["tempo_bpm"] = [f"{tempo.get('min', 20)}-{tempo.get('max', 300)}"]
