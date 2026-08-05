@@ -26,7 +26,7 @@ The quick change creates earlier motion without changing the overall form.
 ## Minor blues
 
 - **ID:** `progression-blues-twelve-bar-minor`
-- **Roman numerals:** `i7 | i7 | i7 | i7 | iv7 | iv7 | i7 | i7 | VI7 | V7 | i7 | V7`
+- **Roman numerals:** `i7 | i7 | i7 | i7 | iv7 | iv7 | i7 | i7 | ♭VI7 | V7 | i7 | V7`
 - **Reference key:** A minor
 - **Chords:** Am7 | Am7 | Am7 | Am7 | Dm7 | Dm7 | Am7 | Am7 | F7 | E7 | Am7 | E7
 
@@ -35,7 +35,7 @@ This is one practical minor-blues realization, not the only canonical form.
 ## Jazz-blues extension
 
 - **ID:** `progression-blues-twelve-bar-jazz-basic`
-- **Roman numerals:** `I7 | IV7 | I7 | vi7 II7 | IV7 | #iv°7 | I7 vi7 | ii7 V7 | iii7 VI7 | ii7 V7 | I7 VI7 | ii7 V7`
+- **Roman numerals:** `I7 | IV7 | I7 | vi7 II7 | IV7 | ♯iv°7 | I7 vi7 | ii7 V7 | iii7 VI7 | ii7 V7 | I7 VI7 | ii7 V7`
 - **Purpose:** introduce turnarounds, secondary dominants, diminished passing motion, and denser harmonic rhythm
 
 Do not treat the jazz form as a replacement for the simpler blues identities. It is a derived vocabulary layer.
@@ -71,7 +71,7 @@ Do not treat the jazz form as a replacement for the simpler blues identities. It
 - Identify bars 5, 9, and 11 without counting from the beginning.
 - Sing roots through one chorus.
 - Hear whether bar 2 remains tonic or changes to subdominant.
-- Distinguish the minor-blues VI7–V7 motion from the dominant-blues V7–IV7 motion.
+- Distinguish the minor-blues ♭VI7–V7 motion from the dominant-blues V7–IV7 motion.
 
 ## Evidence
 
