@@ -33,11 +33,20 @@ class EvidenceFeedbackTests(unittest.TestCase):
         result = feedback.summarize([self.records[0]], date(2026, 8, 6))
         self.assertFalse(result["targets"][0]["reliability_eligible"])
 
-    def test_missing_interval_is_unknown_not_overdue(self) -> None:
-        record = dict(self.records[-1])
-        record["maintenance_interval_days"] = None
-        result = feedback.summarize([record], date(2026, 12, 1))
-        self.assertEqual("unknown", result["targets"][0]["maintenance_status"])
+    def test_stale_context_does_not_qualify_as_recent(self) -> None:
+        records = [dict(item) for item in self.records]
+        records[0]["date"] = "2026-01-01"
+        records[1]["date"] = "2026-08-05"
+        result = feedback.summarize(records, date(2026, 8, 6))
+        self.assertFalse(result["targets"][0]["reliability_eligible"])
+
+    def test_missing_interval_is_unknown_not_overdue_or_reliable(self) -> None:
+        records = [dict(item) for item in self.records]
+        records[-1]["maintenance_interval_days"] = None
+        result = feedback.summarize(records, date(2026, 8, 6))
+        target = result["targets"][0]
+        self.assertEqual("unknown", target["maintenance_status"])
+        self.assertFalse(target["reliability_eligible"])
 
     def test_regression_requires_comparison_evidence(self) -> None:
         record = dict(self.records[-1])
@@ -45,6 +54,25 @@ class EvidenceFeedbackTests(unittest.TestCase):
         record["comparison_evidence_id"] = None
         with self.assertRaises(feedback.EvidenceError):
             feedback.validate_record(record)
+
+    def test_regression_comparison_must_exist_and_be_earlier(self) -> None:
+        records = [dict(item) for item in self.records]
+        records[-1]["regression_observed"] = True
+        records[-1]["comparison_evidence_id"] = "missing-evidence"
+        with self.assertRaises(feedback.EvidenceError):
+            feedback.summarize(records, date(2026, 8, 6))
+
+    def test_duplicate_evidence_ids_are_rejected(self) -> None:
+        records = [dict(item) for item in self.records]
+        records[-1]["id"] = records[0]["id"]
+        with self.assertRaises(feedback.EvidenceError):
+            feedback.summarize(records, date(2026, 8, 6))
+
+    def test_future_dated_evidence_is_rejected(self) -> None:
+        records = [dict(item) for item in self.records]
+        records[-1]["date"] = "2026-08-07"
+        with self.assertRaises(feedback.EvidenceError):
+            feedback.summarize(records, date(2026, 8, 6))
 
     def test_signed_or_secret_media_reference_is_rejected(self) -> None:
         record = dict(self.records[-1])
@@ -67,6 +95,13 @@ class EvidenceFeedbackTests(unittest.TestCase):
     def test_physical_tension_defect_blocks_reliability(self) -> None:
         records = [dict(item) for item in self.records]
         records[-1]["largest_audible_defect"] = "Physical tension increases during long phrases."
+        result = feedback.summarize(records, date(2026, 8, 6))
+        self.assertFalse(result["targets"][0]["reliability_eligible"])
+
+    def test_regression_blocks_reliability(self) -> None:
+        records = [dict(item) for item in self.records]
+        records[-1]["regression_observed"] = True
+        records[-1]["comparison_evidence_id"] = records[0]["id"]
         result = feedback.summarize(records, date(2026, 8, 6))
         self.assertFalse(result["targets"][0]["reliability_eligible"])
 
