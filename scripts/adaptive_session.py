@@ -52,6 +52,8 @@ def validate_request(request: dict[str, Any]) -> None:
         raise SessionError("active_techniques exceeds max_active_techniques")
     clean_strings(request.get("available_gear"), "available_gear")
     clean_strings(request.get("available_backing_tracks"), "available_backing_tracks")
+    clean_strings(request.get("desired_genres"), "desired_genres")
+    clean_strings(request.get("theory_focus"), "theory_focus")
     evidence = request.get("evidence", {})
     if not isinstance(evidence, dict):
         raise SessionError("evidence must be an object")
@@ -76,21 +78,35 @@ def allocation(duration: int) -> dict[str, int]:
     }[duration]
 
 
-def select_focus(request: dict[str, Any]) -> tuple[str, str]:
+def select_focus(request: dict[str, Any]) -> tuple[str, str, list[str]]:
     maintenance = clean_strings(request.get("maintenance_due"), "maintenance_due")
     priorities = clean_strings(request.get("priorities"), "priorities")
     active = clean_strings(request.get("active_techniques"), "active_techniques")
+    max_active = request.get("max_active_techniques", 3)
     evidence = request.get("evidence", {})
-    for technique in maintenance + priorities + active:
+    warnings: list[str] = []
+
+    if len(active) >= max_active:
+        blocked = [item for item in priorities if item not in active and item not in maintenance]
+        priorities = [item for item in priorities if item in active or item in maintenance]
+        if blocked:
+            warnings.append(
+                "Active-work capacity is full; skipped new priority candidates: " + ", ".join(blocked)
+            )
+
+    ordered = list(dict.fromkeys(maintenance + priorities + active))
+    for technique in ordered:
         entry = evidence.get(technique, {})
         defect = entry.get("largest_audible_defect")
         if isinstance(defect, str) and defect.strip():
-            return technique, f"Selected from explicit evidence: {defect.strip()}."
+            return technique, f"Selected from explicit evidence: {defect.strip()}.", warnings
     if maintenance:
-        return maintenance[0], "Selected because maintenance is explicitly due."
+        return maintenance[0], "Selected because maintenance is explicitly due.", warnings
     if priorities:
-        return priorities[0], "Selected from the stated priority order."
-    return active[0], "Selected from the active technique set."
+        return priorities[0], "Selected from the stated priority order.", warnings
+    if active:
+        return active[0], "Selected from the active technique set.", warnings
+    raise SessionError("active-work capacity is full and no eligible active or maintenance focus remains")
 
 
 def environment_notes(environment: str) -> tuple[list[str], list[str]]:
@@ -110,13 +126,9 @@ def environment_notes(environment: str) -> tuple[list[str], list[str]]:
 
 def block(block_type: str, minutes: int, title: str, why: str, *, target: str | None = None,
           gear: list[str] | None = None, evidence_required: bool = False) -> dict[str, Any]:
-    assert block_type in BLOCK_TYPES
-    value: dict[str, Any] = {
-        "type": block_type,
-        "minutes": minutes,
-        "title": title,
-        "why": why,
-    }
+    if block_type not in BLOCK_TYPES:
+        raise SessionError(f"unsupported block type: {block_type}")
+    value: dict[str, Any] = {"type": block_type, "minutes": minutes, "title": title, "why": why}
     if target:
         value["target_id"] = target
     if gear:
@@ -126,13 +138,10 @@ def block(block_type: str, minutes: int, title: str, why: str, *, target: str | 
     return value
 
 
-def recommend(request: dict[str, Any]) -> dict[str, Any]:
-    validate_request(request)
-    duration = request["duration_minutes"]
-    focus, focus_reason = select_focus(request)
+def build_blocks(request: dict[str, Any], duration: int, focus: str, focus_reason: str) -> list[dict[str, Any]]:
     split = allocation(duration)
     environment = request.get("environment", "normal")
-    environment_gear, environment_guidance = environment_notes(environment)
+    environment_gear, _ = environment_notes(environment)
     gear = clean_strings(request.get("available_gear"), "available_gear")
     backing = clean_strings(request.get("available_backing_tracks"), "available_backing_tracks")
     desired_genres = clean_strings(request.get("desired_genres"), "desired_genres")
@@ -145,21 +154,44 @@ def recommend(request: dict[str, Any]) -> dict[str, Any]:
     if split.get("theory"):
         subject = theory_focus[0] if theory_focus else "intervals or chord tones in the application"
         blocks.append(block("theory", split["theory"], f"Connect theory: {subject}", "Theory is included only as support for the primary musical task."))
+
     application_title = f"Apply {focus} musically"
-    application_why = "Use a backing track or constrained creative fragment so isolated control transfers to musical context."
-    application_gear = environment_gear.copy()
-    if backing and environment != "acoustic-only":
+    if backing and environment not in {"acoustic-only", "quiet", "no-computer"}:
         application_title = f"Apply over {backing[0]}"
     elif desired_genres:
         application_title += f" in {desired_genres[0]} vocabulary"
-    blocks.append(block("application", split["application"], application_title, application_why, target=focus, gear=application_gear))
-    blocks.append(block("evidence", split["evidence"], "Capture one short evidence take", "Record or note only what is needed to identify the next audible defect; this does not update progress automatically.", target=focus, evidence_required=True))
+    blocks.append(block(
+        "application",
+        split["application"],
+        application_title,
+        "Use available accompaniment or a constrained creative fragment so isolated control transfers to musical context.",
+        target=focus,
+        gear=environment_gear,
+    ))
+    blocks.append(block(
+        "evidence",
+        split["evidence"],
+        "Capture one short evidence take",
+        "Record or note only what is needed to identify the next audible defect; this does not update progress automatically.",
+        target=focus,
+        evidence_required=True,
+    ))
+    return blocks
+
+
+def recommend(request: dict[str, Any]) -> dict[str, Any]:
+    validate_request(request)
+    duration = request["duration_minutes"]
+    focus, focus_reason, warnings = select_focus(request)
+    environment = request.get("environment", "normal")
+    _, environment_guidance = environment_notes(environment)
+    blocks = build_blocks(request, duration, focus, focus_reason)
 
     fallback_duration = {15: 15, 30: 15, 45: 30, 60: 30}[duration]
-    warnings: list[str] = []
+    fallback_blocks = build_blocks(request, fallback_duration, focus, focus_reason)
     if not request.get("evidence", {}).get(focus):
         warnings.append(f"No evidence supplied for {focus}; recommendation uses stated priorities and does not claim a weakness.")
-    if environment == "acoustic-only" and any("wah" in item or "ebow" in item for item in [focus]):
+    if environment == "acoustic-only" and ("wah" in focus.lower() or "ebow" in focus.lower()):
         warnings.append("The selected focus depends on electric capability; use the block as mechanics/phrasing preparation or choose another approved focus.")
 
     return {
@@ -174,10 +206,11 @@ def recommend(request: dict[str, Any]) -> dict[str, Any]:
         "environment_guidance": environment_guidance,
         "fallback": {
             "duration_minutes": fallback_duration,
-            "instruction": "Regenerate with the shorter duration using the same explicit context; do not silently truncate the evidence block.",
+            "blocks": fallback_blocks,
+            "instruction": "Use this complete shorter variant; do not silently truncate the evidence block.",
         },
         "warnings": warnings,
-        "prohibited_mutations": ["schedule", "progress", "mastery", "maintenance state", "active-work state"],
+        "prohibited_mutations": ["schedule", "progress", "mastery", "maintenance state", "active-work state", "evidence records"],
     }
 
 
