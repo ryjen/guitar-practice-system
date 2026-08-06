@@ -6,8 +6,10 @@ on:
       - "catalogs/discovery/**"
       - "docs/discovery/**"
       - "examples/discovery/**"
-      - "scripts/discovery_catalog.py"
+      - "scripts/discovery*.py"
+      - "scripts/adaptive_session.py"
       - "tests/test_discovery*.py"
+      - "tests/test_adaptive_session*.py"
       - ".github/workflows/validate-discovery.yml"
   push:
     branches:
@@ -16,8 +18,10 @@ on:
       - "catalogs/discovery/**"
       - "docs/discovery/**"
       - "examples/discovery/**"
-      - "scripts/discovery_catalog.py"
+      - "scripts/discovery*.py"
+      - "scripts/adaptive_session.py"
       - "tests/test_discovery*.py"
+      - "tests/test_adaptive_session*.py"
       - ".github/workflows/validate-discovery.yml"
 
 permissions:
@@ -51,4 +55,19 @@ jobs:
           result = json.loads(Path("/tmp/discovery-result.json").read_text())
           assert result["status"] == "complete"
           assert result["candidates"][0]["source_id"] == "slide-slow-blues-a-60"
+          PY
+      - name: Generate adaptive session
+        run: |
+          python scripts/adaptive_session.py \
+            examples/discovery/adaptive-session-request.json \
+            > /tmp/session.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("/tmp/session.json").read_text())
+          assert result["requires_approval"] is True
+          assert sum(block["minutes"] for block in result["blocks"]) == 30
+          assert result["focus_technique"] == "slide-foundations"
+          assert sum(block["minutes"] for block in result["fallback"]["blocks"]) == 15
           PY

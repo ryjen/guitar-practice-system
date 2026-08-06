@@ -1,0 +1,17 @@
+{
+  "duration_minutes": 30,
+  "environment": "headphones",
+  "priorities": ["slide-foundations", "wah-rhythm"],
+  "active_techniques": ["slide-foundations", "wah-rhythm"],
+  "max_active_techniques": 3,
+  "maintenance_due": [],
+  "available_gear": ["guitar-fender-strat-white", "headphones"],
+  "available_backing_tracks": ["slide-slow-blues-a-60"],
+  "desired_genres": ["blues"],
+  "theory_focus": ["chord tones"],
+  "evidence": {
+    "slide-foundations": {
+      "largest_audible_defect": "pitch drifts during slow movement"
+    }
+  }
+}
