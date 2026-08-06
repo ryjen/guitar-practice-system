@@ -9,7 +9,7 @@ on:
       - "scripts/discovery*.py"
       - "scripts/adaptive_session.py"
       - "tests/test_discovery*.py"
-      - "tests/test_adaptive_session.py"
+      - "tests/test_adaptive_session*.py"
       - ".github/workflows/validate-discovery.yml"
   push:
     branches:
@@ -21,7 +21,7 @@ on:
       - "scripts/discovery*.py"
       - "scripts/adaptive_session.py"
       - "tests/test_discovery*.py"
-      - "tests/test_adaptive_session.py"
+      - "tests/test_adaptive_session*.py"
       - ".github/workflows/validate-discovery.yml"
 
 permissions:
@@ -69,4 +69,5 @@ jobs:
           assert result["requires_approval"] is True
           assert sum(block["minutes"] for block in result["blocks"]) == 30
           assert result["focus_technique"] == "slide-foundations"
+          assert sum(block["minutes"] for block in result["fallback"]["blocks"]) == 15
           PY
