@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "id": "evidence-YYYY-MM-DD-target-slug",
+  "date": "YYYY-MM-DD",
+  "target_type": "technique",
+  "target_id": "technique-id",
+  "evidence_type": "baseline",
+  "context": {
+    "tempo_bpm": null,
+    "tuning": "standard",
+    "meter": null,
+    "gear_setup_id": null,
+    "backing_track_id": null,
+    "environment": "normal"
+  },
+  "observations": {
+    "timing": null,
+    "intonation": null,
+    "articulation_muting": null,
+    "dynamics": null,
+    "phrasing_space": null,
+    "physical_tension": null,
+    "consistency": null,
+    "recovery": null
+  },
+  "largest_audible_defect": "",
+  "next_action": "",
+  "media_reference": "none",
+  "privacy": "private",
+  "quality_gates_checked": [],
+  "regression_observed": false,
+  "comparison_evidence_id": null,
+  "maintenance_interval_days": null,
+  "notes": null
+}
