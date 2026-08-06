@@ -1,0 +1,74 @@
+{
+  "records": [
+    {
+      "version": 1,
+      "id": "evidence-2026-08-01-slide-isolated",
+      "date": "2026-08-01",
+      "target_type": "technique",
+      "target_id": "slide-foundations",
+      "evidence_type": "isolated-check",
+      "context": {
+        "tempo_bpm": 60,
+        "tuning": "standard",
+        "meter": "4/4",
+        "gear_setup_id": "slide-diagnostic",
+        "backing_track_id": null,
+        "environment": "normal"
+      },
+      "observations": {
+        "timing": "Stable on sustained notes.",
+        "intonation": "Approach from below is still inconsistent.",
+        "articulation_muting": "Trailing strings are mostly controlled.",
+        "dynamics": null,
+        "phrasing_space": null,
+        "physical_tension": "No unusual tension observed.",
+        "consistency": "Three of five repetitions were representative.",
+        "recovery": null
+      },
+      "largest_audible_defect": "Pitch arrives sharp after upward movement.",
+      "next_action": "Loop two-fret upward movements against a sustained pitch reference.",
+      "media_reference": "none",
+      "privacy": "private",
+      "quality_gates_checked": ["pitch centre", "muting"],
+      "regression_observed": false,
+      "comparison_evidence_id": null,
+      "maintenance_interval_days": 14,
+      "notes": null
+    },
+    {
+      "version": 1,
+      "id": "evidence-2026-08-05-slide-context",
+      "date": "2026-08-05",
+      "target_type": "technique",
+      "target_id": "slide-foundations",
+      "evidence_type": "musical-context",
+      "context": {
+        "tempo_bpm": 60,
+        "tuning": "standard",
+        "meter": "4/4",
+        "gear_setup_id": "slide-musical",
+        "backing_track_id": "slide-slow-blues-a-60",
+        "environment": "normal"
+      },
+      "observations": {
+        "timing": "Entries are stable when phrases begin after beat one.",
+        "intonation": "Long notes settle correctly but fast arrivals remain sharp.",
+        "articulation_muting": "Low-string noise appears during position shifts.",
+        "dynamics": "Phrase peaks are audible.",
+        "phrasing_space": "Response windows remain open.",
+        "physical_tension": "No unusual tension observed.",
+        "consistency": "Two complete representative takes.",
+        "recovery": "Recovered after one missed entry without stopping."
+      },
+      "largest_audible_defect": "Fast upward arrivals are sharp in musical context.",
+      "next_action": "Practise one two-bar call-and-response phrase with a tuner drone before the next full take.",
+      "media_reference": "none",
+      "privacy": "private",
+      "quality_gates_checked": ["pitch centre", "muting", "musical phrasing", "space"],
+      "regression_observed": false,
+      "comparison_evidence_id": null,
+      "maintenance_interval_days": 14,
+      "notes": null
+    }
+  ]
+}
