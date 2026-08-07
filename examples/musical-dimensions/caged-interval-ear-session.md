@@ -11,7 +11,7 @@ Use one CAGED region as a temporary visual frame for hearing chord tones and con
 - **Progression:** A | D | E | A
 - **Tempo:** 72 BPM
 - **Meter:** 4/4
-- **Fretboard region:** A-shape A major around the 5th fret, then one adjacent region
+- **Fretboard region:** E-shape A major around the 5th fret, then one adjacent region
 - **Technique focus:** clean fretting, position shifts, chord-tone targeting
 
 ## Reusable dimensions
@@ -24,7 +24,7 @@ Use one CAGED region as a temporary visual frame for hearing chord tones and con
 
 ## Goal-directed warmup
 
-1. Play the A-major chord shape and name every root.
+1. Play the E-shape A-major chord and name every root.
 2. Find the nearest major third and perfect fifth above and below each root.
 3. Sing root–third–fifth before playing it.
 4. Play the same three tones in a second nearby position without running the full scale.
@@ -33,7 +33,7 @@ Use one CAGED region as a temporary visual frame for hearing chord tones and con
 
 ## Stage 1 — chord-shape orientation
 
-- Hold the A-shape chord or partial triad.
+- Hold the E-shape chord or partial triad.
 - Play only roots for one pass.
 - Add thirds on the next pass.
 - Add fifths on the next pass.
@@ -48,7 +48,7 @@ Over `A | D | E | A`:
 - Target the third of each chord on the first pass.
 - Target the fifth on the second pass.
 - Use the major sixth over A as a colour tone, then resolve it to the fifth or root.
-- Use the major seventh only as directed tension into A.
+- Use G♯, the major seventh of A, as directed tension into the final A chord rather than as a resting tone.
 
 Before each pass:
 
@@ -95,7 +95,7 @@ Review:
 
 For a 10-minute session:
 
-1. stay in one A-shape region
+1. stay in one E-shape region
 2. target only root, third, and fifth
 3. record four short phrases with one beat of silence after each
 4. review pitch recognition and phrase clarity only
