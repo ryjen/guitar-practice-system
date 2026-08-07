@@ -14,13 +14,13 @@ The core question is:
 
 ## Model
 
-The system has four connected practice layers plus a cross-cutting Discovery capability:
+The system has four connected practice layers plus a cross-cutting deterministic Discovery capability:
 
 1. **Techniques** — the primary progression, practice, and assessment layer
 2. **Songs / repertoire** — musical use cases for one or more techniques
 3. **Gear / signal chains** — repeatable setups that support a sound or technique
 4. **Backing tracks / production** — portable accompaniment for practice, improvisation, recording, and composition
-5. **Discovery** — advisory search and ranking across the layers; it cannot mutate practice state without approval
+5. **Discovery** — advisory catalog search and ranking across the layers; it cannot mutate practice state without approval
 
 ```mermaid
 flowchart TD
@@ -48,27 +48,29 @@ Architecture references:
 
 ## Repository boundary
 
-This repository is the **public reference core**. It owns portable practice concepts, schemas, local-first workflows, validators, provider interfaces, synthetic examples, and deliberately disclosed baseline prompts and algorithms.
+This repository is the **public, AI-independent reference core**. It owns portable practice concepts, schemas, local-first workflows, validators, deterministic interfaces, synthetic examples, and deterministic reference algorithms.
 
-A separate private `guitar-practice-platform` repository owns the commercial product layer, including hosted services, accounts, cloud synchronization, billing and entitlements, production AI orchestration, proprietary personalization, premium content, customer analytics, product strategy, and production operations.
+A separate private `guitar-practice-platform` repository owns the commercial product layer and **all AI-related work**, including prompts, model providers, agents, orchestration, retrieval, embeddings, AI-assisted discovery, coaching, generation, evaluation, datasets, traces, guardrails, experiments, and AI roadmap work.
 
 ```mermaid
 flowchart TD
-    P[Private guitar-practice-platform] -->|versioned contracts and releases| C[Public guitar-practice-system]
+    P[Private guitar-practice-platform] -->|versioned AI-independent contracts and releases| C[Public guitar-practice-system]
     C -. must not depend on .-> P
 ```
 
 Important consequences:
 
 - Anything already committed here must be treated as publicly disclosed; deleting it later does not restore secrecy.
-- Existing prompts and adaptive scripts are public reference baselines, not the production implementation.
-- New product judgment, production prompts, ranking logic, user-derived insight, premium content, and commercial planning start private.
+- The former public prompt directory has been removed from the active tree and copied to a private provenance area. Those prompts remain disclosed in Git history and are not commercial differentiation.
+- AI-related code, documentation, interfaces, schemas, fixtures, examples, issues, and roadmap work start and remain private.
+- Only independently useful, AI-neutral domain contracts or deterministic mechanisms may be considered for public disclosure.
 - The private product may depend on tagged public contracts; this public repository must never depend on private source code.
-- Uncertain work defaults to private until it can be deliberately generalized and reviewed for public release.
+- Uncertain or AI-adjacent work defaults to private.
 
 See:
 
 - [`docs/decisions/ADR-0002-public-core-product-boundary.md`](docs/decisions/ADR-0002-public-core-product-boundary.md)
+- [`docs/decisions/ADR-0003-private-ai-ownership.md`](docs/decisions/ADR-0003-private-ai-ownership.md)
 - [`docs/governance/ip-boundary.md`](docs/governance/ip-boundary.md)
 
 ## License status
@@ -156,7 +158,7 @@ python scripts/discovery_catalog.py search \
   catalogs/discovery/repository.json
 ```
 
-Provider output can be normalized through the same candidate contract before review.
+Provider output can be normalized through the same candidate contract before review, provided the public adapter remains deterministic and AI-independent.
 
 ## Quick start
 
@@ -166,7 +168,7 @@ No runtime is required for the documentation workflow. Optional standard-library
 git clone https://github.com/ryjen/guitar-practice-system.git
 cd guitar-practice-system
 
-find docs prompts templates examples -type f | sort
+find docs templates examples -type f | sort
 python -m unittest discover -s tests -v
 mkdir -p generated
 ```
@@ -247,14 +249,13 @@ Specs are canonical. Generated files are disposable until promoted.
 - Generate one portable multi-track MIDI backing track and verify DAW import
 - Add baseline recordings, quality gates, and regression checks
 - Inventory current gear and capture repeatable technique-specific setups
-- Maintain a deterministic public adaptive-session reference while product personalization evolves privately
+- Maintain deterministic adaptive-session behavior and compatibility fixtures
 
 ### Later
 
 - Add deterministic notation generation scripts
 - Build a curated set of reusable public practice fragments and arrangements
-- Add optional external Discovery providers behind the same normalization boundary
-- Improve public contracts for privately operated AI-assisted coaching capabilities
+- Add optional deterministic external catalog providers behind the same normalization boundary
 - Improve portability across GarageBand, Guitar Pro, MuseScore, Flow, and DAWs
 
 ## Design principles
@@ -263,7 +264,7 @@ Specs are canonical. Generated files are disposable until promoted.
 - Songs are musical use cases
 - Gear is operational context, not progress
 - Backing tracks are first-class portable assets
-- Discovery is advisory and human-approved
+- Discovery is deterministic, advisory, and human-approved
 - Musical dimensions are optional constraints, not competing curricula
 - Space is intentional and explicit, not missing data
 - Wah / slide / E-Bow remain the centre of gravity
@@ -273,13 +274,13 @@ Specs are canonical. Generated files are disposable until promoted.
 - Musical intent over tooling novelty
 - Small playable units before complete arrangements
 - DAW-neutral sources with practical DAW-specific import notes
-- Public contracts before private integration
-- Private by default when classification is uncertain
+- Public contracts must be AI-independent
+- AI-related or uncertain work remains private
 
 ## Contributing
 
-This is a personal repository and a public reference core. Contributions, issues, or suggestions should improve portable practice material, public contracts, deterministic reference behavior, or safe local-first workflows.
+This is a personal repository and a public reference core. Contributions, issues, or suggestions should improve portable practice material, AI-independent public contracts, deterministic reference behavior, or safe local-first workflows.
 
-Useful areas include better public-reference prompts, scaffold schemas, worked synthetic examples, MIDI generation experiments, DAW workflows, practice-material evaluation criteria, Discovery adapters, compatibility fixtures, and clearer artifact-promotion rules.
+Useful areas include scaffold schemas, worked synthetic examples, MIDI generation tools, DAW workflows, practice-material evaluation criteria, deterministic Discovery adapters, compatibility fixtures, and clearer artifact-promotion rules.
 
-Commercial product behavior, production prompts, proprietary personalization, premium content, customer data, pricing, and private roadmap details do not belong in this repository. Every pull request must complete the public disclosure checklist.
+All AI-related work, commercial product behavior, proprietary personalization, premium content, customer data, pricing, and private roadmap details belong in the private platform repository. Every pull request must complete the public disclosure checklist.

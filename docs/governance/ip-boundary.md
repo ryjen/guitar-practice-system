@@ -1,61 +1,57 @@
 # Public/private IP boundary
 
-This policy is the operational guardrail between the public `guitar-practice-system` repository and the private `guitar-practice-platform` product repository.
+This policy governs the public `guitar-practice-system` repository and the private `guitar-practice-platform` repository.
+
+## Non-negotiable AI rule
+
+All AI-related material belongs exclusively in `guitar-practice-platform`.
+
+This includes prompts, model-provider code, routing, orchestration, agents, retrieval, embeddings, AI-assisted discovery, coaching, recommendation, generation, evaluation, datasets, traces, guardrails, experiments, AI-specific schemas, examples, fixtures, issues, documentation, and roadmap work.
+
+There is no promotion path from private to public for AI material.
+
+When a private AI capability needs a public dependency, extract only an AI-independent domain contract or deterministic mechanism that remains useful without mentioning models, prompts, providers, or AI product behavior.
 
 ## Classification model
 
 | Classification | Repository | Examples |
 |---|---|---|
-| `PUBLIC-CORE` | Public | Domain schemas, portable formats, validators, reference CLI behavior |
-| `PUBLIC-INTERFACE` | Public | Provider contracts, compatibility fixtures, extension points, generic API descriptions |
-| `PUBLIC-REFERENCE` | Public | Synthetic examples, deliberately disclosed prompts, baseline algorithms |
-| `PRIVATE-PRODUCT` | Private | Hosted workflows, product UX, orchestration, entitlements, marketplace |
-| `PRIVATE-INTELLIGENCE` | Private | Production prompts, ranking, adaptation, evaluation, routing, learned heuristics |
+| `PUBLIC-CORE` | Public | Domain schemas, portable formats, validators, deterministic CLI behavior |
+| `PUBLIC-INTERFACE` | Public | AI-independent compatibility contracts and fixtures |
+| `PUBLIC-REFERENCE` | Public | Synthetic musical examples and deterministic baseline algorithms |
+| `PRIVATE-AI` | Private | Every AI-related artifact or capability |
+| `PRIVATE-PRODUCT` | Private | Hosted workflows, product UX, entitlements, marketplace |
+| `PRIVATE-INTELLIGENCE` | Private | Ranking, adaptation, evaluation, routing, learned heuristics |
 | `PRIVATE-CONTENT` | Private | Premium curricula, licensed material, unreleased editorial plans |
 | `PRIVATE-DATA` | Private | Practice history, recordings, customer data, telemetry, experiments |
-| `SECRET` | Private secret store | Credentials, signing keys, tokens, private endpoints, production configuration |
+| `SECRET` | Private secret store | Credentials, signing keys, tokens, endpoints, production configuration |
 
-A file may contain only one effective classification. Split mixed files rather than relying on comments to hide sensitive sections.
+A file may contain only one effective classification. Split mixed files rather than placing private or AI material beside public content.
 
-## Decision test
+## Public repository ownership
 
-Before adding material to the public repository, answer these questions:
+The public repository may own:
 
-1. Can the material be independently useful without the private product?
-2. Is it generic across users rather than derived from one customer, cohort, or proprietary dataset?
-3. Are all examples synthetic, owned, licensed for redistribution, or clearly public domain?
-4. Would publishing the implementation weaken commercial differentiation, fraud controls, abuse resistance, or operational security?
-5. Does it contain production prompts, thresholds, ranking weights, evaluation criteria, business strategy, pricing, or roadmap detail?
-6. Could it expose personal practice data, recordings, identifiers, or third-party confidential information?
-
-Any `no` to questions 1–3 or `yes` to questions 4–6 means the work starts private.
-
-## Repository ownership
-
-### Public repository
-
-The public core owns stable, portable mechanisms:
-
-- domain concepts and schemas
-- validation and compatibility behavior
-- provider-neutral interfaces
-- deterministic reference implementations
+- musical domain concepts and schemas
+- deterministic validation and compatibility behavior
 - local-first workflows
-- synthetic examples and baseline content
-- provenance and approval invariants
+- deterministic catalog search and ranking
+- AI-independent extension points
+- synthetic, owned, public-domain, or redistribution-safe examples
+- provenance, approval, privacy, and safety invariants
 
-Public reference implementations are intentionally disclosed and must be treated as prior art for this project. New commercial differentiation must not be layered directly into them.
+It must not contain AI-related code, documentation, examples, interfaces, prompts, plans, issues, or fixtures.
 
-### Private repository
+## Private repository ownership
 
-The private platform owns product judgment and operations:
+The private platform owns:
 
-- personalization beyond the public baseline
-- production AI orchestration and evaluation
-- account, billing, entitlement, tenancy, and synchronization systems
+- all AI work
+- hosted services and production operations
+- personalization and proprietary recommendation logic
+- identity, tenancy, synchronization, billing, and entitlements
 - premium and licensed content
 - user-derived analytics and experimentation
-- teacher, school, partner, and marketplace workflows
 - product planning, pricing, acquisition, and commercial metrics
 - deployment, observability, incident response, and threat-model details
 
@@ -63,50 +59,41 @@ The private platform owns product judgment and operations:
 
 The private platform may depend on tagged versions of the public core. The public core must not depend on, import, fetch, or test against private source code.
 
-Allowed integration mechanisms:
+Allowed public integration mechanisms:
 
-- versioned JSON Schema or OpenAPI contracts
+- versioned AI-independent JSON Schema or OpenAPI contracts
 - tagged packages or release artifacts
-- stable command-line interfaces
+- stable deterministic command-line interfaces
 - synthetic compatibility fixtures
-- documented extension/provider interfaces
 
-Avoid:
+Prohibited public integration mechanisms:
 
-- copying private implementation into public examples
-- importing a private Git URL from public build files
-- public test fixtures captured from production
-- public issue descriptions that reveal unreleased product behavior
-- screenshots, logs, or traces containing customer or operational data
+- prompt contracts or prompt examples
+- model-provider or agent interfaces
+- AI-specific fields, schemas, or extension points
+- model-derived production fixtures
+- references to private product or AI roadmap behavior
+- imports from private Git URLs
 
 ## Promotion from private to public
 
-Private work may be promoted only when all of the following are true:
+Private non-AI work may be promoted only after generalization, provenance review, security review, and removal of product-specific assumptions.
 
-1. The implementation has been generalized and stripped of product assumptions.
-2. Inputs and fixtures are synthetic or redistribution-safe.
-3. Secrets, identifiers, telemetry, and production configuration are absent.
-4. Production prompts, weights, thresholds, and evaluations remain private unless disclosure is intentional.
-5. Security and abuse-resistance implications have been reviewed.
-6. A public contract and compatibility tests are sufficient for downstream use.
-7. The promotion is documented as an explicit disclosure decision.
+AI material may not be promoted. Only a separately extracted AI-independent mechanism may be considered.
 
 ## Existing public material
 
 Files already committed publicly must be assumed disclosed. Deleting or moving them does not make them confidential again.
 
-Existing prompts and adaptive scripts may remain as `PUBLIC-REFERENCE` baselines. Product development must fork conceptually behind a private interface rather than incrementally turning those public files into production implementations.
+The former public prompt directory has been removed from the active tree and copied into a private provenance area. Those imported prompts remain disclosed and must not be treated as commercial differentiation.
 
-## Review cadence
+## Review rule
 
-Review this boundary when any of the following occurs:
+Reject or move a public change when it introduces or discusses:
 
-- a new hosted capability is proposed
-- a public schema gains product-specific fields
-- a new AI prompt, evaluator, or ranking mechanism is introduced
-- premium or licensed content is added
-- telemetry or user data becomes an input
-- a private implementation needs a new public extension point
-- a contributor is uncertain where work belongs
+- AI, models, prompts, agents, embeddings, retrieval, or model providers
+- AI-assisted discovery, coaching, recommendation, or generation
+- model evaluation, guardrails, traces, datasets, or derived metadata
+- future AI capabilities or AI-specific public interfaces
 
-Uncertain work defaults to the private repository until reviewed.
+When uncertain, the work starts private.
