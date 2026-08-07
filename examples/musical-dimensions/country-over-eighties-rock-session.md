@@ -37,9 +37,9 @@ The country layer changes articulation and phrase vocabulary. It does not requir
 ## Goal-directed warmup
 
 1. Alternate flat-picked bass notes with plucked upper-string dyads.
-2. Play A-major sixths in two nearby positions.
-3. Bend one note of a two-note shape into an A, D, or E chord tone.
-4. Repeat a two-beat phrase over a straight-eighth pulse while keeping accents on beats 2 and 4.
+2. Play sixths derived from the A Mixolydian pitch set in two nearby positions.
+3. Bend one note of a two-note shape into an A, G, or D chord tone.
+4. Repeat a two-beat phrase over a straight-eighth pulse while keeping the backbeat clear on beats 2 and 4.
 
 **Readiness cue:** picked and plucked notes remain balanced, and the bend arrives in tune without disrupting the pulse.
 
