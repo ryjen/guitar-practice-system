@@ -1,14 +1,31 @@
 {
-  "version": 1,
+  "version": 2,
   "id": "evidence-YYYY-MM-DD-target-slug",
   "date": "YYYY-MM-DD",
   "target_type": "technique",
   "target_id": "technique-id",
   "evidence_type": "baseline",
   "context": {
-    "tempo_bpm": null,
+    "timing": {
+      "rhythm_meter_id": null,
+      "meter": null,
+      "grouping": null,
+      "attempted": {
+        "bpm": null,
+        "beat_unit": null,
+        "subdivision": null,
+        "notes_per_beat": null,
+        "click_mode": null,
+        "click_pulse_unit": null
+      },
+      "highest_clean_in_session": null,
+      "target": null,
+      "stretch_exposure": null,
+      "later_session_verified": false,
+      "musical_context_verified": false,
+      "progression_strategy": null
+    },
     "tuning": "standard",
-    "meter": null,
     "gear_setup_id": null,
     "backing_track_id": null,
     "environment": "normal"
