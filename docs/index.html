@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#17130f">
   <meta name="description" content="A technique-centred guitar practice cockpit for planning, playing, and reviewing focused sessions.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>Guitar Practice System</title>
   <link rel="stylesheet" href="./assets/styles.css">
 </head>
@@ -16,7 +17,10 @@
       <span><strong>Guitar Practice</strong><small>System cockpit</small></span>
     </a>
     <nav aria-label="Primary navigation">
-      <a href="#today">Today</a><a href="#techniques">Techniques</a><a href="#layers">Layers</a><a href="#review">Review</a>
+      <a href="#today">Today</a>
+      <a href="#techniques">Techniques</a>
+      <a href="#layers">Layers</a>
+      <a href="#review">Review</a>
     </nav>
     <a class="repo-link" href="https://github.com/ryjen/guitar-practice-system">Source</a>
   </header>
@@ -36,7 +40,9 @@
         <p class="label">Current centre of gravity</p>
         <h2 id="focus-title">Wah · Slide · E-Bow</h2>
         <p>Movement, sustain, texture, rhythmic placement, phrasing, and deliberate silence.</p>
-        <div class="signal" aria-label="Example signal chain"><span>Guitar</span><i>→</i><span>Comp</span><i>→</i><span>Wah</span><i>→</i><span>Drive</span><i>→</i><span>Delay</span><i>→</i><span>Amp</span></div>
+        <div class="signal" aria-label="Example signal chain">
+          <span>Guitar</span><i aria-hidden="true">→</i><span>Comp</span><i aria-hidden="true">→</i><span>Wah</span><i aria-hidden="true">→</i><span>Drive</span><i aria-hidden="true">→</i><span>Delay</span><i aria-hidden="true">→</i><span>Amp</span>
+        </div>
       </aside>
     </section>
 
@@ -44,20 +50,39 @@
       <div class="section-heading">
         <div><p class="eyebrow">Practice cockpit</p><h2 id="today-title">Today’s focused session</h2></div>
         <div class="duration-control" role="group" aria-label="Session duration">
-          <button data-duration="15" type="button">15</button><button class="active" data-duration="30" type="button">30</button><button data-duration="45" type="button">45 min</button>
+          <button data-duration="15" type="button" aria-pressed="false">15 min</button>
+          <button class="active" data-duration="30" type="button" aria-pressed="true">30 min</button>
+          <button data-duration="45" type="button" aria-pressed="false">45 min</button>
         </div>
       </div>
       <div class="session-grid">
-        <article class="session-main card">
-          <div class="card-top"><span class="pill accent" id="session-technique">Slide</span><span class="muted" id="session-meta">A minor · 72 BPM · 4/4</span></div>
+        <article class="session-main card" aria-labelledby="session-title">
+          <div class="card-top"><span class="pill accent" id="session-technique">Slide</span><span class="muted" id="session-meta">A minor · target 72 BPM · 4/4</span></div>
           <h3 id="session-title">Intonation before vocabulary</h3>
           <p id="session-intent">Make pitch arrival, muting, and release credible before adding speed or density.</p>
           <ol id="session-stages" class="stages"></ol>
+          <a class="source-reference" id="session-source" href="https://github.com/ryjen/guitar-practice-system">Open canonical source material</a>
         </article>
-        <aside class="session-sidebar">
+        <aside class="session-sidebar" aria-label="Session context and tools">
           <article class="card compact"><p class="label">Musical use case</p><h3 id="use-case-title">Slow-blues response phrases</h3><p id="use-case-copy">Two-bar answers over a sparse 12-bar scaffold.</p></article>
           <article class="card compact"><p class="label">Gear intent</p><h3 id="gear-title">Clear attack, long decay</h3><p id="gear-copy">Low-gain compression, restrained drive, short delay, clean headroom.</p></article>
           <article class="card compact space-card"><p class="label">Space constraint</p><strong id="space-rule">Leave beat four empty after every answer.</strong></article>
+          <article class="card compact metronome-card" aria-labelledby="metronome-title">
+            <p class="label">Metronome progression</p>
+            <h3 id="metronome-title">Slow → medium → fast</h3>
+            <div class="tempo-ladder" role="group" aria-label="Tempo progression">
+              <button type="button" data-tempo-level="slow" class="active" aria-pressed="true"><span>Slow</span><strong id="tempo-slow">52</strong></button>
+              <button type="button" data-tempo-level="medium" aria-pressed="false"><span>Medium</span><strong id="tempo-medium">64</strong></button>
+              <button type="button" data-tempo-level="fast" aria-pressed="false"><span>Fast</span><strong id="tempo-fast">72</strong></button>
+            </div>
+            <div class="metronome-controls">
+              <label for="tempo-input">BPM</label>
+              <input id="tempo-input" type="number" inputmode="numeric" min="30" max="240" step="1" value="52">
+              <button class="button secondary" id="metronome-toggle" type="button" aria-pressed="false">Start click</button>
+            </div>
+            <p class="metronome-status" id="metronome-status" role="status">Stopped · quarter-note pulse · 4 beats per bar.</p>
+            <p class="metronome-guide">Advance only after two clean passes. Drop one level when timing, muting, or intonation degrades.</p>
+          </article>
         </aside>
       </div>
     </section>
@@ -69,11 +94,11 @@
 
     <section id="layers" class="section split-section" aria-labelledby="layers-title">
       <div class="section-heading"><div><p class="eyebrow">Composable system</p><h2 id="layers-title">Connect the four practice layers</h2></div></div>
-      <div class="layer-map" aria-label="Practice layer relationship">
-        <button class="layer active" data-layer="technique"><span>01</span><strong>Technique</strong><small>Owns progression and quality gates</small></button>
-        <button class="layer" data-layer="song"><span>02</span><strong>Song</strong><small>Tests the skill in musical context</small></button>
-        <button class="layer" data-layer="gear"><span>03</span><strong>Gear</strong><small>Makes a sound repeatable</small></button>
-        <button class="layer" data-layer="backing"><span>04</span><strong>Backing track</strong><small>Creates portable accompaniment</small></button>
+      <div class="layer-map" role="group" aria-label="Practice layer relationship">
+        <button class="layer active" data-layer="technique" type="button" aria-pressed="true"><span>01</span><strong>Technique</strong><small>Owns progression and quality gates</small></button>
+        <button class="layer" data-layer="song" type="button" aria-pressed="false"><span>02</span><strong>Song</strong><small>Tests the skill in musical context</small></button>
+        <button class="layer" data-layer="gear" type="button" aria-pressed="false"><span>03</span><strong>Gear</strong><small>Makes a sound repeatable</small></button>
+        <button class="layer" data-layer="backing" type="button" aria-pressed="false"><span>04</span><strong>Backing track</strong><small>Creates portable accompaniment</small></button>
       </div>
       <article class="layer-detail card" id="layer-detail" aria-live="polite"></article>
     </section>
@@ -81,10 +106,12 @@
     <section id="review" class="section review-section" aria-labelledby="review-title">
       <div class="review-copy"><p class="eyebrow">Actionable memory</p><h2 id="review-title">End with one useful decision.</h2><p>Do not score everything. Record enough evidence to identify the largest audible defect, then choose what changes next.</p></div>
       <form class="review-card card" id="review-form">
-        <label>Largest audible defect<select id="defect"><option>Timing</option><option>Intonation</option><option>Muting / noise</option><option>Articulation</option><option>Dynamics</option><option>Phrasing</option><option>Too many notes / not enough space</option></select></label>
-        <label>One observation<textarea id="observation" rows="3" placeholder="The note arrived in tune, but the release was late and blurred the response window."></textarea></label>
-        <label>Next action<input id="next-action" placeholder="Repeat at 64 BPM with two-note phrases."></label>
-        <button class="button primary" type="submit">Copy review note</button><p class="form-status" id="form-status" role="status"></p>
+        <label>Largest audible defect<select id="defect" name="defect"><option>Timing</option><option>Intonation</option><option>Muting / noise</option><option>Articulation</option><option>Dynamics</option><option>Phrasing</option><option>Too many notes / not enough space</option></select></label>
+        <label>One observation<textarea id="observation" name="observation" rows="3" placeholder="The note arrived in tune, but the release was late and blurred the response window."></textarea></label>
+        <label>Next action<input id="next-action" name="next-action" placeholder="Repeat at 64 BPM with two-note phrases."></label>
+        <button class="button primary" type="submit">Create review note</button>
+        <label class="review-output" id="review-output-wrap" hidden>Generated note<textarea id="review-output" rows="7" readonly></textarea></label>
+        <p class="form-status" id="form-status" role="status"></p>
       </form>
     </section>
   </main>
