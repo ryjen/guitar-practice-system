@@ -15,6 +15,8 @@ They are intentionally small, playable, and reusable. Each example separates:
 2. [`twelve-bar-blues-variants.md`](twelve-bar-blues-variants.md) — standard, quick-change, minor, and jazz-blues relationships
 3. [`ambiguous-chromatic-mediants.md`](ambiguous-chromatic-mediants.md) — a deliberately non-functional progression analyzed without forced functional labels
 4. [`seven-eight-space-session.md`](seven-eight-space-session.md) — a 7/8 phrasing session using 2+2+3 grouping and explicit silence
+5. [`caged-interval-ear-session.md`](caged-interval-ear-session.md) — CAGED used as an optional orientation frame for interval and contextual ear training
+6. [`country-over-eighties-rock-session.md`](country-over-eighties-rock-session.md) — country articulation layered selectively over an eighties-rock progression and groove
 
 ## Usage
 
@@ -25,5 +27,7 @@ When adapting them:
 - preserve reusable IDs where musical identity is unchanged
 - keep key, tempo, voicing, instrumentation, and session constraints as realization data
 - leave irrelevant dimensions unconstrained
+- treat fretboard systems as interchangeable views rather than exclusive doctrine
+- treat genre layers as selected vocabulary contributions rather than rigid inheritance
 - treat space as intentional musical data
 - capture one largest audible defect rather than scoring every dimension
