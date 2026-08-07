@@ -68,8 +68,14 @@ Important consequences:
 
 See:
 
-- [`docs/decisions/ADR-0002-open-core-product-boundary.md`](docs/decisions/ADR-0002-open-core-product-boundary.md)
+- [`docs/decisions/ADR-0002-public-core-product-boundary.md`](docs/decisions/ADR-0002-public-core-product-boundary.md)
 - [`docs/governance/ip-boundary.md`](docs/governance/ip-boundary.md)
+
+## License status
+
+This repository is publicly visible but currently has no explicit software license. Public visibility should not be interpreted as an open-source license or as permission to use, modify, redistribute, sublicense, or create derivative works beyond rights provided by applicable law and GitHub's terms.
+
+A license decision must be made deliberately and separately from the public/private repository split. Until then, the project should be described as a **public reference core**, not as open source.
 
 ## Goals
 
