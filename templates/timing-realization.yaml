@@ -1,0 +1,30 @@
+rhythm_meter_id: rhythm-straight-4-4
+meter: 4/4
+grouping: null
+start:
+  bpm: 60
+  beat_unit: quarter
+working:
+  bpm: 75
+  beat_unit: quarter
+target:
+  bpm: 90
+  beat_unit: quarter
+stretch: null
+subdivision:
+  value: eighth
+  notes_per_beat: 2
+click:
+  mode: every-beat
+  pulse_unit: quarter
+  accent: downbeat
+strategy: ladder
+increment_bpm: 3
+decrement_bpm: 5
+clean_repetitions: 3
+max_failed_attempts: 2
+rest_seconds: 30
+stop_condition: accumulating tension, pain, or degraded timing/articulation
+fallback: reduce tempo, shorten the loop, simplify articulation, or change strategy
+final_check: sparse click followed by a recorded musical-context take
+source: session
