@@ -7,7 +7,7 @@ Layer country articulation onto an eighties-rock harmonic and rhythmic bed witho
 - **Session ID:** `session-country-articulation-eighties-rock`
 - **Primary goal:** preserve a driving rock pulse while adding selective hybrid picking, double-stops, and pedal-steel-style movement
 - **Duration:** 30 minutes
-- **Key:** A major
+- **Tonal centre:** A, with Mixolydian-flavoured harmony
 - **Progression:** A | G | D | A (`I | ♭VII | IV | I`)
 - **Tempo:** 112 BPM
 - **Meter:** 4/4
@@ -28,7 +28,7 @@ Layer country articulation onto an eighties-rock harmonic and rhythmic bed witho
 
 - hybrid-picked string separation
 - sixths and double-stops
-- open-string pull-offs where they fit the key
+- open-string pull-offs where they fit the tonal material
 - controlled snap and muted ghost attacks
 - pedal-steel-style bend into a chord tone
 
