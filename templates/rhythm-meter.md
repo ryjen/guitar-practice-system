@@ -4,13 +4,13 @@
 - **Intent or feel:**
 - **Meter:**
 - **Suggested tempo or range:**
-- **Pulse level:**
+- **Beat / pulse unit:** quarter / dotted-quarter / eighth / other
 
 ## Identity boundary
 
-This document owns reusable meter, grouping, groove intent, phrase behaviour, and space rules. A song, backing track, exercise, or session normally owns the actual tempo, notes, instrumentation, and arrangement.
+This document owns reusable meter, grouping, groove intent, pulse interpretation, click guidance, phrase behaviour, and space rules. A song, backing track, exercise, or session normally owns the actual tempo, notes, instrumentation, arrangement, and today's concrete metronome realization.
 
-Treat the tempo above as guidance unless a particular range is intrinsic to the feel.
+Treat the tempo above as guidance unless a particular range is intrinsic to the feel. Reference `docs/metronome-progression.md` rather than duplicating progression rules here.
 
 ## Grouping and subdivision
 
@@ -21,6 +21,21 @@ Treat the tempo above as guidance unless a particular range is intrinsic to the 
 - **Count or spoken cue:**
 
 Grouping is required for odd or additive meters. Meter alone is not enough.
+
+## Pulse and click guidance
+
+- **Default pulse unit:**
+- **Beginner click mode:** every-beat / accented-downbeat / other
+- **Internal-clock validation:** backbeat / half-time / one-per-bar / off-beat / gap / count-in-silence
+- **Additive accent behavior:**
+
+Compound and odd meters must state the pulse explicitly. For example:
+
+- `6/8 at 60 BPM, dotted-quarter pulse`
+- `6/8 at 120 BPM, eighth-note pulse`
+- `7/8 at 100 BPM, eighth-note pulse, grouping 2+2+3`
+
+A rhythm definition may recommend click behavior, but the practice session owns the selected mode, starting tempo, target tempo, dose, fallback, and stop conditions.
 
 ## Groove
 
