@@ -1,10 +1,10 @@
 # Guitar Practice System
 
-**Status:** early design / personal practice-material generation
+**Status:** public reference core / early design / personal practice-material generation
 
-A personal, technique-centred guitar practice and backing-track system for developing my own style, sound, rhythm, vocabulary, and writing instincts.
+A personal, technique-centred guitar practice and backing-track system for developing my own style, sound, rhythm, vocabulary, and writing instincts. It also provides the portable public reference core used by a separately operated private product.
 
-This repository is not trying to be a universal guitar-learning platform. It is a working system for helping me generate things I actually want to play: technique exercises, grooves, MIDI scaffolds, backing structures, arrangement cues, song use cases, and style-specific practice sessions.
+This repository is not trying to be a universal hosted guitar-learning platform. It is a working system for helping me generate things I actually want to play: technique exercises, grooves, MIDI scaffolds, backing structures, arrangement cues, song use cases, and style-specific practice sessions.
 
 The main focus is the wah / slide / E-Bow direction: atmospheric, expressive, rhythm-aware guitar built around movement, sustain, texture, and feel. Country picking and jazz vocabulary are optional branches that feed the same core sound through articulation, harmony, rhythm, phrasing, and voice leading.
 
@@ -45,6 +45,31 @@ Architecture references:
 - [`docs/architecture/musical-dimensions.md`](docs/architecture/musical-dimensions.md) — composable musical and expressive coordinates
 - [`docs/architecture/reference-conventions.md`](docs/architecture/reference-conventions.md) — stable Markdown identifiers and identity/realization boundaries
 - [`docs/discovery/README.md`](docs/discovery/README.md) — provider-neutral discovery, approval, provenance, and adapter boundaries
+
+## Repository boundary
+
+This repository is the **public reference core**. It owns portable practice concepts, schemas, local-first workflows, validators, provider interfaces, synthetic examples, and deliberately disclosed baseline prompts and algorithms.
+
+A separate private `guitar-practice-platform` repository owns the commercial product layer, including hosted services, accounts, cloud synchronization, billing and entitlements, production AI orchestration, proprietary personalization, premium content, customer analytics, product strategy, and production operations.
+
+```mermaid
+flowchart TD
+    P[Private guitar-practice-platform] -->|versioned contracts and releases| C[Public guitar-practice-system]
+    C -. must not depend on .-> P
+```
+
+Important consequences:
+
+- Anything already committed here must be treated as publicly disclosed; deleting it later does not restore secrecy.
+- Existing prompts and adaptive scripts are public reference baselines, not the production implementation.
+- New product judgment, production prompts, ranking logic, user-derived insight, premium content, and commercial planning start private.
+- The private product may depend on tagged public contracts; this public repository must never depend on private source code.
+- Uncertain work defaults to private until it can be deliberately generalized and reviewed for public release.
+
+See:
+
+- [`docs/decisions/ADR-0002-open-core-product-boundary.md`](docs/decisions/ADR-0002-open-core-product-boundary.md)
+- [`docs/governance/ip-boundary.md`](docs/governance/ip-boundary.md)
 
 ## Goals
 
@@ -216,14 +241,14 @@ Specs are canonical. Generated files are disposable until promoted.
 - Generate one portable multi-track MIDI backing track and verify DAW import
 - Add baseline recordings, quality gates, and regression checks
 - Inventory current gear and capture repeatable technique-specific setups
-- Extend Discovery from the local catalog into adaptive session recommendations
+- Maintain a deterministic public adaptive-session reference while product personalization evolves privately
 
 ### Later
 
 - Add deterministic notation generation scripts
-- Build a curated set of reusable practice fragments and arrangements
+- Build a curated set of reusable public practice fragments and arrangements
 - Add optional external Discovery providers behind the same normalization boundary
-- Explore AI-assisted coaching loops around sound, rhythm, and arrangement
+- Improve public contracts for privately operated AI-assisted coaching capabilities
 - Improve portability across GarageBand, Guitar Pro, MuseScore, Flow, and DAWs
 
 ## Design principles
@@ -242,9 +267,13 @@ Specs are canonical. Generated files are disposable until promoted.
 - Musical intent over tooling novelty
 - Small playable units before complete arrangements
 - DAW-neutral sources with practical DAW-specific import notes
+- Public contracts before private integration
+- Private by default when classification is uncertain
 
 ## Contributing
 
-This is a personal repository. Contributions, issues, or suggestions only make sense if they help the system produce better practice material for my style, sound, rhythm, or workflow.
+This is a personal repository and a public reference core. Contributions, issues, or suggestions should improve portable practice material, public contracts, deterministic reference behavior, or safe local-first workflows.
 
-Useful areas include better prompts, scaffold schemas, worked examples, MIDI generation experiments, DAW workflows, practice-material evaluation criteria, Discovery adapters, and clearer artifact-promotion rules.
+Useful areas include better public-reference prompts, scaffold schemas, worked synthetic examples, MIDI generation experiments, DAW workflows, practice-material evaluation criteria, Discovery adapters, compatibility fixtures, and clearer artifact-promotion rules.
+
+Commercial product behavior, production prompts, proprietary personalization, premium content, customer data, pricing, and private roadmap details do not belong in this repository. Every pull request must complete the public disclosure checklist.
