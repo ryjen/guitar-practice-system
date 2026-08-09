@@ -1,5 +1,7 @@
 # Practice Session: <name>
 
+Follow the canonical process in [`../docs/practice-session-workflow.md`](../docs/practice-session-workflow.md). This template captures one concrete realization of that workflow.
+
 ## Intent
 
 - **Primary musical goal:**
@@ -44,9 +46,12 @@ Use only the sections that matter. An omitted dimension is unconstrained, not in
 ## Rhythm
 
 - **Tempo:**
+- **Beat unit:**
 - **Meter:**
 - **Additive grouping:**
 - **Subdivision:**
+- **Click mode:** normal / backbeat / half-time / sparse / off-beat / other
+- **Tempo progression / bounds:**
 - **Accent pattern:**
 - **Feel / groove:**
 - **Phrase length:**
@@ -121,24 +126,76 @@ Space is required whenever phrasing or arrangement is being assessed.
 - **Gear setup ID:**
 - **Loop boundaries:**
 
+## Baseline
+
+Capture one short pre-drill take before substantial correction work.
+
+- **Recording reference:**
+- **Duration / repetition bound:**
+- **Realization used:**
+- **What remained credible:**
+- **Largest audible defect observed:**
+
+## Isolation plan
+
+Reduce the task until the largest defect can be practised without unrelated complexity.
+
+- **Defect being isolated:**
+- **Variables held constant:**
+- **Variables simplified:**
+- **Metronome / repetition rule:**
+- **Clean-repetition criterion:**
+- **Fallback / simplification rule:**
+
+## Reintegration
+
+- **Musical context restored:**
+- **Which dimensions return:**
+- **Isolated competence observed:** yes / no / unknown
+- **Musical-context competence observed:** yes / no / unknown
+
+## Controlled challenge
+
+Change at most one deliberate variable when practical.
+
+- **Variable changed:**
+- **From:**
+- **To:**
+- **Why this challenge matters:**
+
+## Verification take
+
+Keep the important comparison variables stable unless the session explicitly tests one of them.
+
+- **Recording reference:**
+- **Comparable to baseline:** yes / no
+- **Intentional difference from baseline, if any:**
+- **What improved:**
+- **What did not transfer:**
+- **Largest remaining audible defect:**
+
 ## Session flow
 
-1. Prepare
-2. Orient by hearing and locating the musical context
-3. Isolate the main technique
-4. Combine selected dimensions
-5. Apply in musical context
-6. Record a bounded take
-7. Review
-8. Retain, modify, discard, or schedule maintenance
+1. Select the primary target
+2. Resolve today's concrete realization
+3. Prepare with a goal-directed warmup
+4. Capture a pre-drill baseline
+5. Isolate the largest audible defect
+6. Progress the isolated task within explicit bounds
+7. Reintegrate into musical context
+8. Add one controlled challenge when useful
+9. Capture a comparable verification take
+10. Record lightweight evidence
+11. Run deterministic assessment when applicable
+12. Hand approved state to deterministic scheduling
 
-Delete phases that do not serve the session.
+Delete phases that do not serve the session, but preserve the feedback loop whenever possible.
 
 ## Evidence
 
-- **Recording reference:**
 - **Date:**
-- **Tempo / variant:**
+- **Attempted tempo / variant:**
+- **Highest clean tempo / realization:**
 - **What remained credible:**
 - **Largest audible defect:**
 - **Timing:**
@@ -149,3 +206,11 @@ Delete phases that do not serve the session.
 - **Space:** Did rests, decay, delayed entries, and empty regions improve the phrase or arrangement?
 - **Physical tension / fatigue:**
 - **Next action:** maintain / change / simplify / increase constraint / discard
+
+## Assessment / scheduling handoff
+
+- **Assessment gate / ruleset:**
+- **Assessment outcome:** pass / fail / unknown / blocked / not-applicable
+- **Proposed progression transition:**
+- **Approved progression state, if changed:**
+- **Scheduling action:** remain active / maintenance / verification / catch-up / retire / none

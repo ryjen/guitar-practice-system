@@ -37,11 +37,12 @@ flowchart TD
 
 Optional musical dimensions describe how a technique or practice item is realized: harmony, rhythm, fretboard navigation, ear training, genre vocabulary, phrasing, dynamics, articulation, and **space**.
 
-Architecture references:
+Architecture and workflow references:
 
 - [`docs/architecture/layered-practice-model.md`](docs/architecture/layered-practice-model.md)
 - [`docs/architecture/musical-dimensions.md`](docs/architecture/musical-dimensions.md)
 - [`docs/architecture/reference-conventions.md`](docs/architecture/reference-conventions.md)
+- [`docs/practice-session-workflow.md`](docs/practice-session-workflow.md)
 - [`docs/discovery/README.md`](docs/discovery/README.md)
 - [`docs/assessment/README.md`](docs/assessment/README.md)
 - [`docs/scheduling/README.md`](docs/scheduling/README.md)
@@ -72,16 +73,24 @@ Boundary governance is documented in:
 
 ## Core workflow
 
+A practice session follows the canonical closed loop documented in [`docs/practice-session-workflow.md`](docs/practice-session-workflow.md):
+
 ```mermaid
 flowchart TD
-    A[Choose technique or explicit audible problem] --> B[Select exercise or song use case]
-    B --> C[Select gear setup]
-    C --> D[Create or choose backing track]
-    D --> E[Practice and record]
-    E --> F[Review timing, intonation, articulation, dynamics, phrasing, space, and tension]
-    F --> G[Record explicit observation / largest audible defect]
-    G --> A
+    A[Select target] --> B[Resolve today's realization]
+    B --> C[Task-specific preparation]
+    C --> D[Capture baseline]
+    D --> E[Isolate largest audible defect]
+    E --> F[Reintegrate in musical context]
+    F --> G[Controlled challenge]
+    G --> H[Verification take]
+    H --> I[Record evidence]
+    I --> J[Deterministic assessment]
+    J --> K[Approved progression state]
+    K --> L[Deterministic scheduling]
 ```
+
+The core principle is: **plan → observe → isolate → reintegrate → verify → record → assess → schedule**.
 
 ## Deterministic discovery
 
@@ -123,12 +132,13 @@ Suggested first pass:
 
 1. Copy [`templates/technique.md`](templates/technique.md) and define a technique
 2. Select supporting dimensions as needed
-3. Compose a bounded session with [`templates/practice-session.md`](templates/practice-session.md)
-4. Link a song section with [`templates/song-use-case.md`](templates/song-use-case.md)
-5. Capture the setup with [`templates/gear-setup.md`](templates/gear-setup.md)
-6. Specify accompaniment with [`templates/backing-track.md`](templates/backing-track.md)
-7. Practice and record a short baseline
-8. Capture evidence and choose the next explicit action
+3. Read the canonical [`practice-session workflow`](docs/practice-session-workflow.md)
+4. Compose a bounded session with [`templates/practice-session.md`](templates/practice-session.md)
+5. Link a song section with [`templates/song-use-case.md`](templates/song-use-case.md)
+6. Capture the setup with [`templates/gear-setup.md`](templates/gear-setup.md)
+7. Specify accompaniment with [`templates/backing-track.md`](templates/backing-track.md)
+8. Run baseline → isolation → reintegration → verification
+9. Capture evidence and choose the next explicit action
 
 ## Concepts
 

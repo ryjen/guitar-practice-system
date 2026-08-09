@@ -4,6 +4,8 @@
 
 Turn a vague practice impulse into a concrete playable artifact using explicit source specs.
 
+This workflow owns **material creation and revision**. Once the material is ready to play, use the canonical [`practice-session-workflow.md`](practice-session-workflow.md) for the actual baseline → isolation → reintegration → verification → evidence loop.
+
 Examples:
 
 - "I want more wah in my style"
@@ -20,10 +22,9 @@ flowchart TD
     B --> C[Write explicit source spec]
     C --> D[Render or assemble playable scaffold]
     D --> E[Move into GarageBand / Guitar Pro / MuseScore / Flow]
-    E --> F[Practice / record / experiment]
-    F --> G[Optional lightweight note]
-    G --> H[Record next explicit change]
-    H --> C
+    E --> F[Run canonical practice session workflow]
+    F --> G[Record material-specific change]
+    G --> C
 ```
 
 ## Step 1 — Choose the input
@@ -76,18 +77,34 @@ A playable scaffold can be:
 
 Prefer a small useful loop over a large vague arrangement.
 
-## Step 5 — Practice and record
+## Step 5 — Run the practice session
+
+Use [`practice-session-workflow.md`](practice-session-workflow.md) to conduct the actual session.
+
+That workflow owns:
+
+- task-specific preparation
+- pre-drill baseline
+- largest-defect isolation
+- bounded metronome progression
+- musical-context reintegration
+- one controlled challenge
+- comparable verification take
+- evidence capture
+- deterministic assessment and scheduling handoff
 
 Capture only what helps evaluate the current goal and choose the next explicit change.
 
-## Step 6 — Optional lightweight review
+## Step 6 — Revise material only when the session exposes a material problem
 
 Use the three-question review:
 
 ```text
 What was useful?
-What should change?
+What should change in the material?
 What should be practised or created next?
 ```
+
+A technique defect does not automatically require rewriting the backing track or exercise. Change the source material only when the session shows that the artifact itself is unclear, over-constrained, poorly arranged, or otherwise unsuitable.
 
 Record the answer as source data for the next revision. No hidden inference is required.
