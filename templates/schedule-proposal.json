@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "proposal_id": "schedule-YYYY-MM-DD-fingerprint",
+  "snapshot_version": "practice-state:1",
+  "ruleset_version": "scheduling-rules:1",
+  "generated_at": "2026-08-08T19:00:00-07:00",
+  "effective_date": "2026-08-08",
+  "timezone": "America/Vancouver",
+  "week": {"start": "2026-08-03", "end": "2026-08-09"},
+  "selected": [],
+  "excluded": [],
+  "projection": [],
+  "remaining_budget": {"sessions": 0, "minutes": 0},
+  "status": "proposed",
+  "requires_approval": true,
+  "application_key": "",
+  "stale_when_snapshot_version_changes": true,
+  "input_fingerprint": ""
+}
