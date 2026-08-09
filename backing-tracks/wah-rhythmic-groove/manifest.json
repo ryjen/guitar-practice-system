@@ -1,7 +1,7 @@
 {
   "id": "wah-rhythmic-groove-em-96",
   "title": "Rhythmic Wah Groove",
-  "purpose": "Expose wah timing, repeatable pedal movement, parked-filter control, and phrase-level sweeps over a sparse groove with clear subdivisions.",
+  "purpose": "Expose wah timing, repeatable pedal movement, parked-filter control, and phrase-level sweeps over a sparse groove with a stable pulse for subdivision practice.",
   "linked_techniques": [
     "wah-control"
   ],
@@ -12,7 +12,7 @@
     4,
     4
   ],
-  "feel": "straight-sixteenth funk-rock pulse with deliberate guitar space",
+  "feel": "straight funk-rock pulse with deliberate space for eighth- and sixteenth-note guitar subdivisions",
   "count_in_bars": 1,
   "loop": {
     "start_marker": "GROOVE-A",
@@ -54,7 +54,7 @@
       "role": "drums",
       "channel": 9,
       "velocity": 82,
-      "instrument_intent": "tight dry kit defining subdivisions without fills that mask pedal timing"
+      "instrument_intent": "tight dry kit defining a stable pulse without fills that mask pedal timing; subdivision detail belongs to the guitar exercise"
     },
     {
       "name": "Bass",
