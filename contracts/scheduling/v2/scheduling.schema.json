@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ryjen/guitar-practice-system/contracts/scheduling/v2/scheduling.schema.json",
+  "title": "Guitar Practice Scheduling Contract v2",
+  "oneOf": [
+    {"$ref": "#/$defs/snapshot"},
+    {"$ref": "#/$defs/proposal"},
+    {"$ref": "#/$defs/approval"},
+    {"$ref": "#/$defs/completion"},
+    {"$ref": "#/$defs/event"}
+  ],
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 256},
+    "date": {"type": "string", "format": "date"},
+    "dateTime": {"type": "string", "format": "date-time"},
+    "progressionState": {
+      "type": "string",
+      "enum": ["discovered", "developing", "reliable-isolation", "reliable-context", "maintained", "paused", "retired"]
+    },
+    "practiceGoal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["goal_id", "priority", "status", "target_item_ids"],
+      "properties": {
+        "goal_id": {"$ref": "#/$defs/id"},
+        "priority": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "status": {"type": "string", "enum": ["active", "paused", "completed"]},
+        "target_item_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/id"}
+        },
+        "weekly_target_minutes": {"type": "integer", "minimum": 0, "maximum": 10080},
+        "weekly_completed_minutes": {"type": "integer", "minimum": 0, "maximum": 10080},
+        "monthly_target_minutes": {"type": "integer", "minimum": 0, "maximum": 44640},
+        "monthly_completed_minutes": {"type": "integer", "minimum": 0, "maximum": 44640}
+      }
+    },
+    "activeWorkItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_id", "goal_id", "priority", "target_minutes", "min_recovery_hours", "missed"],
+      "properties": {
+        "item_id": {"$ref": "#/$defs/id"},
+        "goal_id": {"$ref": "#/$defs/id"},
+        "priority": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "target_minutes": {"type": "integer", "minimum": 1, "maximum": 240},
+        "min_recovery_hours": {"type": "integer", "minimum": 0, "maximum": 720},
+        "missed": {"type": "boolean"}
+      }
+    },
+    "maintenanceRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_id", "interval_days", "priority", "target_minutes", "min_recovery_hours"],
+      "properties": {
+        "item_id": {"$ref": "#/$defs/id"},
+        "interval_days": {"type": "integer", "minimum": 1, "maximum": 3650},
+        "priority": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "target_minutes": {"type": "integer", "minimum": 1, "maximum": 240},
+        "min_recovery_hours": {"type": "integer", "minimum": 0, "maximum": 720}
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_id", "requires_item_id", "satisfied_states"],
+      "properties": {
+        "item_id": {"$ref": "#/$defs/id"},
+        "requires_item_id": {"$ref": "#/$defs/id"},
+        "satisfied_states": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/progressionState"}
+        }
+      }
+    },
+    "progressionProjection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "item_id", "state", "state_revision", "supporting_assessment_proposal_ids",
+        "weekly_count", "plateau_observation_ids"
+      ],
+      "properties": {
+        "item_id": {"$ref": "#/$defs/id"},
+        "dimension_id": {"$ref": "#/$defs/id"},
+        "state": {"$ref": "#/$defs/progressionState"},
+        "state_revision": {"$ref": "#/$defs/id"},
+        "supporting_assessment_proposal_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/id"}
+        },
+        "target_realization_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/id"}
+        },
+        "maintenance_realization_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/id"}
+        },
+        "last_meaningful_practice_date": {"$ref": "#/$defs/date"},
+        "last_verification_date": {"$ref": "#/$defs/date"},
+        "last_practiced_at": {"$ref": "#/$defs/dateTime"},
+        "weekly_count": {"type": "integer", "minimum": 0, "maximum": 100},
+        "plateau_observation_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/id"}
+        }
+      }
+    },
+    "weeklyBudget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_sessions", "completed_sessions", "max_minutes", "completed_minutes", "max_same_target"],
+      "properties": {
+        "max_sessions": {"type": "integer", "minimum": 0, "maximum": 50},
+        "completed_sessions": {"type": "integer", "minimum": 0, "maximum": 50},
+        "max_minutes": {"type": "integer", "minimum": 0, "maximum": 10080},
+        "completed_minutes": {"type": "integer", "minimum": 0, "maximum": 10080},
+        "max_same_target": {"type": "integer", "minimum": 1, "maximum": 50}
+      }
+    },
+    "scheduleConstraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "session_minutes", "minimum_block_minutes", "max_active_items", "self_reported_load",
+        "high_load_max_minutes", "weekly_budget"
+      ],
+      "properties": {
+        "session_minutes": {"type": "integer", "minimum": 1, "maximum": 240},
+        "minimum_block_minutes": {"type": "integer", "minimum": 1, "maximum": 60},
+        "max_active_items": {"type": "integer", "minimum": 0, "maximum": 20},
+        "self_reported_load": {"type": "string", "enum": ["normal", "high"]},
+        "high_load_max_minutes": {"type": "integer", "minimum": 1, "maximum": 240},
+        "weekly_budget": {"$ref": "#/$defs/weeklyBudget"}
+      }
+    },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_type", "contract_version", "snapshot_id", "state_revision", "ruleset_version",
+        "generated_at", "effective_date", "timezone", "goals", "active_work", "maintenance_rules",
+        "dependencies", "progression", "constraints"
+      ],
+      "properties": {
+        "record_type": {"const": "schedule-snapshot"},
+        "contract_version": {"const": "scheduling/v2"},
+        "snapshot_id": {"$ref": "#/$defs/id"},
+        "state_revision": {"type": "integer", "minimum": 0},
+        "ruleset_version": {"$ref": "#/$defs/id"},
+        "generated_at": {"$ref": "#/$defs/dateTime"},
+        "effective_date": {"$ref": "#/$defs/date"},
+        "timezone": {"$ref": "#/$defs/id"},
+        "goals": {"type": "array", "maxItems": 128, "items": {"$ref": "#/$defs/practiceGoal"}},
+        "active_work": {"type": "array", "maxItems": 20, "items": {"$ref": "#/$defs/activeWorkItem"}},
+        "maintenance_rules": {"type": "array", "maxItems": 256, "items": {"$ref": "#/$defs/maintenanceRule"}},
+        "dependencies": {"type": "array", "maxItems": 512, "items": {"$ref": "#/$defs/dependency"}},
+        "progression": {"type": "array", "maxItems": 256, "items": {"$ref": "#/$defs/progressionProjection"}},
+        "constraints": {"$ref": "#/$defs/scheduleConstraint"}
+      }
+    },
+    "selectedItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_id", "work_kind", "minutes", "reason_codes", "due_state", "overdue_days"],
+      "properties": {
+        "item_id": {"$ref": "#/$defs/id"},
+        "work_kind": {"type": "string", "enum": ["development", "maintenance"]},
+        "minutes": {"type": "integer", "minimum": 1, "maximum": 240},
+        "reason_codes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+        "due_state": {"type": "string", "enum": ["due", "not-due", "not-applicable"]},
+        "overdue_days": {"type": "integer", "minimum": 0}
+      }
+    },
+    "excludedItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item_id", "reason_codes"],
+      "properties": {
+        "item_id": {"$ref": "#/$defs/id"},
+        "reason_codes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}}
+      }
+    },
+    "proposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_type", "contract_version", "proposal_id", "snapshot_id", "state_revision",
+        "ruleset_version", "generated_at", "effective_date", "expires_after_date", "status",
+        "selected", "excluded", "conflicts", "requires_approval"
+      ],
+      "properties": {
+        "record_type": {"const": "schedule-proposal"},
+        "contract_version": {"const": "scheduling/v2"},
+        "proposal_id": {"$ref": "#/$defs/id"},
+        "snapshot_id": {"$ref": "#/$defs/id"},
+        "state_revision": {"type": "integer", "minimum": 0},
+        "ruleset_version": {"$ref": "#/$defs/id"},
+        "generated_at": {"$ref": "#/$defs/dateTime"},
+        "effective_date": {"$ref": "#/$defs/date"},
+        "expires_after_date": {"$ref": "#/$defs/date"},
+        "status": {"type": "string", "enum": ["complete", "no-op"]},
+        "selected": {"type": "array", "maxItems": 64, "items": {"$ref": "#/$defs/selectedItem"}},
+        "excluded": {"type": "array", "maxItems": 256, "items": {"$ref": "#/$defs/excludedItem"}},
+        "conflicts": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+        "requires_approval": {"const": true}
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_type", "contract_version", "approval_id", "proposal_id", "snapshot_id", "state_revision", "ruleset_version", "approved_at"],
+      "properties": {
+        "record_type": {"const": "approved-schedule"},
+        "contract_version": {"const": "scheduling/v2"},
+        "approval_id": {"$ref": "#/$defs/id"},
+        "proposal_id": {"$ref": "#/$defs/id"},
+        "snapshot_id": {"$ref": "#/$defs/id"},
+        "state_revision": {"type": "integer", "minimum": 0},
+        "ruleset_version": {"$ref": "#/$defs/id"},
+        "approved_at": {"$ref": "#/$defs/dateTime"}
+      }
+    },
+    "completion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_type", "contract_version", "completion_id", "proposal_id", "completed_at", "completed_item_ids", "actual_minutes"],
+      "properties": {
+        "record_type": {"const": "completion-record"},
+        "contract_version": {"const": "scheduling/v2"},
+        "completion_id": {"$ref": "#/$defs/id"},
+        "proposal_id": {"$ref": "#/$defs/id"},
+        "completed_at": {"$ref": "#/$defs/dateTime"},
+        "completed_item_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+        "actual_minutes": {"type": "integer", "minimum": 0, "maximum": 1440}
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_type", "contract_version", "event_id", "event_type", "occurred_at", "state_revision", "references"],
+      "properties": {
+        "record_type": {"const": "schedule-event"},
+        "contract_version": {"const": "scheduling/v2"},
+        "event_id": {"$ref": "#/$defs/id"},
+        "event_type": {"type": "string", "enum": ["proposal-created", "proposal-approved", "proposal-rejected", "session-completed", "session-missed", "active-work-added", "active-work-removed"]},
+        "occurred_at": {"$ref": "#/$defs/dateTime"},
+        "state_revision": {"type": "integer", "minimum": 0},
+        "references": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}}
+      }
+    }
+  }
+}

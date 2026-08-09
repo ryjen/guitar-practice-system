@@ -43,6 +43,7 @@ Architecture references:
 - [`docs/architecture/musical-dimensions.md`](docs/architecture/musical-dimensions.md)
 - [`docs/architecture/reference-conventions.md`](docs/architecture/reference-conventions.md)
 - [`docs/discovery/README.md`](docs/discovery/README.md)
+- [`docs/assessment/README.md`](docs/assessment/README.md)
 - [`docs/scheduling/README.md`](docs/scheduling/README.md)
 
 ## Public boundary
@@ -96,14 +97,14 @@ The same request, catalog version, and ranking rules should produce the same can
 
 ## Deterministic scheduling
 
-Generate an approval-gated practice schedule from an explicit versioned snapshot:
+Generate an approval-gated practice schedule from an explicit normalized snapshot:
 
 ```bash
-python scripts/scheduling.py propose \
-  examples/scheduling/example-snapshot.json
+python scripts/scheduling_v2.py propose \
+  examples/scheduling/v2-example-snapshot.json
 ```
 
-The same snapshot, state revision, ruleset version, clock value, and timezone produce the same proposal. Scheduling does not mutate progress or reinterpret evidence.
+The same snapshot, state revision, ruleset version, clock value, and timezone produce the same proposal. Scheduling uses the same canonical progression-state vocabulary as assessment while keeping active-work membership separate. It does not mutate progress or reinterpret evidence.
 
 ## Quick start
 
@@ -166,7 +167,7 @@ Specs are canonical. Generated files are disposable until promoted.
 Near-term public work:
 
 - stabilize deterministic scheduling and long-term progression contracts
-- deterministic assessment gates and evidence semantics
+- stabilize deterministic assessment gates and evidence semantics
 - real-session validation of the multidimensional model
 - timing/metronome integration
 - deterministic catalog filtering and ranking

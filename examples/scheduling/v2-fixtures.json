@@ -1,0 +1,285 @@
+{
+  "contract_version": "scheduling/v2",
+  "base_snapshot": {
+    "record_type": "schedule-snapshot",
+    "contract_version": "scheduling/v2",
+    "snapshot_id": "snapshot-v2-fixture",
+    "state_revision": 30,
+    "ruleset_version": "scheduling-rules-v2",
+    "generated_at": "2026-08-08T18:00:00-07:00",
+    "effective_date": "2026-08-08",
+    "timezone": "America/Vancouver",
+    "goals": [
+      {
+        "goal_id": "goal-core-techniques",
+        "priority": 1,
+        "status": "active",
+        "target_item_ids": ["slide", "wah"]
+      }
+    ],
+    "active_work": [
+      {
+        "item_id": "slide",
+        "goal_id": "goal-core-techniques",
+        "priority": 1,
+        "target_minutes": 15,
+        "min_recovery_hours": 0,
+        "missed": false
+      },
+      {
+        "item_id": "wah",
+        "goal_id": "goal-core-techniques",
+        "priority": 2,
+        "target_minutes": 15,
+        "min_recovery_hours": 0,
+        "missed": false
+      }
+    ],
+    "maintenance_rules": [],
+    "dependencies": [],
+    "progression": [
+      {
+        "item_id": "slide",
+        "state": "developing",
+        "state_revision": "slide:2",
+        "supporting_assessment_proposal_ids": [],
+        "last_meaningful_practice_date": "2026-08-07",
+        "weekly_count": 1,
+        "plateau_observation_ids": []
+      },
+      {
+        "item_id": "wah",
+        "state": "developing",
+        "state_revision": "wah:2",
+        "supporting_assessment_proposal_ids": [],
+        "last_meaningful_practice_date": "2026-08-07",
+        "weekly_count": 0,
+        "plateau_observation_ids": []
+      }
+    ],
+    "constraints": {
+      "session_minutes": 30,
+      "minimum_block_minutes": 5,
+      "max_active_items": 2,
+      "self_reported_load": "normal",
+      "high_load_max_minutes": 20,
+      "weekly_budget": {
+        "max_sessions": 5,
+        "completed_sessions": 1,
+        "max_minutes": 180,
+        "completed_minutes": 30,
+        "max_same_target": 3
+      }
+    }
+  },
+  "scenarios": [
+    {
+      "name": "normal progression",
+      "overrides": {},
+      "expected_selected": ["slide", "wah"]
+    },
+    {
+      "name": "maintenance due",
+      "overrides": {
+        "progression": [
+          {
+            "item_id": "slide",
+            "state": "developing",
+            "state_revision": "slide:2",
+            "supporting_assessment_proposal_ids": [],
+            "last_meaningful_practice_date": "2026-08-07",
+            "weekly_count": 1,
+            "plateau_observation_ids": []
+          },
+          {
+            "item_id": "wah",
+            "state": "developing",
+            "state_revision": "wah:2",
+            "supporting_assessment_proposal_ids": [],
+            "last_meaningful_practice_date": "2026-08-07",
+            "weekly_count": 0,
+            "plateau_observation_ids": []
+          },
+          {
+            "item_id": "ebow",
+            "state": "maintained",
+            "state_revision": "ebow:8",
+            "supporting_assessment_proposal_ids": ["assessment-ebow-maintained"],
+            "last_meaningful_practice_date": "2026-07-30",
+            "last_verification_date": "2026-07-30",
+            "weekly_count": 0,
+            "plateau_observation_ids": []
+          }
+        ],
+        "maintenance_rules": [
+          {
+            "item_id": "ebow",
+            "interval_days": 7,
+            "priority": 1,
+            "target_minutes": 10,
+            "min_recovery_hours": 0
+          }
+        ]
+      },
+      "expected_selected": ["ebow", "slide", "wah"],
+      "expected_first_reason": "maintenance-due",
+      "expected_overdue_days": 2
+    },
+    {
+      "name": "blocked prerequisite",
+      "overrides": {
+        "dependencies": [
+          {
+            "item_id": "wah",
+            "requires_item_id": "slide",
+            "satisfied_states": ["reliable-context", "maintained"]
+          }
+        ]
+      },
+      "expected_selected": ["slide"],
+      "expected_excluded": {"wah": "prerequisite-blocked"}
+    },
+    {
+      "name": "dependency unlocking",
+      "overrides": {
+        "dependencies": [
+          {
+            "item_id": "wah",
+            "requires_item_id": "slide",
+            "satisfied_states": ["reliable-context", "maintained"]
+          }
+        ],
+        "progression": [
+          {
+            "item_id": "slide",
+            "state": "reliable-context",
+            "state_revision": "slide:4",
+            "supporting_assessment_proposal_ids": ["assessment-slide-context"],
+            "last_meaningful_practice_date": "2026-08-07",
+            "weekly_count": 1,
+            "plateau_observation_ids": []
+          },
+          {
+            "item_id": "wah",
+            "state": "developing",
+            "state_revision": "wah:2",
+            "supporting_assessment_proposal_ids": [],
+            "last_meaningful_practice_date": "2026-08-07",
+            "weekly_count": 0,
+            "plateau_observation_ids": []
+          }
+        ]
+      },
+      "expected_selected": ["slide", "wah"]
+    },
+    {
+      "name": "missed session recovery",
+      "overrides": {
+        "active_work": [
+          {
+            "item_id": "slide",
+            "goal_id": "goal-core-techniques",
+            "priority": 1,
+            "target_minutes": 15,
+            "min_recovery_hours": 0,
+            "missed": false
+          },
+          {
+            "item_id": "wah",
+            "goal_id": "goal-core-techniques",
+            "priority": 20,
+            "target_minutes": 15,
+            "min_recovery_hours": 0,
+            "missed": true
+          }
+        ]
+      },
+      "expected_selected": ["wah", "slide"],
+      "expected_first_reason": "missed-session-recovery"
+    },
+    {
+      "name": "paused item preserved outside active work",
+      "overrides": {
+        "active_work": [
+          {
+            "item_id": "slide",
+            "goal_id": "goal-core-techniques",
+            "priority": 1,
+            "target_minutes": 15,
+            "min_recovery_hours": 0,
+            "missed": false
+          }
+        ],
+        "progression": [
+          {
+            "item_id": "slide",
+            "state": "developing",
+            "state_revision": "slide:2",
+            "supporting_assessment_proposal_ids": [],
+            "last_meaningful_practice_date": "2026-08-07",
+            "weekly_count": 1,
+            "plateau_observation_ids": []
+          },
+          {
+            "item_id": "wah",
+            "state": "paused",
+            "state_revision": "wah:3",
+            "supporting_assessment_proposal_ids": [],
+            "last_meaningful_practice_date": "2026-08-07",
+            "weekly_count": 0,
+            "plateau_observation_ids": []
+          }
+        ]
+      },
+      "expected_selected": ["slide"],
+      "expected_excluded": {"wah": "paused"}
+    },
+    {
+      "name": "resumed item returns to active work",
+      "overrides": {
+        "progression": [
+          {
+            "item_id": "slide",
+            "state": "developing",
+            "state_revision": "slide:2",
+            "supporting_assessment_proposal_ids": [],
+            "last_meaningful_practice_date": "2026-08-07",
+            "weekly_count": 1,
+            "plateau_observation_ids": []
+          },
+          {
+            "item_id": "wah",
+            "state": "developing",
+            "state_revision": "wah:4",
+            "supporting_assessment_proposal_ids": [],
+            "last_meaningful_practice_date": "2026-08-07",
+            "weekly_count": 0,
+            "plateau_observation_ids": []
+          }
+        ]
+      },
+      "expected_selected": ["slide", "wah"]
+    },
+    {
+      "name": "weekly session budget exhausted",
+      "overrides": {
+        "constraints": {
+          "session_minutes": 30,
+          "minimum_block_minutes": 5,
+          "max_active_items": 2,
+          "self_reported_load": "normal",
+          "high_load_max_minutes": 20,
+          "weekly_budget": {
+            "max_sessions": 3,
+            "completed_sessions": 3,
+            "max_minutes": 180,
+            "completed_minutes": 90,
+            "max_same_target": 3
+          }
+        }
+      },
+      "expected_selected": [],
+      "expected_conflict": "weekly-session-budget-exhausted"
+    }
+  ]
+}

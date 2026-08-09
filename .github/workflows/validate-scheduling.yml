@@ -7,8 +7,10 @@ on:
       - "docs/scheduling/**"
       - "examples/scheduling/**"
       - "scripts/scheduling.py"
+      - "scripts/scheduling_v2.py"
+      - "scripts/assessment_core.py"
       - "scripts/check_public_boundary.py"
-      - "tests/test_scheduling.py"
+      - "tests/test_scheduling*.py"
       - ".github/workflows/validate-scheduling.yml"
   push:
     branches:
@@ -18,8 +20,10 @@ on:
       - "docs/scheduling/**"
       - "examples/scheduling/**"
       - "scripts/scheduling.py"
+      - "scripts/scheduling_v2.py"
+      - "scripts/assessment_core.py"
       - "scripts/check_public_boundary.py"
-      - "tests/test_scheduling.py"
+      - "tests/test_scheduling*.py"
       - ".github/workflows/validate-scheduling.yml"
 
 permissions:
@@ -41,32 +45,49 @@ jobs:
       - name: Enforce public boundary
         run: python scripts/check_public_boundary.py
       - name: Run scheduling tests
-        run: python -m unittest discover -s tests -p 'test_scheduling.py' -v
-      - name: Generate deterministic proposal
+        run: python -m unittest discover -s tests -p 'test_scheduling*.py' -v
+      - name: Generate v1 deterministic proposal
         run: |
           python scripts/scheduling.py propose \
             examples/scheduling/example-snapshot.json \
-            > /tmp/schedule-proposal.json
+            > /tmp/schedule-v1.json
           python - <<'PY'
           import json
           from pathlib import Path
 
-          proposal = json.loads(Path("/tmp/schedule-proposal.json").read_text())
+          proposal = json.loads(Path("/tmp/schedule-v1.json").read_text())
           assert proposal["status"] == "complete"
           assert proposal["requires_approval"] is True
           assert [item["item_id"] for item in proposal["selected"]] == ["ebow-foundations", "slide-foundations"]
           assert sum(item["minutes"] for item in proposal["selected"]) == 30
           PY
-      - name: Verify approval replay
+      - name: Generate v2 normalized proposal
         run: |
-          python scripts/scheduling.py check-approval \
-            /tmp/schedule-proposal.json \
-            examples/scheduling/example-snapshot.json \
-            > /tmp/approval-status.json
+          python scripts/scheduling_v2.py propose \
+            examples/scheduling/v2-example-snapshot.json \
+            > /tmp/schedule-v2.json
           python - <<'PY'
           import json
           from pathlib import Path
 
-          result = json.loads(Path("/tmp/approval-status.json").read_text())
+          proposal = json.loads(Path("/tmp/schedule-v2.json").read_text())
+          assert proposal["contract_version"] == "scheduling/v2"
+          assert proposal["status"] == "complete"
+          assert proposal["requires_approval"] is True
+          assert [item["item_id"] for item in proposal["selected"]] == ["ebow-foundations", "slide-foundations"]
+          assert [item["work_kind"] for item in proposal["selected"]] == ["maintenance", "development"]
+          assert sum(item["minutes"] for item in proposal["selected"]) == 30
+          PY
+      - name: Verify v2 approval replay
+        run: |
+          python scripts/scheduling_v2.py check-approval \
+            /tmp/schedule-v2.json \
+            examples/scheduling/v2-example-snapshot.json \
+            > /tmp/approval-v2.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("/tmp/approval-v2.json").read_text())
           assert result == {"status": "valid", "reasons": []}
           PY
