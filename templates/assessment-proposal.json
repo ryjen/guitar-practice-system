@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "proposal_id": "assessment-target-fingerprint",
+  "target_id": "target-id",
+  "current_state": "developing",
+  "requested_state": "reliable-isolation",
+  "proposed_state": null,
+  "state_revision": "target-id:1",
+  "gate_set": {
+    "id": "technique-reliability",
+    "revision": 1
+  },
+  "ruleset_fingerprint": "",
+  "input_fingerprint": "",
+  "gate_results": [
+    {
+      "gate_id": "gate-id",
+      "dimension": "timing",
+      "outcome": "unknown",
+      "reason": "",
+      "used_evidence_ids": [],
+      "missing": []
+    }
+  ],
+  "supporting_evidence_ids": [],
+  "conflicting_evidence_ids": [],
+  "missing_evidence": [],
+  "transition_valid": false,
+  "requires_approval": true,
+  "application_key": "",
+  "stale_when_state_revision_changes": true
+}
