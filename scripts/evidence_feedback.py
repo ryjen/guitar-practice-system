@@ -55,9 +55,28 @@ def validate_media_reference(value: Any) -> None:
         raise EvidenceError("media_reference must not expose a personal absolute home path")
 
 
+def validate_timing_v2(context: dict[str, Any]) -> None:
+    timing = context.get("timing")
+    if timing is None:
+        return
+    if not isinstance(timing, dict):
+        raise EvidenceError("context.timing must be an object")
+    attempted = timing.get("attempted")
+    if attempted is not None:
+        if not isinstance(attempted, dict):
+            raise EvidenceError("context.timing.attempted must be an object or null")
+        bpm = attempted.get("bpm")
+        if bpm is not None and (isinstance(bpm, bool) or not isinstance(bpm, int) or not 20 <= bpm <= 300):
+            raise EvidenceError("context.timing.attempted.bpm must be null or between 20 and 300")
+    for field in ("later_session_verified", "musical_context_verified"):
+        value = timing.get(field)
+        if value is not None and not isinstance(value, bool):
+            raise EvidenceError(f"context.timing.{field} must be boolean")
+
+
 def validate_record(record: dict[str, Any]) -> None:
-    if not isinstance(record, dict) or record.get("version") != 1:
-        raise EvidenceError("record must be an object with version 1")
+    if not isinstance(record, dict) or record.get("version") not in {1, 2}:
+        raise EvidenceError("record must be an object with version 1 or 2")
     record_id = nonempty(record.get("id"), "id")
     if not ID_RE.fullmatch(record_id):
         raise EvidenceError("id must be lowercase kebab-case")
@@ -74,9 +93,12 @@ def validate_record(record: dict[str, Any]) -> None:
     context = record.get("context", {})
     if not isinstance(context, dict):
         raise EvidenceError("context must be an object")
-    tempo = context.get("tempo_bpm")
-    if tempo is not None and (isinstance(tempo, bool) or not isinstance(tempo, int) or not 20 <= tempo <= 300):
-        raise EvidenceError("context.tempo_bpm must be null or between 20 and 300")
+    if record["version"] == 1:
+        tempo = context.get("tempo_bpm")
+        if tempo is not None and (isinstance(tempo, bool) or not isinstance(tempo, int) or not 20 <= tempo <= 300):
+            raise EvidenceError("context.tempo_bpm must be null or between 20 and 300")
+    else:
+        validate_timing_v2(context)
 
     observations = record.get("observations", {})
     if not isinstance(observations, dict) or set(observations) - OBSERVATION_FIELDS:

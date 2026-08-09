@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "target_id": "technique-id",
+  "current_state": "developing",
+  "proposed_state": "reliable-isolation",
+  "state_revision": "technique-id:1",
+  "as_of": "YYYY-MM-DD",
+  "comparison_evidence_ids": [],
+  "conflicting_evidence_ids": [],
+  "supersedes_proposal_id": null,
+  "evidence": [
+    {
+      "id": "evidence-id",
+      "target_id": "technique-id",
+      "date": "YYYY-MM-DD",
+      "session_id": "session-id",
+      "evidence_type": "isolated-check",
+      "producer": "player",
+      "observation_source": "explicit-session-review",
+      "realization": {
+        "attempted": "realization-id",
+        "verified": null
+      },
+      "observations": {
+        "timing_gate": "pass",
+        "physical_stop": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "target_id": "slide-foundations",
+  "current_state": "reliable-isolation",
+  "proposed_state": "reliable-context",
+  "state_revision": "slide-foundations:7",
+  "as_of": "2026-08-08",
+  "comparison_evidence_ids": [],
+  "conflicting_evidence_ids": [],
+  "supersedes_proposal_id": null,
+  "evidence": [
+    {
+      "id": "slide-isolated-1",
+      "target_id": "slide-foundations",
+      "date": "2026-08-01",
+      "session_id": "session-2026-08-01",
+      "evidence_type": "isolated-check",
+      "producer": "player",
+      "observation_source": "explicit-session-review",
+      "realization": {
+        "attempted": "60-bpm-eighths-normal-click",
+        "verified": "60-bpm-eighths-normal-click"
+      },
+      "observations": {
+        "timing_gate": "pass",
+        "physical_stop": false
+      }
+    },
+    {
+      "id": "slide-isolated-2",
+      "target_id": "slide-foundations",
+      "date": "2026-08-04",
+      "session_id": "session-2026-08-04",
+      "evidence_type": "isolated-check",
+      "producer": "player",
+      "observation_source": "explicit-session-review",
+      "realization": {
+        "attempted": "60-bpm-eighths-normal-click",
+        "verified": "60-bpm-eighths-normal-click"
+      },
+      "observations": {
+        "timing_gate": "pass",
+        "physical_stop": false
+      }
+    },
+    {
+      "id": "slide-context-1",
+      "target_id": "slide-foundations",
+      "date": "2026-08-07",
+      "session_id": "session-2026-08-07",
+      "evidence_type": "musical-context",
+      "producer": "player",
+      "observation_source": "explicit-session-review",
+      "realization": {
+        "attempted": "slide-slow-blues-a-60",
+        "verified": "slide-slow-blues-a-60"
+      },
+      "observations": {
+        "timing_gate": "pass",
+        "physical_stop": false
+      }
+    }
+  ]
+}
