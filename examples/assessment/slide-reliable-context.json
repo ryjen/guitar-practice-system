@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "target_id": "slide-foundations",
+  "current_state": "reliable-isolation",
+  "proposed_state": "reliable-context",
+  "state_revision": "slide-foundations:7",
+  "as_of": "2026-08-08",
+  "conflicting_evidence_ids": [],
+  "evidence": [
+    {
+      "id": "slide-isolated-1",
+      "target_id": "slide-foundations",
+      "date": "2026-08-01",
+      "session_id": "session-2026-08-01",
+      "evidence_type": "isolated-check",
+      "observations": {
+        "timing_gate": "pass",
+        "physical_stop": false
+      }
+    },
+    {
+      "id": "slide-isolated-2",
+      "target_id": "slide-foundations",
+      "date": "2026-08-04",
+      "session_id": "session-2026-08-04",
+      "evidence_type": "isolated-check",
+      "observations": {
+        "timing_gate": "pass",
+        "physical_stop": false
+      }
+    },
+    {
+      "id": "slide-context-1",
+      "target_id": "slide-foundations",
+      "date": "2026-08-07",
+      "session_id": "session-2026-08-07",
+      "evidence_type": "musical-context",
+      "observations": {
+        "timing_gate": "pass",
+        "physical_stop": false
+      }
+    }
+  ]
+}
