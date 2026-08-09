@@ -12,6 +12,8 @@ from typing import Any
 
 STATES = {"discovered", "developing", "reliable-isolation", "reliable-context", "maintained", "paused", "retired"}
 LOADS = {"normal", "high"}
+PERIODS = {"weekly", "monthly"}
+EVENT_TYPES = {"completed", "missed", "approved-transition", "paused", "resumed"}
 
 class SchedulingError(ValueError):
     pass
@@ -46,6 +48,11 @@ def week_bounds(day: date, week_start: int) -> tuple[date, date]:
     start = day - timedelta(days=(day.weekday() - week_start) % 7)
     return start, start + timedelta(days=6)
 
+def month_bounds(day: date) -> tuple[date, date]:
+    start = day.replace(day=1)
+    next_month = start.replace(year=start.year + (1 if start.month == 12 else 0), month=1 if start.month == 12 else start.month + 1)
+    return start, next_month - timedelta(days=1)
+
 def validate_snapshot(snapshot: dict[str, Any]) -> None:
     if not isinstance(snapshot, dict) or snapshot.get("version") != 1:
         raise SchedulingError("snapshot must be an object with version 1")
@@ -77,6 +84,7 @@ def validate_snapshot(snapshot: dict[str, Any]) -> None:
         ids.add(item_id)
         if item.get("state") not in STATES:
             raise SchedulingError(f"item {item_id} has unsupported state")
+        nonempty(item.get("state_revision"), f"item.{item_id}.state_revision")
         priority = item.get("priority")
         if isinstance(priority, bool) or not isinstance(priority, int) or priority < 1:
             raise SchedulingError(f"item {item_id} priority must be a positive integer")
@@ -92,6 +100,8 @@ def validate_snapshot(snapshot: dict[str, Any]) -> None:
             raise SchedulingError(f"item {item_id} session_minutes must be 5..240")
         if item.get("self_reported_load", "normal") not in LOADS:
             raise SchedulingError(f"item {item_id} has unsupported self_reported_load")
+        if not isinstance(item.get("plateau_observed", False), bool):
+            raise SchedulingError(f"item {item_id} plateau_observed must be boolean")
         for field in ("last_practice_date", "last_verified_date"):
             if item.get(field) is not None and parse_date(item[field], f"item.{item_id}.{field}") > effective:
                 raise SchedulingError(f"item {item_id} {field} is after effective_date")
@@ -108,11 +118,29 @@ def validate_snapshot(snapshot: dict[str, Any]) -> None:
     unknown_deps = sorted({dep["target_id"] for item in items for dep in item.get("dependencies", [])} - ids)
     if unknown_deps:
         raise SchedulingError(f"dependencies reference unknown items: {unknown_deps}")
+    goals = snapshot.get("goals", [])
+    if not isinstance(goals, list):
+        raise SchedulingError("goals must be a list")
+    goal_ids: set[str] = set()
+    for goal in goals:
+        if not isinstance(goal, dict):
+            raise SchedulingError("goals must contain objects")
+        goal_id = nonempty(goal.get("id"), "goal.id")
+        if goal_id in goal_ids:
+            raise SchedulingError(f"duplicate goal id: {goal_id}")
+        goal_ids.add(goal_id)
+        if goal.get("target_id") not in ids:
+            raise SchedulingError(f"goal {goal_id} references unknown target")
+        if goal.get("period") not in PERIODS:
+            raise SchedulingError(f"goal {goal_id} period must be weekly or monthly")
+        target_sessions = goal.get("target_sessions")
+        if isinstance(target_sessions, bool) or not isinstance(target_sessions, int) or target_sessions < 1:
+            raise SchedulingError(f"goal {goal_id} target_sessions must be positive")
     history = snapshot.get("history", [])
     if not isinstance(history, list):
         raise SchedulingError("history must be a list")
     for event in history:
-        if not isinstance(event, dict) or event.get("type") not in {"completed", "missed", "approved-transition", "paused", "resumed"}:
+        if not isinstance(event, dict) or event.get("type") not in EVENT_TYPES:
             raise SchedulingError("history contains unsupported event")
         if event.get("target_id") not in ids:
             raise SchedulingError("history target_id must reference an item")
@@ -134,6 +162,17 @@ def item_status(item: dict[str, Any], effective: date) -> dict[str, Any]:
 def dependency_blockers(item: dict[str, Any], by_id: dict[str, dict[str, Any]]) -> list[str]:
     return sorted(dep["target_id"] for dep in item.get("dependencies", []) if by_id[dep["target_id"]]["state"] not in dep["required_states"])
 
+def goal_projection(snapshot: dict[str, Any], effective: date) -> list[dict[str, Any]]:
+    history = snapshot.get("history", [])
+    week_start, week_end = week_bounds(effective, snapshot.get("week_start", 0))
+    month_start, month_end = month_bounds(effective)
+    result = []
+    for goal in snapshot.get("goals", []):
+        start, end = (week_start, week_end) if goal["period"] == "weekly" else (month_start, month_end)
+        completed = sum(1 for event in history if event["type"] == "completed" and event["target_id"] == goal["target_id"] and start <= parse_date(event["date"], "history.date") <= end)
+        result.append({"goal_id": goal["id"], "target_id": goal["target_id"], "period": goal["period"], "period_start": start.isoformat(), "period_end": end.isoformat(), "target_sessions": goal["target_sessions"], "completed_sessions": completed, "remaining_sessions": max(0, goal["target_sessions"] - completed), "complete": completed >= goal["target_sessions"]})
+    return sorted(result, key=lambda item: item["goal_id"])
+
 def propose(snapshot: dict[str, Any]) -> dict[str, Any]:
     validate_snapshot(snapshot)
     effective = parse_date(snapshot["effective_date"], "effective_date")
@@ -149,6 +188,9 @@ def propose(snapshot: dict[str, Any]) -> dict[str, Any]:
     remaining_sessions = max(0, constraints["weekly_session_budget"] - len(completed))
     remaining_minutes = max(0, constraints["weekly_minute_budget"] - sum(event["minutes"] for event in completed))
     active_count = sum(1 for item in items if item["active"] and item["state"] not in {"paused", "retired"})
+    conflicts = []
+    if active_count > constraints["max_active_items"]:
+        conflicts.append(f"active-items-exceed-capacity:{active_count}>{constraints['max_active_items']}")
     status_rows: list[dict[str, Any]] = []
     candidates: list[tuple[tuple[Any, ...], dict[str, Any]]] = []
     for item in items:
@@ -171,25 +213,46 @@ def propose(snapshot: dict[str, Any]) -> dict[str, Any]:
         catch_up = item["id"] in missed
         age = (effective - last_practice).days if last_practice else 999999
         rank = (0 if status["maintenance_due"] else 1, 0 if catch_up else 1, item["priority"], -status["overdue_days"], -age, item["id"])
-        row = {"target_id": item["id"], **status, "catch_up": catch_up, "eligible": eligible, "blockers": blockers, "reasons": reasons, "rank_key": list(rank)}
+        selection_reasons = []
+        if status["maintenance_due"]: selection_reasons.append("maintenance-due")
+        if catch_up: selection_reasons.append("missed-session-catch-up")
+        selection_reasons.append(f"explicit-priority:{item['priority']}")
+        row = {"target_id": item["id"], **status, "catch_up": catch_up, "eligible": eligible, "blockers": blockers, "reasons": reasons, "selection_reasons": selection_reasons, "rank_key": list(rank)}
         status_rows.append(row)
         if eligible:
             candidates.append((rank, item))
     selected: list[dict[str, Any]] = []
+    dynamic_exclusions: dict[str, list[str]] = {}
+    new_active_slots = max(0, constraints["max_active_items"] - active_count)
     for _, item in sorted(candidates, key=lambda pair: pair[0]):
         if remaining_sessions <= 0:
-            break
+            dynamic_exclusions[item["id"]] = ["weekly-session-budget-exhausted"]
+            continue
         minutes = item.get("session_minutes", constraints["default_session_minutes"])
         if minutes > remaining_minutes:
+            dynamic_exclusions[item["id"]] = ["weekly-minute-budget-insufficient"]
             continue
-        selected.append({"target_id": item["id"], "minutes": minutes, "reason": next(row for row in status_rows if row["target_id"] == item["id"])["reasons"], "maintenance_due": item_status(item, effective)["maintenance_due"], "catch_up": item["id"] in missed})
+        status = item_status(item, effective)
+        starts_new_active_work = not item["active"] and not status["maintenance_due"]
+        if starts_new_active_work and new_active_slots <= 0:
+            dynamic_exclusions[item["id"]] = ["active-capacity-full"]
+            continue
+        row = next(row for row in status_rows if row["target_id"] == item["id"])
+        selected.append({"target_id": item["id"], "minutes": minutes, "reasons": row["selection_reasons"], "maintenance_due": status["maintenance_due"], "catch_up": item["id"] in missed, "starts_new_active_work": starts_new_active_work})
+        if starts_new_active_work:
+            new_active_slots -= 1
         remaining_sessions -= 1
         remaining_minutes -= minutes
     selected_ids = {item["target_id"] for item in selected}
-    excluded = [{"target_id": row["target_id"], "reasons": row["reasons"] or ["lower-deterministic-rank-or-budget"]} for row in status_rows if row["target_id"] not in selected_ids]
-    fingerprint_input = {"snapshot": snapshot, "selected": selected, "excluded": excluded}
+    excluded = []
+    for row in status_rows:
+        if row["target_id"] in selected_ids:
+            continue
+        excluded.append({"target_id": row["target_id"], "reasons": row["reasons"] or dynamic_exclusions.get(row["target_id"], ["lower-deterministic-rank-or-budget"])})
+    goals = goal_projection(snapshot, effective)
+    fingerprint_input = {"snapshot": snapshot, "selected": selected, "excluded": excluded, "goals": goals}
     proposal_id = f"schedule-{snapshot['effective_date']}-{stable_hash(fingerprint_input)}"
-    return {"version": 1, "proposal_id": proposal_id, "snapshot_version": snapshot["snapshot_version"], "ruleset_version": snapshot["ruleset_version"], "generated_at": snapshot["generated_at"], "effective_date": snapshot["effective_date"], "timezone": snapshot["timezone"], "week": {"start": week_start.isoformat(), "end": week_end.isoformat()}, "selected": selected, "excluded": excluded, "projection": sorted(status_rows, key=lambda row: row["target_id"]), "remaining_budget": {"sessions": remaining_sessions, "minutes": remaining_minutes}, "status": "no-op" if not selected else "proposed", "requires_approval": True, "application_key": f"{proposal_id}:{snapshot['snapshot_version']}", "stale_when_snapshot_version_changes": True, "input_fingerprint": stable_hash(snapshot)}
+    return {"version": 1, "proposal_id": proposal_id, "snapshot_version": snapshot["snapshot_version"], "ruleset_version": snapshot["ruleset_version"], "generated_at": snapshot["generated_at"], "effective_date": snapshot["effective_date"], "timezone": snapshot["timezone"], "week": {"start": week_start.isoformat(), "end": week_end.isoformat()}, "selected": selected, "excluded": excluded, "projection": sorted(status_rows, key=lambda row: row["target_id"]), "goal_projection": goals, "conflicts": conflicts, "unresolved_choices": [], "remaining_budget": {"sessions": remaining_sessions, "minutes": remaining_minutes}, "status": "no-op" if not selected else "proposed", "approval_status": "pending", "requires_approval": True, "application_key": f"{proposal_id}:{snapshot['snapshot_version']}", "stale_when_snapshot_version_changes": True, "expires_after_effective_date": True, "input_fingerprint": stable_hash(snapshot)}
 
 def application_status(proposal: dict[str, Any], current_snapshot_version: str, applied_keys: list[str] | None = None) -> str:
     if proposal.get("snapshot_version") != current_snapshot_version:
