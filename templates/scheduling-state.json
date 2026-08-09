@@ -22,6 +22,7 @@
     {
       "id": "technique-id",
       "target_type": "technique",
+      "dimension": null,
       "state": "developing",
       "state_revision": "technique-id:1",
       "approved_transition_proposal_id": null,
@@ -31,6 +32,8 @@
       "maintenance_interval_days": 14,
       "last_practice_date": null,
       "last_verified_date": null,
+      "target_realization": {"timing_realization_id": null},
+      "maintenance_realization": {"timing_realization_id": null},
       "self_reported_load": "normal",
       "plateau_observed": false,
       "dependencies": []
