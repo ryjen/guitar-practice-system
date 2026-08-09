@@ -23,19 +23,18 @@ class AssessmentCoreTests(unittest.TestCase):
     def test_promotion_fixture_passes_all_required_gates(self) -> None:
         result = assessment.assess(self.request, self.gates)
         self.assertTrue(result["transition_valid"])
+        self.assertEqual("promotion", result["transition_kind"])
         self.assertEqual("reliable-context", result["proposed_state"])
         self.assertTrue(result["requires_approval"])
         self.assertTrue(all(item["outcome"] in assessment.OUTCOMES for item in result["gate_results"]))
         self.assertFalse(result["missing_evidence"])
 
     def test_replay_is_deterministic(self) -> None:
-        first = assessment.assess(self.request, self.gates)
-        second = assessment.assess(self.request, self.gates)
-        self.assertEqual(first, second)
+        self.assertEqual(assessment.assess(self.request, self.gates), assessment.assess(self.request, self.gates))
 
     def test_missing_musical_context_is_unknown_not_fail(self) -> None:
-        request = dict(self.request)
-        request["evidence"] = [item for item in self.request["evidence"] if item["evidence_type"] != "musical-context"]
+        request = json.loads(json.dumps(self.request))
+        request["evidence"] = [item for item in request["evidence"] if item["evidence_type"] != "musical-context"]
         result = assessment.assess(request, self.gates)
         gate = next(item for item in result["gate_results"] if item["gate_id"] == "musical-context-transfer")
         self.assertEqual("unknown", gate["outcome"])
@@ -92,16 +91,26 @@ class AssessmentCoreTests(unittest.TestCase):
         request = json.loads(json.dumps(self.request))
         request["current_state"] = "reliable-context"
         request["proposed_state"] = "reliable-isolation"
+        request["comparison_evidence_ids"] = ["slide-context-1"]
         result = assessment.assess(request, self.gates)
         context_gate = next(item for item in result["gate_results"] if item["gate_id"] == "musical-context-transfer")
         self.assertEqual("not-applicable", context_gate["outcome"])
+        self.assertEqual("regression", result["transition_kind"])
         self.assertTrue(result["transition_valid"])
         self.assertEqual("reliable-isolation", result["proposed_state"])
 
-    def test_failed_maintenance_can_propose_regression_without_mutating(self) -> None:
+    def test_regression_requires_comparison_evidence(self) -> None:
+        request = json.loads(json.dumps(self.request))
+        request["current_state"] = "reliable-context"
+        request["proposed_state"] = "reliable-isolation"
+        with self.assertRaises(assessment.AssessmentError):
+            assessment.assess(request, self.gates)
+
+    def test_failed_maintenance_is_inconclusive_without_supported_regression(self) -> None:
         request = json.loads(json.dumps(self.request))
         request["current_state"] = "maintained"
         request["proposed_state"] = "reliable-context"
+        request["comparison_evidence_ids"] = ["slide-context-1"]
         for item in request["evidence"]:
             item["observations"]["timing_gate"] = "fail"
         result = assessment.assess(request, self.gates)
@@ -109,8 +118,23 @@ class AssessmentCoreTests(unittest.TestCase):
         self.assertIsNone(result["proposed_state"])
         self.assertTrue(result["requires_approval"])
 
+    def test_pause_is_valid_lifecycle_transition_without_quality_gate_promotion(self) -> None:
+        request = json.loads(json.dumps(self.request))
+        request["proposed_state"] = "paused"
+        result = assessment.assess(request, self.gates)
+        self.assertEqual("lifecycle", result["transition_kind"])
+        self.assertTrue(result["transition_valid"])
+        self.assertEqual("paused", result["proposed_state"])
+
+    def test_retirement_is_valid_lifecycle_transition(self) -> None:
+        request = json.loads(json.dumps(self.request))
+        request["proposed_state"] = "retired"
+        result = assessment.assess(request, self.gates)
+        self.assertEqual("lifecycle", result["transition_kind"])
+        self.assertTrue(result["transition_valid"])
+
     def test_invalid_transition_is_rejected(self) -> None:
-        request = dict(self.request)
+        request = json.loads(json.dumps(self.request))
         request["current_state"] = "discovered"
         request["proposed_state"] = "reliable-context"
         with self.assertRaises(assessment.AssessmentError):
@@ -124,7 +148,14 @@ class AssessmentCoreTests(unittest.TestCase):
         self.assertNotEqual(first["ruleset_fingerprint"], second["ruleset_fingerprint"])
         self.assertNotEqual(first["proposal_id"], second["proposal_id"])
 
-    def test_non_authoritative_metadata_is_ignored(self) -> None:
+    def test_supersession_is_explicit_and_affects_proposal_identity(self) -> None:
+        request = json.loads(json.dumps(self.request))
+        request["supersedes_proposal_id"] = "assessment-old"
+        result = assessment.assess(request, self.gates)
+        self.assertEqual("assessment-old", result["supersedes_proposal_id"])
+        self.assertNotEqual(result["proposal_id"], assessment.assess(self.request, self.gates)["proposal_id"])
+
+    def test_non_authoritative_metadata_is_ignored_for_gate_results(self) -> None:
         request = json.loads(json.dumps(self.request))
         request["evidence"][-1]["confidence"] = 0.99
         request["evidence"][-1]["interpretation"] = "probably mastered"
@@ -133,6 +164,12 @@ class AssessmentCoreTests(unittest.TestCase):
         decorated = assessment.assess(request, self.gates)
         self.assertEqual(baseline["transition_valid"], decorated["transition_valid"])
         self.assertEqual(baseline["gate_results"], decorated["gate_results"])
+
+    def test_unknown_comparison_reference_is_rejected(self) -> None:
+        request = json.loads(json.dumps(self.request))
+        request["comparison_evidence_ids"] = ["missing"]
+        with self.assertRaises(assessment.AssessmentError):
+            assessment.assess(request, self.gates)
 
 
 if __name__ == "__main__":
