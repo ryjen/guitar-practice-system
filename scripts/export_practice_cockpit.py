@@ -127,10 +127,12 @@ def export(output: Path) -> None:
 
 
 def check(output: Path) -> None:
-    expected = render_catalog(load_catalog())
+    expected = load_catalog()
     if not output.exists():
         raise CatalogError(f"generated export is missing: {output.relative_to(ROOT)}")
-    actual = output.read_text(encoding="utf-8")
+    with output.open(encoding="utf-8") as handle:
+        actual = json.load(handle)
+    validate_catalog(actual)
     if actual != expected:
         raise CatalogError(
             f"generated export is stale: run {Path(__file__).relative_to(ROOT)}"
