@@ -24,7 +24,7 @@ Keep these concepts separate:
 5. **Gate result** — deterministic evaluation of fields explicitly named by a gate.
 6. **Approved canonical finding** — state accepted by an explicit state-application workflow.
 
-Confidence, interpretation, recommendation, prose notes, and unspecified fields never become evidence merely because they are present.
+Each evidence entry names its `producer`, `observation_source`, and optional attempted/verified realization. Confidence, interpretation, recommendation, prose notes, and unspecified fields never become evidence merely because they are present.
 
 ## Gate outcomes
 
@@ -38,25 +38,19 @@ Each gate resolves to exactly one outcome:
 
 `unknown` is intentionally distinct from `fail`.
 
-## Versioning
+## Versioning and supersession
 
-Gate sets are immutable once used. A gate set has:
+Gate sets are immutable once used. A gate set has a stable `id`, integer `revision`, and ordered gate definitions. Changing a rule requires a new revision.
 
-- stable `id`
-- integer `revision`
-- ordered gate definitions
-
-Changing a rule requires a new revision. Replaying the same assessment request with the same gate set produces the same proposal identifier, ruleset fingerprint, and gate results. Re-evaluating under another revision creates a distinct proposal and preserves the earlier result.
+Replaying the same assessment request with the same gate set produces the same proposal identifier, ruleset fingerprint, and gate results. Re-evaluating under another revision creates a distinct proposal and preserves the earlier result. A replacement proposal may explicitly name `supersedes_proposal_id`; older records remain history rather than being rewritten.
 
 ## Supported deterministic rules
 
-The initial reference evaluator deliberately supports only two transparent rule types:
+The initial reference evaluator deliberately supports only two transparent rule types.
 
 ### `observation-equals`
 
-Evaluates one explicit observation field against an expected value.
-
-If no qualifying observation exists, the outcome is `unknown`. If qualifying observations conflict, the outcome is also `unknown`.
+Evaluates one explicit observation field against an expected value. If no qualifying observation exists, the outcome is `unknown`. If qualifying observations conflict, the outcome is also `unknown`.
 
 ### `evidence-count`
 
@@ -76,9 +70,13 @@ discovered
   -> maintained
 ```
 
-`paused` and `retired` are explicit lifecycle states. Regression proposals may move only to a valid earlier state; they do not erase unrelated dimension history.
+Transitions are classified as:
 
-Assessment validates whether a requested transition is supported. It never applies it.
+- **promotion** — moves forward through the active progression and requires all applicable required gates to pass;
+- **regression** — moves backward through the active progression, requires explicit comparison evidence, and evaluates only gates applicable to the requested lower state;
+- **lifecycle** — pause, retirement, resume, or rediscovery. These remain explicit approval-gated state changes but do not pretend to be quality-gate promotions.
+
+A partial regression should target only the unsupported state/dimension instead of erasing unrelated evidence history.
 
 ## Stale state and idempotency
 
@@ -99,14 +97,7 @@ python scripts/assessment_core.py \
   templates/assessment-gate-set.json
 ```
 
-The fixture requires:
-
-- two isolated checks from two different sessions
-- one musical-context take
-- explicit passing timing observations
-- no explicit physical stop condition
-
-All are supplied directly; the evaluator does not derive them from audio or prose.
+The fixture requires two isolated checks from separate sessions, one musical-context take, explicit passing timing observations, and no explicit physical stop condition. All facts are supplied directly; the evaluator does not derive them from audio or prose.
 
 ## Integration boundary
 
