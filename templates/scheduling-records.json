@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "practice_goal": {"id": "goal-id", "target_id": "target-id", "period": "weekly", "target_sessions": 2},
+  "active_work_item": {"id": "target-id", "active": true, "priority": 1, "state": "developing", "state_revision": "target-id:1"},
+  "maintenance_rule": {"target_id": "target-id", "interval_days": 14, "last_verified_date": "2026-08-01"},
+  "dependency": {"target_id": "dependent-id", "requires_target_id": "prerequisite-id", "required_states": ["reliable-context", "maintained"]},
+  "progression_projection": {"target_id": "target-id", "state": "developing", "due_status": "not-due", "blocked": false, "paused": false, "retired": false},
+  "schedule_constraint": {"max_active_items": 3, "weekly_session_budget": 5, "weekly_minute_budget": 180, "recovery_days": 1},
+  "schedule_proposal": {"proposal_id": "schedule-date-fingerprint", "snapshot_version": "practice-state:1", "approval_status": "pending"},
+  "approved_schedule": {"proposal_id": "schedule-date-fingerprint", "application_key": "proposal:snapshot", "approved_at": "2026-08-08T19:10:00-07:00"},
+  "completion_record": {"type": "completed", "target_id": "target-id", "date": "2026-08-08", "minutes": 30},
+  "schedule_event": {"type": "missed", "target_id": "target-id", "date": "2026-08-08"}
+}
