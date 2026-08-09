@@ -6,9 +6,9 @@ on:
       - "contracts/scheduling/**"
       - "docs/scheduling/**"
       - "examples/scheduling/**"
-      - "scripts/scheduling.py"
+      - "scripts/scheduling*.py"
       - "scripts/check_public_boundary.py"
-      - "tests/test_scheduling.py"
+      - "tests/test_scheduling*.py"
       - ".github/workflows/validate-scheduling.yml"
   push:
     branches:
@@ -17,9 +17,9 @@ on:
       - "contracts/scheduling/**"
       - "docs/scheduling/**"
       - "examples/scheduling/**"
-      - "scripts/scheduling.py"
+      - "scripts/scheduling*.py"
       - "scripts/check_public_boundary.py"
-      - "tests/test_scheduling.py"
+      - "tests/test_scheduling*.py"
       - ".github/workflows/validate-scheduling.yml"
 
 permissions:
@@ -41,7 +41,7 @@ jobs:
       - name: Enforce public boundary
         run: python scripts/check_public_boundary.py
       - name: Run scheduling tests
-        run: python -m unittest discover -s tests -p 'test_scheduling.py' -v
+        run: python -m unittest discover -s tests -p 'test_scheduling*.py' -v
       - name: Generate deterministic proposal
         run: |
           python scripts/scheduling.py propose \
@@ -56,6 +56,20 @@ jobs:
           assert proposal["requires_approval"] is True
           assert [item["item_id"] for item in proposal["selected"]] == ["ebow-foundations", "slide-foundations"]
           assert sum(item["minutes"] for item in proposal["selected"]) == 30
+          PY
+      - name: Generate long-term projection
+        run: |
+          python scripts/scheduling_projection.py \
+            examples/scheduling/projection-snapshot.json \
+            > /tmp/projection.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("/tmp/projection.json").read_text())
+          assert result["record_type"] == "progression-projection"
+          assert result["goals"][0]["goal_id"] == "goal-ebow-monthly"
+          assert any(item["blocked"] for item in result["items"])
           PY
       - name: Verify approval replay
         run: |
