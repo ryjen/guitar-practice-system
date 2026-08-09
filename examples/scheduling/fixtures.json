@@ -1,0 +1,201 @@
+{
+  "contract_version": "scheduling/v1",
+  "scenarios": [
+    {
+      "name": "normal active priorities",
+      "snapshot": {
+        "record_type": "schedule-snapshot",
+        "contract_version": "scheduling/v1",
+        "snapshot_id": "snapshot-normal",
+        "state_revision": 10,
+        "ruleset_version": "scheduling-rules-v1",
+        "generated_at": "2026-08-08T18:00:00-07:00",
+        "effective_date": "2026-08-08",
+        "timezone": "America/Vancouver",
+        "session_minutes": 30,
+        "minimum_block_minutes": 5,
+        "max_active_items": 2,
+        "self_reported_load": "normal",
+        "high_load_max_minutes": 20,
+        "weekly_budget": {"max_sessions": 5, "completed_sessions": 1, "max_minutes": 180, "completed_minutes": 30, "max_same_target": 3},
+        "items": [
+          {"id": "slide", "state": "active", "priority": 1, "target_minutes": 15, "prerequisites": [], "weekly_count": 1, "min_recovery_hours": 0},
+          {"id": "wah", "state": "active", "priority": 2, "target_minutes": 15, "prerequisites": [], "weekly_count": 0, "min_recovery_hours": 0}
+        ]
+      },
+      "expected_selected": ["slide", "wah"]
+    },
+    {
+      "name": "maintenance due outranks active work",
+      "snapshot": {
+        "record_type": "schedule-snapshot",
+        "contract_version": "scheduling/v1",
+        "snapshot_id": "snapshot-maintenance",
+        "state_revision": 11,
+        "ruleset_version": "scheduling-rules-v1",
+        "generated_at": "2026-08-08T18:00:00-07:00",
+        "effective_date": "2026-08-08",
+        "timezone": "America/Vancouver",
+        "session_minutes": 30,
+        "minimum_block_minutes": 5,
+        "max_active_items": 2,
+        "self_reported_load": "normal",
+        "high_load_max_minutes": 20,
+        "weekly_budget": {"max_sessions": 5, "completed_sessions": 1, "max_minutes": 180, "completed_minutes": 30, "max_same_target": 3},
+        "items": [
+          {"id": "slide", "state": "active", "priority": 1, "target_minutes": 20, "prerequisites": [], "weekly_count": 1, "min_recovery_hours": 0},
+          {"id": "ebow", "state": "maintenance", "priority": 9, "target_minutes": 10, "prerequisites": [], "maintenance_interval_days": 7, "last_verified_date": "2026-07-30", "weekly_count": 0, "min_recovery_hours": 0}
+        ]
+      },
+      "expected_selected": ["ebow", "slide"],
+      "expected_first_reason": "maintenance-due",
+      "expected_overdue_days": 2
+    },
+    {
+      "name": "blocked prerequisite",
+      "snapshot": {
+        "record_type": "schedule-snapshot",
+        "contract_version": "scheduling/v1",
+        "snapshot_id": "snapshot-blocked",
+        "state_revision": 12,
+        "ruleset_version": "scheduling-rules-v1",
+        "generated_at": "2026-08-08T18:00:00-07:00",
+        "effective_date": "2026-08-08",
+        "timezone": "America/Vancouver",
+        "session_minutes": 30,
+        "minimum_block_minutes": 5,
+        "max_active_items": 2,
+        "self_reported_load": "normal",
+        "high_load_max_minutes": 20,
+        "weekly_budget": {"max_sessions": 5, "completed_sessions": 1, "max_minutes": 180, "completed_minutes": 30, "max_same_target": 3},
+        "items": [
+          {"id": "slide", "state": "active", "priority": 1, "target_minutes": 20, "prerequisites": [], "weekly_count": 0, "min_recovery_hours": 0},
+          {"id": "country", "state": "candidate", "priority": 1, "target_minutes": 10, "prerequisites": [{"item_id": "slide", "satisfied_states": ["verified", "maintenance"]}], "weekly_count": 0, "min_recovery_hours": 0}
+        ]
+      },
+      "expected_selected": ["slide"],
+      "expected_excluded": {"country": "prerequisite-blocked"}
+    },
+    {
+      "name": "dependency unlocked",
+      "snapshot": {
+        "record_type": "schedule-snapshot",
+        "contract_version": "scheduling/v1",
+        "snapshot_id": "snapshot-unlocked",
+        "state_revision": 13,
+        "ruleset_version": "scheduling-rules-v1",
+        "generated_at": "2026-08-08T18:00:00-07:00",
+        "effective_date": "2026-08-08",
+        "timezone": "America/Vancouver",
+        "session_minutes": 20,
+        "minimum_block_minutes": 5,
+        "max_active_items": 2,
+        "self_reported_load": "normal",
+        "high_load_max_minutes": 20,
+        "weekly_budget": {"max_sessions": 5, "completed_sessions": 1, "max_minutes": 180, "completed_minutes": 30, "max_same_target": 3},
+        "items": [
+          {"id": "slide", "state": "verified", "priority": 1, "target_minutes": 10, "prerequisites": [], "weekly_count": 0, "min_recovery_hours": 0},
+          {"id": "country", "state": "candidate", "priority": 1, "target_minutes": 20, "prerequisites": [{"item_id": "slide", "satisfied_states": ["verified", "maintenance"]}], "weekly_count": 0, "min_recovery_hours": 0}
+        ]
+      },
+      "expected_selected": ["country"]
+    },
+    {
+      "name": "missed work is recovered before regular active priority",
+      "snapshot": {
+        "record_type": "schedule-snapshot",
+        "contract_version": "scheduling/v1",
+        "snapshot_id": "snapshot-missed",
+        "state_revision": 14,
+        "ruleset_version": "scheduling-rules-v1",
+        "generated_at": "2026-08-08T18:00:00-07:00",
+        "effective_date": "2026-08-08",
+        "timezone": "America/Vancouver",
+        "session_minutes": 30,
+        "minimum_block_minutes": 5,
+        "max_active_items": 2,
+        "self_reported_load": "normal",
+        "high_load_max_minutes": 20,
+        "weekly_budget": {"max_sessions": 5, "completed_sessions": 1, "max_minutes": 180, "completed_minutes": 30, "max_same_target": 3},
+        "items": [
+          {"id": "slide", "state": "active", "priority": 10, "target_minutes": 15, "prerequisites": [], "weekly_count": 0, "min_recovery_hours": 0, "missed": true},
+          {"id": "wah", "state": "active", "priority": 1, "target_minutes": 15, "prerequisites": [], "weekly_count": 0, "min_recovery_hours": 0}
+        ]
+      },
+      "expected_selected": ["slide", "wah"],
+      "expected_first_reason": "missed-session-recovery"
+    },
+    {
+      "name": "paused item is preserved but excluded",
+      "snapshot": {
+        "record_type": "schedule-snapshot",
+        "contract_version": "scheduling/v1",
+        "snapshot_id": "snapshot-paused",
+        "state_revision": 15,
+        "ruleset_version": "scheduling-rules-v1",
+        "generated_at": "2026-08-08T18:00:00-07:00",
+        "effective_date": "2026-08-08",
+        "timezone": "America/Vancouver",
+        "session_minutes": 20,
+        "minimum_block_minutes": 5,
+        "max_active_items": 2,
+        "self_reported_load": "normal",
+        "high_load_max_minutes": 20,
+        "weekly_budget": {"max_sessions": 5, "completed_sessions": 1, "max_minutes": 180, "completed_minutes": 30, "max_same_target": 3},
+        "items": [
+          {"id": "ebow", "state": "paused", "priority": 1, "target_minutes": 10, "prerequisites": [], "weekly_count": 0, "min_recovery_hours": 0},
+          {"id": "slide", "state": "active", "priority": 2, "target_minutes": 20, "prerequisites": [], "weekly_count": 0, "min_recovery_hours": 0}
+        ]
+      },
+      "expected_selected": ["slide"],
+      "expected_excluded": {"ebow": "paused"}
+    },
+    {
+      "name": "resumed item becomes ordinary active work",
+      "snapshot": {
+        "record_type": "schedule-snapshot",
+        "contract_version": "scheduling/v1",
+        "snapshot_id": "snapshot-resumed",
+        "state_revision": 16,
+        "ruleset_version": "scheduling-rules-v1",
+        "generated_at": "2026-08-08T18:00:00-07:00",
+        "effective_date": "2026-08-08",
+        "timezone": "America/Vancouver",
+        "session_minutes": 20,
+        "minimum_block_minutes": 5,
+        "max_active_items": 2,
+        "self_reported_load": "normal",
+        "high_load_max_minutes": 20,
+        "weekly_budget": {"max_sessions": 5, "completed_sessions": 1, "max_minutes": 180, "completed_minutes": 30, "max_same_target": 3},
+        "items": [
+          {"id": "ebow", "state": "active", "priority": 1, "target_minutes": 20, "prerequisites": [], "weekly_count": 0, "min_recovery_hours": 0}
+        ]
+      },
+      "expected_selected": ["ebow"]
+    },
+    {
+      "name": "weekly session budget exhausted",
+      "snapshot": {
+        "record_type": "schedule-snapshot",
+        "contract_version": "scheduling/v1",
+        "snapshot_id": "snapshot-budget",
+        "state_revision": 17,
+        "ruleset_version": "scheduling-rules-v1",
+        "generated_at": "2026-08-08T18:00:00-07:00",
+        "effective_date": "2026-08-08",
+        "timezone": "America/Vancouver",
+        "session_minutes": 30,
+        "minimum_block_minutes": 5,
+        "max_active_items": 2,
+        "self_reported_load": "normal",
+        "high_load_max_minutes": 20,
+        "weekly_budget": {"max_sessions": 3, "completed_sessions": 3, "max_minutes": 180, "completed_minutes": 90, "max_same_target": 3},
+        "items": [
+          {"id": "slide", "state": "active", "priority": 1, "target_minutes": 30, "prerequisites": [], "weekly_count": 1, "min_recovery_hours": 0}
+        ]
+      },
+      "expected_selected": [],
+      "expected_conflict": "weekly-session-budget-exhausted"
+    }
+  ]
+}
