@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "id": "technique-reliability",
+  "revision": 1,
+  "gates": [
+    {
+      "id": "isolated-repeatability",
+      "dimension": "repeatability",
+      "required": true,
+      "applies_to_states": ["reliable-isolation", "reliable-context", "maintained"],
+      "max_age_days": 30,
+      "rule": {
+        "type": "evidence-count",
+        "evidence_types": ["isolated-check"],
+        "minimum": 2,
+        "minimum_sessions": 2
+      }
+    },
+    {
+      "id": "musical-context-transfer",
+      "dimension": "musical-context-transfer",
+      "required": true,
+      "applies_to_states": ["reliable-context", "maintained"],
+      "max_age_days": 30,
+      "rule": {
+        "type": "evidence-count",
+        "evidence_types": ["musical-context", "full-take"],
+        "minimum": 1,
+        "minimum_sessions": 1
+      }
+    },
+    {
+      "id": "timing-explicit",
+      "dimension": "timing",
+      "required": true,
+      "applies_to_states": ["reliable-context", "maintained"],
+      "max_age_days": 30,
+      "rule": {
+        "type": "observation-equals",
+        "field": "timing_gate",
+        "expected": "pass"
+      }
+    },
+    {
+      "id": "physical-stop-condition",
+      "dimension": "physical-tension",
+      "required": true,
+      "applies_to_states": ["reliable-isolation", "reliable-context", "maintained"],
+      "blocked_by_observation": {
+        "field": "physical_stop",
+        "value": true,
+        "reason": "explicit stop condition is present"
+      },
+      "rule": {
+        "type": "observation-equals",
+        "field": "physical_stop",
+        "expected": false
+      }
+    }
+  ]
+}
