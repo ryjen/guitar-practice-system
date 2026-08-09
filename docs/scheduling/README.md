@@ -12,28 +12,20 @@ approved state snapshot + explicit constraints + injected clock
     -> explicit approval elsewhere
 ```
 
-## State snapshot
+## Contracts
 
-`templates/scheduling-state.json` is the implementation-neutral exchange contract. It carries:
+- `templates/scheduling-state.json` — complete versioned input snapshot.
+- `templates/schedule-proposal.json` — generated advisory proposal.
+- `templates/scheduling-records.json` — implementation-neutral shapes for goals, active work, maintenance rules, dependencies, projections, constraints, approvals, completions, and schedule events.
 
-- `snapshot_version` and `ruleset_version`
-- injected `generated_at`, `effective_date`, and timezone
-- active-work and weekly budget constraints
-- practice goals
-- progression items with approved state revisions
-- maintenance intervals and dates
-- explicit self-reported load
-- dependency requirements
-- append-only schedule history
-
-The scheduler never reads ambient time in domain logic.
+The state snapshot carries `snapshot_version`, `ruleset_version`, injected `generated_at`, `effective_date`, timezone, constraints, goals, progression items, maintenance dates, explicit self-reported load, dependencies, and append-only schedule history. The scheduler never reads ambient time in domain logic.
 
 ## Deterministic ordering
 
 Eligible targets are ordered by:
 
 1. maintenance due before not due;
-2. explicit missed-session catch-up before ordinary work;
+2. unresolved missed-session catch-up before ordinary work;
 3. explicit numeric priority;
 4. greater overdue age;
 5. older last-practice date;
@@ -41,32 +33,25 @@ Eligible targets are ordered by:
 
 This is intentionally transparent. There is no hidden score or inferred weakness.
 
-## Eligibility
+## Eligibility and capacity
 
-A target may be excluded because it is:
+A target may be excluded because it is paused or retired, blocked by an explicit dependency, inside a recovery window, at its per-target weekly repetition limit, a new inactive item while active-work capacity is full, or unable to fit in the remaining weekly session/minute budget.
 
-- paused or retired;
-- blocked by an explicit dependency;
-- inside a recovery window;
-- at its per-target weekly repetition limit;
-- a new inactive item while active-work capacity is full;
-- unable to fit in the remaining weekly session/minute budget.
+Maintenance work may remain eligible when active-work capacity is full because it preserves already-approved state rather than starting new active work. When several inactive targets are otherwise eligible, selection reserves active slots as it proceeds so a proposal cannot start more work than the configured capacity permits.
 
-Maintenance work may remain eligible even when active-work capacity is full because it is preserving already-approved state rather than starting new active work.
+If the supplied snapshot already contains more active items than the configured maximum, the proposal reports an explicit conflict rather than silently deactivating anything.
 
-## Maintenance and long-term state
+## Maintenance and long-term projection
 
-Maintenance is due only when both an explicit interval and a last verified date exist. Missing history stays unknown; it is not treated as overdue.
+Maintenance is due only when both an explicit interval and a last verified date exist. Missing verification history stays unknown; it is not treated as overdue.
 
-The projection exposes:
+The projection exposes approved state and revision, optional dimension, assessment-transition provenance, target and maintenance realizations, due date and overdue age, catch-up state, dependency blockers, paused/retired/blocked state, explicit plateau observation, and deterministic eligibility reasons.
 
-- maintenance due date
-- overdue days
-- catch-up status
-- dependency blockers
-- eligibility and deterministic exclusion reasons
+A plateau is only carried when explicitly supplied. Scheduling never assigns a cause.
 
-`plateau_observed` may be carried as explicit state but is never assigned a cause by the scheduler.
+## Goals
+
+Weekly and monthly goals are explicit records with a target and target session count. The proposal projects completed and remaining sessions for the relevant calendar period. Goals affect reporting only in this initial ruleset; they do not create a hidden ranking weight.
 
 ## Recovery and load
 
@@ -74,7 +59,7 @@ Normal and high-load recovery spacing are configured separately. High load is us
 
 ## Missed sessions
 
-A `missed` history event marks the target for catch-up ordering during the current week. Catch-up does not override hard constraints such as recovery, dependencies, repetition caps, or total budget.
+A `missed` event creates catch-up status only while unresolved. A later `completed` event for the same target in the current week clears catch-up. Catch-up changes deterministic ordering but never overrides recovery, dependencies, repetition caps, active capacity, or total budget.
 
 ## Pause/resume and dependencies
 
@@ -84,30 +69,19 @@ Dependencies specify target IDs and acceptable approved states. When a prerequis
 
 ## Replay, timezone, and DST
 
-The state snapshot records an offset-aware `generated_at`, local `effective_date`, timezone identifier, and week-start convention. Domain calculations use the supplied local date. The same snapshot and ruleset produce the same proposal regardless of the machine running the evaluator.
+The snapshot records an offset-aware `generated_at`, local `effective_date`, timezone identifier, and week-start convention. Domain calculations use the supplied local date. The same snapshot and ruleset produce the same proposal regardless of the machine running the evaluator.
 
-DST conversion from an instant into the supplied local date belongs to the caller that constructs the snapshot; the scheduler does not consult the host timezone database during proposal generation.
+DST conversion from an instant into the supplied local date belongs to the caller constructing the snapshot; the scheduler does not consult the host timezone database during proposal generation. This keeps replay deterministic across environments and timezone-database revisions.
 
-## Approval, staleness, and idempotency
+## Approval, staleness, expiry, and idempotency
 
-A proposal returns:
+A proposal returns a deterministic `proposal_id`, source `snapshot_version`, `application_key`, pending approval status, `stale_when_snapshot_version_changes: true`, and `expires_after_effective_date: true`.
 
-- deterministic `proposal_id`
-- source `snapshot_version`
-- deterministic `application_key`
-- `stale_when_snapshot_version_changes: true`
-
-`application_status()` reports:
-
-- `applicable`
-- `stale`
-- `already-applied`
-
-Actual state mutation remains outside the scheduler. An approval layer must reject stale proposals and treat an already-used application key idempotently.
+`application_status()` reports `applicable`, `stale`, or `already-applied`. Actual state mutation remains outside the scheduler. An approval layer must reject stale proposals and treat an already-used application key idempotently.
 
 ## Relationship to assessment
 
-Assessment owns evidence interpretation rules and progression-transition proposals. Scheduling consumes the resulting **approved state** and optional proposal reference only. It must not inspect assessment gate results to create its own promotion or regression decision.
+Assessment owns evidence-gate evaluation and progression-transition proposals. Scheduling consumes the resulting **approved state** and optional assessment proposal reference only. It must not inspect assessment gate results to create its own promotion or regression decision.
 
 ## Example
 
@@ -115,4 +89,4 @@ Assessment owns evidence interpretation rules and progression-transition proposa
 python scripts/scheduling_core.py examples/scheduling/weekly-progression.json
 ```
 
-The example demonstrates maintenance priority, missed-session catch-up, active capacity, a dependency that has become unlocked, and a paused technique.
+The example demonstrates maintenance priority, unresolved missed-session catch-up, active capacity, a dependency unlocked by approved state, goal projection, and a paused technique.
