@@ -1,0 +1,101 @@
+{
+  "id": "ebow-ambient-bed-d-56",
+  "title": "E-Bow Ambient Modal Bed",
+  "purpose": "Leave sustained harmonic and register space for E-Bow activation, long-note intonation, drones, string changes, swells, and counter-melodies.",
+  "linked_techniques": [
+    "ebow-articulation"
+  ],
+  "linked_songs": [],
+  "key_signature": "D",
+  "tempo_bpm": 56,
+  "meter": [
+    4,
+    4
+  ],
+  "feel": "slow spacious ambient rock with long harmonic windows",
+  "count_in_bars": 1,
+  "loop": {
+    "start_marker": "DRONE",
+    "end_marker": "END"
+  },
+  "sections": [
+    {
+      "name": "DRONE",
+      "bars": 8,
+      "chords": [
+        "D",
+        "D",
+        "G",
+        "G",
+        "Bm",
+        "Bm",
+        "A",
+        "A"
+      ]
+    },
+    {
+      "name": "LIFT",
+      "bars": 8,
+      "chords": [
+        "D",
+        "A",
+        "Bm",
+        "G",
+        "D",
+        "A",
+        "G",
+        "G"
+      ]
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Drums",
+      "role": "drums",
+      "channel": 9,
+      "velocity": 58,
+      "instrument_intent": "minimal pulse only; keep cymbal and fill density low so E-Bow attacks and decay remain audible"
+    },
+    {
+      "name": "Bass",
+      "role": "bass",
+      "channel": 0,
+      "program": 33,
+      "velocity": 62,
+      "instrument_intent": "round sustained-support bass; avoid melodic fills in the E-Bow register"
+    },
+    {
+      "name": "Pad",
+      "role": "pad",
+      "channel": 1,
+      "program": 89,
+      "velocity": 42,
+      "instrument_intent": "soft long pad voicings with enough upper-register space for sustained guitar lines"
+    }
+  ],
+  "variants": {
+    "tempo_bpm": [
+      48,
+      56,
+      64
+    ],
+    "keys": [
+      "D",
+      "A",
+      "E"
+    ],
+    "density": [
+      "bass-pad",
+      "full"
+    ]
+  },
+  "provenance": {
+    "type": "original",
+    "notes": "Original diatonic ambient practice bed designed for sustained guitar rather than song emulation."
+  },
+  "outputs": {
+    "midi": "generated/backing-tracks/ebow-ambient-bed-d-56.mid",
+    "audio": null,
+    "daw_project": null
+  }
+}

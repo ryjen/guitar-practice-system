@@ -1,0 +1,101 @@
+{
+  "id": "wah-rhythmic-groove-em-96",
+  "title": "Rhythmic Wah Groove",
+  "purpose": "Expose wah timing, repeatable pedal movement, parked-filter control, and phrase-level sweeps over a sparse groove with a stable pulse for subdivision practice.",
+  "linked_techniques": [
+    "wah-control"
+  ],
+  "linked_songs": [],
+  "key_signature": "Emin",
+  "tempo_bpm": 96,
+  "meter": [
+    4,
+    4
+  ],
+  "feel": "straight funk-rock pulse with deliberate space for eighth- and sixteenth-note guitar subdivisions",
+  "count_in_bars": 1,
+  "loop": {
+    "start_marker": "GROOVE-A",
+    "end_marker": "END"
+  },
+  "sections": [
+    {
+      "name": "GROOVE-A",
+      "bars": 8,
+      "chords": [
+        "Em7",
+        "Em7",
+        "A7",
+        "A7",
+        "Em7",
+        "Em7",
+        "A7",
+        "B7"
+      ]
+    },
+    {
+      "name": "LEAD-B",
+      "bars": 8,
+      "chords": [
+        "Em7",
+        "G",
+        "A7",
+        "Em7",
+        "Em7",
+        "G",
+        "A7",
+        "B7"
+      ]
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Drums",
+      "role": "drums",
+      "channel": 9,
+      "velocity": 82,
+      "instrument_intent": "tight dry kit defining a stable pulse without fills that mask pedal timing; subdivision detail belongs to the guitar exercise"
+    },
+    {
+      "name": "Bass",
+      "role": "bass",
+      "channel": 0,
+      "program": 33,
+      "velocity": 78,
+      "instrument_intent": "short supportive electric bass pulse with room for muted wah rhythm"
+    },
+    {
+      "name": "Keys",
+      "role": "keys",
+      "channel": 1,
+      "program": 4,
+      "velocity": 48,
+      "instrument_intent": "light electric-piano harmony; avoid continuous upper-mid activity"
+    }
+  ],
+  "variants": {
+    "tempo_bpm": [
+      72,
+      84,
+      96,
+      112
+    ],
+    "keys": [
+      "Emin",
+      "Amin"
+    ],
+    "density": [
+      "drums-bass",
+      "full"
+    ]
+  },
+  "provenance": {
+    "type": "original",
+    "notes": "Original funk-rock practice groove designed for synchronized wah movement and parked-filter comparisons."
+  },
+  "outputs": {
+    "midi": "generated/backing-tracks/wah-rhythmic-groove-em-96.mid",
+    "audio": null,
+    "daw_project": null
+  }
+}

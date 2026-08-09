@@ -1,0 +1,126 @@
+{
+  "id": "country-rock-form-a-108",
+  "title": "Country-Rock Rhythm and Fill Form",
+  "purpose": "Practice switching between rhythm support and short country fills while keeping hybrid picking, muting, chord tones, and pedal-steel bends inside a rock-oriented song form.",
+  "linked_techniques": [
+    "country-picking"
+  ],
+  "linked_songs": [],
+  "key_signature": "A",
+  "tempo_bpm": 108,
+  "meter": [
+    4,
+    4
+  ],
+  "feel": "country-rock with clear rhythm-versus-fill sections and moderate eighth-note drive",
+  "count_in_bars": 1,
+  "loop": {
+    "start_marker": "RHYTHM-A",
+    "end_marker": "END"
+  },
+  "sections": [
+    {
+      "name": "RHYTHM-A",
+      "bars": 8,
+      "chords": [
+        "A",
+        "A",
+        "D",
+        "A",
+        "A",
+        "E",
+        "D",
+        "A"
+      ]
+    },
+    {
+      "name": "FILL-B",
+      "bars": 8,
+      "chords": [
+        "A",
+        "D",
+        "A",
+        "E",
+        "A",
+        "D",
+        "E",
+        "E"
+      ]
+    },
+    {
+      "name": "RHYTHM-C",
+      "bars": 8,
+      "chords": [
+        "A",
+        "A",
+        "D",
+        "A",
+        "A",
+        "E",
+        "D",
+        "A"
+      ]
+    },
+    {
+      "name": "TURNAROUND",
+      "bars": 4,
+      "chords": [
+        "D",
+        "A",
+        "E",
+        "A"
+      ]
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Drums",
+      "role": "drums",
+      "channel": 9,
+      "velocity": 82,
+      "instrument_intent": "firm country-rock backbeat with enough space for rhythm/fill role changes"
+    },
+    {
+      "name": "Bass",
+      "role": "bass",
+      "channel": 0,
+      "program": 33,
+      "velocity": 78,
+      "instrument_intent": "direct root-and-fifth support; avoid busy transitions that compete with guitar fills"
+    },
+    {
+      "name": "Keys",
+      "role": "keys",
+      "channel": 1,
+      "program": 4,
+      "velocity": 48,
+      "instrument_intent": "sparse piano bed marking harmony while leaving upper-mid space for double-stops and bends"
+    }
+  ],
+  "variants": {
+    "tempo_bpm": [
+      84,
+      96,
+      108,
+      120
+    ],
+    "keys": [
+      "A",
+      "G",
+      "D"
+    ],
+    "density": [
+      "drums-bass",
+      "full"
+    ]
+  },
+  "provenance": {
+    "type": "original",
+    "notes": "Original country-rock practice arrangement designed around explicit rhythm and fill sections."
+  },
+  "outputs": {
+    "midi": "generated/backing-tracks/country-rock-form-a-108.mid",
+    "audio": null,
+    "daw_project": null
+  }
+}

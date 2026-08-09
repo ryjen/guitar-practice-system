@@ -1,0 +1,102 @@
+{
+  "id": "country-i-iv-v-g-100",
+  "title": "Country I-IV-V Clean Practice",
+  "purpose": "Support hybrid picking, alternating bass, double-stops, chord-tone targeting, muting, and pedal-steel-style bends in a clean country context.",
+  "linked_techniques": [
+    "country-picking"
+  ],
+  "linked_songs": [],
+  "key_signature": "G",
+  "tempo_bpm": 100,
+  "meter": [
+    4,
+    4
+  ],
+  "feel": "clean straight country with boom-chuck space and a simple turnaround",
+  "count_in_bars": 1,
+  "loop": {
+    "start_marker": "I-IV-V",
+    "end_marker": "END"
+  },
+  "sections": [
+    {
+      "name": "I-IV-V",
+      "bars": 8,
+      "chords": [
+        "G",
+        "G",
+        "C",
+        "C",
+        "G",
+        "D",
+        "G",
+        "D"
+      ]
+    },
+    {
+      "name": "TURNAROUND",
+      "bars": 8,
+      "chords": [
+        "G",
+        "C",
+        "G",
+        "G",
+        "C",
+        "G",
+        "D",
+        "G"
+      ]
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Drums",
+      "role": "drums",
+      "channel": 9,
+      "velocity": 70,
+      "instrument_intent": "restrained country kit emphasizing stable backbeat and clean guitar articulation"
+    },
+    {
+      "name": "Bass",
+      "role": "bass",
+      "channel": 0,
+      "program": 33,
+      "velocity": 74,
+      "instrument_intent": "simple root-and-fifth electric bass supporting boom-chuck practice"
+    },
+    {
+      "name": "Keys",
+      "role": "keys",
+      "channel": 1,
+      "program": 4,
+      "velocity": 44,
+      "instrument_intent": "very light piano chord support; leave upper strings open for double-stops and bends"
+    }
+  ],
+  "variants": {
+    "tempo_bpm": [
+      72,
+      84,
+      100,
+      116
+    ],
+    "keys": [
+      "G",
+      "A",
+      "D"
+    ],
+    "density": [
+      "drums-bass",
+      "full"
+    ]
+  },
+  "provenance": {
+    "type": "original",
+    "notes": "Original I-IV-V country practice form using common functional harmony."
+  },
+  "outputs": {
+    "midi": "generated/backing-tracks/country-i-iv-v-g-100.mid",
+    "audio": null,
+    "daw_project": null
+  }
+}

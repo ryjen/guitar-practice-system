@@ -21,24 +21,37 @@ class MidiWorkflowTests(unittest.TestCase):
     def setUp(self) -> None:
         self.manifest = ROOT / "backing-tracks" / "slide-slow-blues" / "manifest.json"
 
-    def test_example_manifest_generates_valid_type_one_midi(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory) / "slide.mid"
-            midi_workflow.generate(self.manifest, output)
-            report = midi_workflow.validate_output(self.manifest, output)
+    def test_all_catalog_manifests_generate_valid_type_one_midi(self) -> None:
+        manifests = sorted((ROOT / "backing-tracks").glob("*/manifest.json"))
+        self.assertGreaterEqual(len(manifests), 5)
 
-        self.assertEqual(1, report["format"])
-        self.assertEqual(4, report["tracks"])
-        self.assertEqual(
-            ["Conductor", "Drums", "Bass", "Keys"], report["track_names"]
-        )
-        self.assertEqual(
-            ["COUNT-IN", "PRACTICE-A", "PRACTICE-B", "END"],
-            report["markers"],
-        )
-        self.assertEqual(1, report["tempo_events"])
-        self.assertEqual(1, report["meter_events"])
-        self.assertEqual(1, report["key_events"])
+        with tempfile.TemporaryDirectory() as directory:
+            output_dir = Path(directory)
+            for manifest_path in manifests:
+                with self.subTest(manifest=manifest_path.parent.name):
+                    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                    output = output_dir / f"{manifest['id']}.mid"
+                    midi_workflow.generate(manifest_path, output)
+                    report = midi_workflow.validate_output(manifest_path, output)
+
+                    expected_names = ["Conductor", *[track["name"] for track in manifest["tracks"]]]
+                    expected_markers = [
+                        "COUNT-IN",
+                        *[section["name"] for section in manifest["sections"]],
+                        "END",
+                    ]
+
+                    self.assertEqual(1, report["format"])
+                    self.assertEqual(len(expected_names), report["tracks"])
+                    self.assertEqual(expected_names, report["track_names"])
+                    self.assertEqual(expected_markers, report["markers"])
+                    self.assertEqual(1, report["tempo_events"])
+                    self.assertEqual(1, report["meter_events"])
+                    self.assertEqual(1, report["key_events"])
+                    self.assertEqual(
+                        f"generated/backing-tracks/{manifest['id']}.mid",
+                        manifest["outputs"]["midi"],
+                    )
 
     def test_rejects_duplicate_track_names(self) -> None:
         manifest = json.loads(self.manifest.read_text(encoding="utf-8"))

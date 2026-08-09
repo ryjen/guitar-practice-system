@@ -21,6 +21,7 @@ backing-tracks/
     README.md              # optional human notes
 scripts/
   midi_workflow.py
+  generate_backing_tracks.py
 generated/
   backing-tracks/
     <variant-id>.mid       # ignored unless deliberately promoted
@@ -59,6 +60,8 @@ A promoted output should include provenance and a reason it cannot be regenerate
 
 ## Generate and validate
 
+Generate and validate one asset:
+
 ```bash
 python scripts/midi_workflow.py generate \
   backing-tracks/slide-slow-blues/manifest.json \
@@ -69,13 +72,24 @@ python scripts/midi_workflow.py validate \
   generated/backing-tracks/slide-slow-blues-a-60.mid
 ```
 
-The command generates a Standard MIDI File Type 1 and immediately validates:
+Generate and validate the entire committed backing-track catalog:
+
+```bash
+python scripts/generate_backing_tracks.py
+```
+
+The catalog command discovers every `backing-tracks/*/manifest.json`, uses each manifest's canonical `outputs.midi` path, rejects repository-escape/output-name mismatches, regenerates the Type-1 MIDI, and validates it immediately.
+
+Validation checks:
 
 - file format and track count
 - separately named tracks
 - tempo, meter, and key-signature events
 - section markers
 - structural integrity of track chunks
+- manifest/output ID consistency for catalog generation
+
+Generated `.mid` files remain ignored build artifacts by default.
 
 ## MIDI conventions
 
@@ -89,13 +103,19 @@ The command generates a Standard MIDI File Type 1 and immediately validates:
 - Count-in: represented as an explicit marker and silent harmonic bar
 - Section boundaries: marker events on the conductor track
 
+## DAW assignment and routing
+
+See [backing-track-daw-routing.md](backing-track-daw-routing.md) for the intended instrument assignments, routing, guitar-space rules, and the explicit GarageBand/REAPER verification matrix.
+
+The routing document defines the target interpretation only. It does not mark DAW interoperability as verified until the generated files are imported into those applications.
+
 ## DAW import checklist
 
 After import:
 
 1. Confirm tempo, meter, key, and markers.
 2. Confirm tracks remain separately named.
-3. Assign suitable drum, bass, and keyboard instruments.
+3. Assign suitable drum, bass, keyboard, or pad instruments.
 4. Route each track independently.
 5. Confirm the count-in and section boundaries align to bars.
 6. Loop from the intended start marker to `END`.
@@ -104,16 +124,37 @@ After import:
 
 DAWs interpret some metadata differently. The portable contract is the MIDI file and manifest, not exact plugin patches, mixer state, or articulation maps.
 
-## Initial catalog
+## Current catalog
 
-| ID | Technique | Form | Status |
-|---|---|---|---|
-| `slide-slow-blues-a-60` | `slide-foundations` | Two 12-bar choruses | Implemented |
-| `wah-rhythmic-groove` | rhythmic wah | Short loop plus full form | Planned |
-| `ebow-ambient-bed` | E-Bow sustain and layering | Evolving modal bed | Planned |
-| `country-i-iv-v` | hybrid and country picking | Loop plus turnaround form | Planned |
-| `hard-rock-riff-bed` | muted rhythm articulation | Riff sections | Planned |
-| `melodic-ballad-bed` | lead phrasing | Verse/chorus form | Planned |
+| ID | Technique | Form | Source/generator status | DAW verification |
+|---|---|---|---|---|
+| `slide-slow-blues-a-60` | `slide-foundations` | Two 12-bar choruses | Implemented | Pending GarageBand + REAPER |
+| `ebow-ambient-bed-d-56` | E-Bow sustain and layering | `DRONE` + `LIFT`, 16 bars | Implemented | Pending GarageBand + REAPER |
+| `wah-rhythmic-groove-em-96` | rhythmic/expressive wah | `GROOVE-A` + `LEAD-B`, 16 bars | Implemented | Pending GarageBand + REAPER |
+| `country-i-iv-v-g-100` | hybrid/country picking | I-IV-V + turnaround, 16 bars | Implemented | Pending GarageBand + REAPER |
+| `country-rock-form-a-108` | country picking + rhythm/fill switching | 28-bar multi-section form | Implemented | Pending GarageBand + REAPER |
+| `hard-rock-riff-bed` | muted rhythm articulation | Riff sections | Planned | Not applicable yet |
+| `melodic-ballad-bed` | lead phrasing | Verse/chorus form | Planned | Not applicable yet |
+
+The first five manifests are also exercised as a catalog by `tests/test_midi_workflow.py`; adding another manifest automatically brings it under generation/metadata validation.
+
+## Practice intent
+
+### E-Bow ambient bed
+
+Keep long harmonic windows, restrained support parts, and upper-register space for activation, sustain, string changes, drones, and counter-melodies. Muting the drum track in the DAW is a valid diagnostic variant.
+
+### Wah rhythmic groove
+
+Prioritize an obvious stable pulse over arrangement complexity. The guitar owns subdivision detail; supporting instruments should not compete with busy sixteenth-note figures.
+
+### Country I-IV-V
+
+Use this as the cleaner diagnostic context for alternating bass, hybrid picking, string separation, double-stops, chord-tone targeting, and bend intonation.
+
+### Country-rock form
+
+The named `RHYTHM-A`, `FILL-B`, `RHYTHM-C`, and `TURNAROUND` sections make role switching explicit. The goal is to stop continuous fill-playing and practice leaving arrangement space while moving deliberately between accompaniment and short lead vocabulary.
 
 ## Trade-offs
 
