@@ -3,19 +3,27 @@ name: Validate Pages Frontend
 on:
   pull_request:
     paths:
+      - "catalogs/practice-cockpit.json"
       - "docs/index.html"
       - "docs/assets/**"
+      - "docs/data/**"
       - "docs/.nojekyll"
+      - "scripts/export_practice_cockpit.py"
       - "tests/test_pages_frontend.py"
+      - "tests/test_practice_cockpit_export.py"
       - ".github/workflows/validate-pages.yml"
   push:
     branches:
       - main
     paths:
+      - "catalogs/practice-cockpit.json"
       - "docs/index.html"
       - "docs/assets/**"
+      - "docs/data/**"
       - "docs/.nojekyll"
+      - "scripts/export_practice_cockpit.py"
       - "tests/test_pages_frontend.py"
+      - "tests/test_practice_cockpit_export.py"
       - ".github/workflows/validate-pages.yml"
 
 permissions:
@@ -37,7 +45,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Validate cockpit export is current
+        run: python scripts/export_practice_cockpit.py --check
       - name: Run frontend contract tests
         run: python -m unittest discover -s tests -p "test_pages_frontend.py" -v
+      - name: Run cockpit export tests
+        run: python -m unittest discover -s tests -p "test_practice_cockpit_export.py" -v
       - name: Check JavaScript syntax
         run: node --check docs/assets/app.js
