@@ -28,6 +28,7 @@ class SchedulingCoreTests(unittest.TestCase):
         self.assertEqual("slide-foundations", result["selected"][0]["target_id"])
         self.assertTrue(result["selected"][0]["maintenance_due"])
         self.assertTrue(result["selected"][0]["catch_up"])
+        self.assertEqual("pending", result["approval_status"])
         self.assertTrue(result["requires_approval"])
 
     def test_replay_is_deterministic(self) -> None:
@@ -71,6 +72,24 @@ class SchedulingCoreTests(unittest.TestCase):
         self.assertIn("active-capacity-full", row["reasons"])
         due = next(item for item in result["projection"] if item["target_id"] == "slide-foundations")
         self.assertTrue(due["eligible"])
+
+    def test_selection_cannot_overrun_remaining_active_slot(self) -> None:
+        snapshot = self.clone()
+        snapshot["constraints"]["max_active_items"] = 3
+        extra = json.loads(json.dumps(next(item for item in snapshot["items"] if item["id"] == "slide-open-tuning")))
+        extra["id"] = "new-technique-two"
+        extra["priority"] = 4
+        extra["dependencies"] = []
+        snapshot["items"].append(extra)
+        result = scheduling.propose(snapshot)
+        new_work = [item for item in result["selected"] if item["starts_new_active_work"]]
+        self.assertLessEqual(len(new_work), 1)
+
+    def test_existing_over_capacity_state_is_reported_as_conflict(self) -> None:
+        snapshot = self.clone()
+        snapshot["constraints"]["max_active_items"] = 1
+        result = scheduling.propose(snapshot)
+        self.assertEqual(["active-items-exceed-capacity:2>1"], result["conflicts"])
 
     def test_high_load_uses_explicit_longer_recovery(self) -> None:
         snapshot = self.clone()
@@ -116,6 +135,25 @@ class SchedulingCoreTests(unittest.TestCase):
         self.assertFalse(row["eligible"])
         self.assertIn("recovery-window", row["reasons"])
 
+    def test_weekly_goal_projection_counts_completed_sessions(self) -> None:
+        result = scheduling.propose(self.snapshot)
+        goal = result["goal_projection"][0]
+        self.assertEqual("goal-slide", goal["goal_id"])
+        self.assertEqual(0, goal["completed_sessions"])
+        self.assertEqual(2, goal["remaining_sessions"])
+        snapshot = self.clone()
+        snapshot["history"].append({"type": "completed", "target_id": "slide-foundations", "date": "2026-08-08", "minutes": 30})
+        goal = scheduling.propose(snapshot)["goal_projection"][0]
+        self.assertEqual(1, goal["completed_sessions"])
+
+    def test_monthly_goal_projection_is_supported(self) -> None:
+        snapshot = self.clone()
+        snapshot["goals"][0]["period"] = "monthly"
+        snapshot["goals"][0]["target_sessions"] = 1
+        snapshot["history"].append({"type": "completed", "target_id": "slide-foundations", "date": "2026-08-02", "minutes": 30})
+        goal = scheduling.propose(snapshot)["goal_projection"][0]
+        self.assertTrue(goal["complete"])
+
     def test_application_status_detects_stale_and_idempotent(self) -> None:
         proposal = scheduling.propose(self.snapshot)
         self.assertEqual("applicable", scheduling.application_status(proposal, self.snapshot["snapshot_version"]))
@@ -131,6 +169,12 @@ class SchedulingCoreTests(unittest.TestCase):
     def test_unknown_dependency_is_rejected(self) -> None:
         snapshot = self.clone()
         snapshot["items"][0]["dependencies"] = [{"target_id": "missing", "required_states": ["maintained"]}]
+        with self.assertRaises(scheduling.SchedulingError):
+            scheduling.propose(snapshot)
+
+    def test_unknown_goal_target_is_rejected(self) -> None:
+        snapshot = self.clone()
+        snapshot["goals"][0]["target_id"] = "missing"
         with self.assertRaises(scheduling.SchedulingError):
             scheduling.propose(snapshot)
 
