@@ -14,6 +14,7 @@ on:
       - "tests/test_evidence_feedback*.py"
       - "tests/test_assessment_core.py"
       - ".github/workflows/validate-evidence.yml"
+      - ".github/workflows/validate-scheduling.yml"
   push:
     branches:
       - main
@@ -29,6 +30,7 @@ on:
       - "tests/test_evidence_feedback*.py"
       - "tests/test_assessment_core.py"
       - ".github/workflows/validate-evidence.yml"
+      - ".github/workflows/validate-scheduling.yml"
 
 permissions:
   contents: read
