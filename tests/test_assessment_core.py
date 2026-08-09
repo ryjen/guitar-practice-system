@@ -49,6 +49,15 @@ class AssessmentCoreTests(unittest.TestCase):
         self.assertEqual("unknown", gate["outcome"])
         self.assertFalse(result["transition_valid"])
 
+    def test_explicit_failed_observation_is_fail(self) -> None:
+        request = json.loads(json.dumps(self.request))
+        for item in request["evidence"]:
+            item["observations"]["timing_gate"] = "fail"
+        result = assessment.assess(request, self.gates)
+        gate = next(item for item in result["gate_results"] if item["gate_id"] == "timing-explicit")
+        self.assertEqual("fail", gate["outcome"])
+        self.assertFalse(result["transition_valid"])
+
     def test_explicit_stop_condition_blocks_transition(self) -> None:
         request = json.loads(json.dumps(self.request))
         request["evidence"][-1]["observations"]["physical_stop"] = True
@@ -78,6 +87,27 @@ class AssessmentCoreTests(unittest.TestCase):
         result = assessment.assess(request, self.gates)
         self.assertFalse(result["transition_valid"])
         self.assertEqual(["slide-context-1"], result["conflicting_evidence_ids"])
+
+    def test_partial_regression_can_target_only_isolation_state(self) -> None:
+        request = json.loads(json.dumps(self.request))
+        request["current_state"] = "reliable-context"
+        request["proposed_state"] = "reliable-isolation"
+        result = assessment.assess(request, self.gates)
+        context_gate = next(item for item in result["gate_results"] if item["gate_id"] == "musical-context-transfer")
+        self.assertEqual("not-applicable", context_gate["outcome"])
+        self.assertTrue(result["transition_valid"])
+        self.assertEqual("reliable-isolation", result["proposed_state"])
+
+    def test_failed_maintenance_can_propose_regression_without_mutating(self) -> None:
+        request = json.loads(json.dumps(self.request))
+        request["current_state"] = "maintained"
+        request["proposed_state"] = "reliable-context"
+        for item in request["evidence"]:
+            item["observations"]["timing_gate"] = "fail"
+        result = assessment.assess(request, self.gates)
+        self.assertFalse(result["transition_valid"])
+        self.assertIsNone(result["proposed_state"])
+        self.assertTrue(result["requires_approval"])
 
     def test_invalid_transition_is_rejected(self) -> None:
         request = dict(self.request)
