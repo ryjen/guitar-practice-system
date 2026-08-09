@@ -1,0 +1,74 @@
+{
+  "record_type": "schedule-snapshot",
+  "contract_version": "scheduling/v2",
+  "snapshot_id": "snapshot-v2-example",
+  "state_revision": 20,
+  "ruleset_version": "scheduling-rules-v2",
+  "generated_at": "2026-08-08T18:00:00-07:00",
+  "effective_date": "2026-08-08",
+  "timezone": "America/Vancouver",
+  "goals": [
+    {
+      "goal_id": "goal-technique-development",
+      "priority": 1,
+      "status": "active",
+      "target_item_ids": ["slide-foundations"]
+    }
+  ],
+  "active_work": [
+    {
+      "item_id": "slide-foundations",
+      "goal_id": "goal-technique-development",
+      "priority": 1,
+      "target_minutes": 20,
+      "min_recovery_hours": 24,
+      "missed": false
+    }
+  ],
+  "maintenance_rules": [
+    {
+      "item_id": "ebow-foundations",
+      "interval_days": 7,
+      "priority": 1,
+      "target_minutes": 10,
+      "min_recovery_hours": 0
+    }
+  ],
+  "dependencies": [],
+  "progression": [
+    {
+      "item_id": "slide-foundations",
+      "state": "developing",
+      "state_revision": "slide-foundations:4",
+      "supporting_assessment_proposal_ids": [],
+      "last_meaningful_practice_date": "2026-08-07",
+      "last_practiced_at": "2026-08-07T16:00:00-07:00",
+      "weekly_count": 1,
+      "plateau_observation_ids": []
+    },
+    {
+      "item_id": "ebow-foundations",
+      "state": "maintained",
+      "state_revision": "ebow-foundations:8",
+      "supporting_assessment_proposal_ids": ["assessment-ebow-maintained-1"],
+      "last_meaningful_practice_date": "2026-07-30",
+      "last_verification_date": "2026-07-30",
+      "weekly_count": 0,
+      "plateau_observation_ids": []
+    }
+  ],
+  "constraints": {
+    "session_minutes": 30,
+    "minimum_block_minutes": 5,
+    "max_active_items": 2,
+    "self_reported_load": "normal",
+    "high_load_max_minutes": 20,
+    "weekly_budget": {
+      "max_sessions": 5,
+      "completed_sessions": 1,
+      "max_minutes": 180,
+      "completed_minutes": 30,
+      "max_same_target": 3
+    }
+  }
+}
