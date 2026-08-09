@@ -2,9 +2,9 @@
 
 ## Purpose
 
-The scheduling contract turns an explicit, versioned practice-state snapshot into a reproducible schedule proposal. It does not mutate canonical state and it does not reinterpret evidence.
+The scheduling contract turns an explicit, versioned practice-state snapshot into reproducible schedule and long-term progression projections. It does not mutate canonical state and it does not reinterpret evidence.
 
-The same snapshot, state revision, ruleset version, clock value, and timezone must produce the same proposal.
+The same snapshot, state revision, ruleset version, clock value, and timezone must produce the same outputs.
 
 ## Contract
 
@@ -12,41 +12,36 @@ The v1 exchange schema is:
 
 - [`contracts/scheduling/v1/scheduling.schema.json`](../../contracts/scheduling/v1/scheduling.schema.json)
 
-It defines five record families:
+It defines six record families:
 
 1. `schedule-snapshot`
 2. `schedule-proposal`
-3. `schedule-approval`
-4. `completion-record`
-5. `schedule-event`
+3. `progression-projection`
+4. `schedule-approval`
+5. `completion-record`
+6. `schedule-event`
 
-The reference implementation is [`scripts/scheduling.py`](../../scripts/scheduling.py).
+Reference implementations:
+
+- [`scripts/scheduling.py`](../../scripts/scheduling.py) — schedule selection and stale-approval checks
+- [`scripts/scheduling_projection.py`](../../scripts/scheduling_projection.py) — approved long-term state and goal projection
 
 ## Snapshot semantics
 
-A scheduling snapshot is immutable input for one proposal attempt. It carries:
+A scheduling snapshot is immutable input. It carries snapshot/state/ruleset identity, generated timestamp, effective local date and IANA timezone, session limits, active-work capacity, explicit self-reported load, weekly budgets, current work items, prerequisites, and optional practice goals.
 
-- `snapshot_id`
-- canonical `state_revision`
-- `ruleset_version`
-- generated timestamp
-- effective local date and IANA timezone
-- session duration and minimum block duration
-- active-work capacity
-- explicit self-reported load state
-- weekly session/minute/repetition budgets
-- current work items and prerequisite relationships
+A work item records only supplied facts. The v1 contract supports:
 
-A work item records only supplied scheduling facts:
-
-- lifecycle state
-- explicit priority
-- target minutes
-- prerequisite state requirements
+- lifecycle state and explicit priority
+- optional musical dimension
+- optional approved assessment-transition proposal reference
+- target and maintenance realizations, including timing/metronome references
 - maintenance interval and last verification date
 - last-practiced timestamp and minimum recovery window
-- current weekly repetition count
-- explicit missed-session flag
+- weekly repetition count and explicit missed-session flag
+- explicit plateau observation without assigning a cause
+
+These additional fields are projection metadata only; they do not alter the deterministic schedule ranking rules.
 
 ## Lifecycle states
 
@@ -61,18 +56,14 @@ Changing lifecycle state is a separate approved state mutation. Proposal generat
 
 ## Deterministic ordering
 
-Eligible work is sorted by this explicit tier order:
+Eligible work is sorted by:
 
 1. due maintenance
 2. explicitly missed work
 3. active work
 4. candidate work
 
-Within due maintenance, more-overdue work sorts first, then explicit priority, then item ID.
-
-Within all other tiers, lower numeric priority sorts first, then item ID.
-
-There is no hidden score.
+Within due maintenance, more-overdue work sorts first, then explicit priority, then item ID. Within all other tiers, lower numeric priority sorts first, then item ID. There is no hidden score.
 
 ## Maintenance due state
 
@@ -82,135 +73,77 @@ When a maintenance interval is present:
 next_due_date = last_verified_date + maintenance_interval_days
 ```
 
-- If no prior verification date exists, maintenance is due.
-- If the effective date is before `next_due_date`, maintenance is not due.
-- On or after `next_due_date`, maintenance is due and `overdue_days` is explicit.
-- An item already in `maintenance` without an interval is treated as explicitly due.
+If no prior verification date exists, maintenance is due. Before the due date it is not due; on or after the date it is due with explicit `overdue_days`. An item already in `maintenance` without an interval is explicitly due.
 
-## Prerequisites
+## Prerequisites and active capacity
 
-Each prerequisite names another work item plus the exact states that satisfy the relationship.
+Each prerequisite names another work item plus exact states satisfying the relationship. An item is blocked when any prerequisite is unsatisfied. Dependencies are evaluated from the supplied snapshot only; a proposal cannot unlock its own prerequisites.
 
-An item is excluded with `prerequisite-blocked` when any prerequisite is not currently in one of its declared satisfying states.
+The snapshot cannot contain more active items than `max_active_items`. Candidate selection consumes only proposal-local remaining capacity and does not mutate canonical lifecycle state.
 
-Dependencies are evaluated from the supplied snapshot only. A schedule proposal cannot unlock its own prerequisites.
+## Recovery, load, missed work, and weekly budgets
 
-## Active-work capacity
+Each work item may specify `min_recovery_hours` and `last_practiced_at`. Under explicit high load, v1 doubles the supplied recovery window and caps proposal duration at `high_load_max_minutes`. This is a constraint, not an inferred readiness judgment.
 
-The snapshot must not contain more `active` items than `max_active_items`.
+`missed: true` moves otherwise eligible work ahead of ordinary active priority without bypassing prerequisites, recovery, repetition caps, weekly budget, or capacity.
 
-Candidate proposals use only the remaining capacity:
+Weekly budget fields cover maximum/completed sessions, maximum/completed minutes, and per-target repetition caps. Exhausted budgets produce a deterministic no-op or exclusion reason.
 
-```text
-candidate_slots = max_active_items - active_item_count
-```
+## Schedule proposal semantics
 
-Selecting a candidate in a proposal consumes a proposal-local slot, but does not change canonical lifecycle state.
+A proposal contains stable input identity, expiry, selected and excluded work with reason codes, conflicts, and `requires_approval: true`. Proposal IDs are hashes of canonical inputs and results. Replaying the same snapshot produces the same record.
 
-## Recovery and load
-
-Each work item may specify `min_recovery_hours` and `last_practiced_at`.
-
-Under normal load, the configured recovery window is used directly. Under explicit `self_reported_load: high`, the reference ruleset doubles the recovery window and caps the proposed session duration at `high_load_max_minutes`.
-
-This is a scheduling constraint, not a diagnosis or inferred readiness judgment.
-
-## Missed-session recovery
-
-`missed: true` places otherwise eligible work ahead of ordinary active priority. All other constraints still apply:
-
-- prerequisites
-- recovery
-- repetition caps
-- weekly budget
-- active capacity
-
-Missed work does not bypass safety or capacity rules.
-
-## Weekly budgets
-
-The v1 snapshot carries:
-
-- maximum sessions
-- completed sessions
-- maximum minutes
-- completed minutes
-- maximum repetitions of the same target
-
-When the session or minute budget is exhausted, the proposal is `no-op` with an explicit conflict reason.
-
-A target at its weekly repetition cap is excluded before ranking.
-
-## Proposal semantics
-
-A proposal contains:
-
-- stable deterministic `proposal_id`
-- input snapshot/state/ruleset identity
-- effective date and expiry date
-- selected work with allocated minutes and reason codes
-- excluded work with reason codes
-- conflicts
-- `requires_approval: true`
-
-Proposal IDs are hashes of canonical proposal inputs and results. Generating a proposal twice from the same snapshot produces the same record.
-
-A proposal with no selected work has `status: no-op`.
-
-## Approval and stale-state checks
-
-Approval is a separate command boundary.
-
-Before approval, compare the proposal with current canonical scheduling state. The reference `check-approval` operation rejects a proposal when any of these change:
-
-- snapshot identity
-- state revision
-- ruleset version
-- effective date
-
-A no-op proposal cannot be approved as practice work.
-
-Example:
+Approval is separate. `check-approval` rejects changed snapshot identity, state revision, ruleset version, effective date, or a no-op proposal.
 
 ```bash
 python scripts/scheduling.py propose examples/scheduling/example-snapshot.json > /tmp/proposal.json
 python scripts/scheduling.py check-approval /tmp/proposal.json examples/scheduling/example-snapshot.json
 ```
 
+## Long-term progression projection
+
+`progression-projection` is deliberately separate from schedule selection. It exposes the current approved scheduling view without changing ranking behavior.
+
+Each item projection includes:
+
+- lifecycle state and optional dimension
+- optional approved assessment-transition proposal reference
+- due state and overdue days
+- blocked, paused, retired, and missed status
+- explicit plateau observation
+- target and maintenance realizations
+
+This allows a regression or plateau in one dimension to be represented without erasing unrelated state elsewhere in the system.
+
+Generate it with:
+
+```bash
+python scripts/scheduling_projection.py examples/scheduling/projection-snapshot.json
+```
+
+## Weekly and monthly goals
+
+Optional goals belong to the snapshot and are explicit counters, not inferred behavior. A goal includes target item, `weekly` or `monthly` period, target sessions, and completed sessions for the caller-defined current period.
+
+The projection reports remaining sessions and completion state. Goals are reporting/progression metadata in v1 and do **not** introduce hidden ranking weight into schedule selection.
+
 ## Completion and events
 
-The exchange schema includes implementation-neutral records for:
-
-- approved proposal identity
-- actual completion time and completed item IDs
-- session completion or missed-session events
-- pause/resume events
-
-Completion records describe what happened; they do not directly assert assessment outcomes or progression transitions.
+The exchange schema includes implementation-neutral records for approvals, actual completion, session completion/missed events, and pause/resume events. Completion records describe what happened; they do not assert assessment outcomes.
 
 ## Assessment boundary
 
-Scheduling consumes approved progression/evidence state. It does not evaluate quality gates, reinterpret recordings, or decide promotion/regression from evidence.
-
-Assessment owns those decisions and supplies approved state back into later scheduling snapshots.
+Scheduling consumes approved progression/evidence state. It does not evaluate quality gates, reinterpret recordings, diagnose causes, or decide promotion/regression. Assessment owns those decisions and supplies approved state into later scheduling snapshots.
 
 ## Time and replay
 
-- Domain behavior uses the supplied `generated_at` value rather than ambient current time.
+- Domain behavior uses supplied `generated_at`, not ambient current time.
 - `effective_date` must match `generated_at` in the declared IANA timezone.
 - Replay uses the same snapshot, ruleset version, and supplied clock.
 - Proposal expiry is the effective local date in v1.
 
 ## Fixtures
 
-[`examples/scheduling/fixtures.json`](../../examples/scheduling/fixtures.json) covers:
+[`examples/scheduling/fixtures.json`](../../examples/scheduling/fixtures.json) covers normal work, maintenance, blocked/unlocked dependencies, missed sessions, pause/resume, and exhausted budgets.
 
-- normal active work
-- maintenance due state
-- blocked prerequisites
-- dependency unlocking
-- missed-session recovery
-- pause and resume
-- weekly budget exhaustion
-
-The tests also cover stale proposals, recovery windows, load caps, repetition caps, active capacity, and timezone validation.
+[`examples/scheduling/projection-snapshot.json`](../../examples/scheduling/projection-snapshot.json) covers dimension/provenance metadata, realizations, plateau state, blocked work, and weekly/monthly goals.
