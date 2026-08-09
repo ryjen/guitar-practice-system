@@ -135,6 +135,13 @@ class SchedulingCoreTests(unittest.TestCase):
         self.assertFalse(row["eligible"])
         self.assertIn("recovery-window", row["reasons"])
 
+    def test_later_completion_resolves_missed_session_catch_up(self) -> None:
+        snapshot = self.clone()
+        snapshot["history"].append({"type": "completed", "target_id": "slide-foundations", "date": "2026-08-08", "minutes": 30})
+        result = scheduling.propose(snapshot)
+        row = next(item for item in result["projection"] if item["target_id"] == "slide-foundations")
+        self.assertFalse(row["catch_up"])
+
     def test_weekly_goal_projection_counts_completed_sessions(self) -> None:
         result = scheduling.propose(self.snapshot)
         goal = result["goal_projection"][0]
