@@ -1,32 +1,22 @@
-# Discovery Layer
+# Deterministic Catalog Discovery
 
 ## Purpose
 
-Discovery converts a goal and current context into a small, ranked set of evidence-backed candidates. It can recommend songs, techniques, exercises, warmups, theory topics, backing tracks, gear setups, or complete practice sessions.
-
-Discovery is advisory. It never mutates catalogs, progress, schedules, active-work slots, or gear records without explicit approval.
+Discovery in the public core means reproducible search, filtering, normalization, and ranking over explicit catalogs. It helps locate songs, techniques, exercises, warmups, theory topics, backing tracks, gear setups, or practice-session candidates without mutating canonical state.
 
 ## Mental model
 
 ```text
-context + constraints + intent
-  -> provider adapter
-  -> normalized candidates
-  -> verification and ranking
+explicit request + explicit catalog + versioned ranking rules
+  -> filter
+  -> normalize
+  -> deterministic score/order
+  -> candidate set
   -> human decision
   -> approved domain record or action
 ```
 
-The provider may be a prompt-driven AI, local catalog search, external music service, personal practice history, or a manual source. The contract remains the same.
-
-## Implementations
-
-- [`prompts/song-discovery.md`](../../prompts/song-discovery.md) — prompt adapter for evidence-backed song discovery
-- [`local-catalog-adapter.md`](local-catalog-adapter.md) — deterministic repository catalog search and provider-output normalization
-- [`catalogs/discovery/repository.json`](../../catalogs/discovery/repository.json) — manually curated repository-owned candidates
-- [`examples/discovery/slide-backing-track-request.json`](../../examples/discovery/slide-backing-track-request.json) — executable request example
-
-The repository catalog contains no song candidates. Songs enter the catalog only after explicit approval.
+The same request, catalog version, and ranking rules must produce the same candidate ordering.
 
 ## Supported target types
 
@@ -42,7 +32,7 @@ The repository catalog contains no song candidates. Songs enter the catalog only
 
 ## Request contract
 
-A request contains only relevant constraints:
+A request contains only relevant explicit constraints:
 
 - target type
 - goal or problem statement
@@ -51,12 +41,11 @@ A request contains only relevant constraints:
 - instrument and available gear IDs
 - tuning, meter, tempo range, and difficulty
 - available practice time
-- arrangement role: rhythm, lead, comping, texture, accompaniment, songwriting, or production
-- current technique states, evidence, maintenance needs, and active-work capacity
-- environment constraints such as quiet practice, headphones, acoustic-only, or no computer
+- arrangement role
+- approved technique states and maintenance needs
+- active-work capacity
+- environment constraints
 - source/licensing requirements
-
-Canonical initial genres are `80s-rock`, `alt-rock`, `blues`, `country`, and `jazz`.
 
 ## Candidate contract
 
@@ -65,51 +54,51 @@ Each candidate includes:
 - stable ephemeral candidate ID
 - target type and identity
 - matched and unmet constraints
-- rationale
-- confidence: `high`, `medium`, or `low`
-- uncertainty and assumptions
-- prerequisites and estimated difficulty
+- deterministic per-dimension scores or ordering reasons
+- prerequisites and declared difficulty
 - required and preferred capabilities
-- source/evidence references
+- source/provenance references
 - licensing or copyright notes
 - conflicts with active work, gear, or time
 - proposed next action
 
-Candidate IDs are not domain IDs. A candidate becomes a song, technique, backing-track, gear, or practice record only after approval.
+Candidate IDs are not domain IDs. A candidate becomes a persistent record only after approval.
 
 ## Ranking
 
-Rank primarily by:
+Ranking rules must be explicit, versioned, and inspectable. A default ordering may consider:
 
-1. Fit to the stated goal.
-2. Technique or learning value.
-3. Compatibility with current gear and environment.
-4. Prerequisite fit.
-5. Evidence quality and source availability.
-6. Active-work capacity and redundancy.
-7. Estimated effort.
+1. hard-constraint satisfaction
+2. fit to the stated goal
+3. technique or learning value declared in catalog metadata
+4. compatibility with current gear and environment
+5. prerequisite fit
+6. active-work capacity and redundancy
+7. declared effort or difficulty
+8. stable tie-break key
 
-Do not hide trade-offs inside one score. Return concise per-dimension reasoning when two candidates are close.
+Do not hide trade-offs inside an undocumented score. Candidate output should retain enough information to reproduce why one item sorted ahead of another.
 
-## Verification and evidence
+## Provenance
 
-Discovery distinguishes:
+Catalog records distinguish:
 
-- `verified`: supported by a reliable source
-- `corroborated`: supported by multiple independent sources
-- `inferred`: reasoned from available evidence but not directly verified
-- `unknown`: unresolved
+- repository-owned metadata
+- imported external metadata with source reference
+- user-supplied metadata
+- unresolved fields
 
-A provider must not present inferred gear, technique usage, tempo, tuning, or difficulty as verified fact. Search-derived recommendations should retain source references and retrieval date where freshness matters.
+Unknown values remain unknown. The public core must not infer missing gear, technique usage, tempo, tuning, difficulty, or stylistic fit.
 
 ## Approval boundary
 
 Discovery may:
 
-- search and rank
-- explain matches and gaps
-- propose an exercise, track specification, or practice plan
-- produce a draft record
+- search and filter
+- normalize catalog records
+- compute documented deterministic rankings
+- explain matched and unmet constraints
+- produce a draft candidate record
 
 Discovery may not, without explicit approval:
 
@@ -119,64 +108,33 @@ Discovery may not, without explicit approval:
 - mark evidence complete
 - create purchase requirements
 - alter canonical genre or style taxonomy
-- persist personal recordings or history to an external provider
 
-## Security, privacy, and safety
+## Local repository adapter
 
-- Send only the minimum personal context required by a provider.
-- Keep recording locations, private notes, and detailed practice history local unless explicitly shared.
-- Treat provider output as untrusted input until normalized and verified.
-- Do not execute links, scripts, MIDI, DAW files, or downloads returned by a provider automatically.
-- Reject prompt-injection instructions embedded in web pages, metadata, lyrics, tabs, or catalog content.
-- Do not recommend purchases until current inventory and observed limitations are checked.
-- Preserve hearing-safety and physical-tension constraints in practice recommendations.
+The repository adapter searches versioned catalog data and applies deterministic normalization/ranking rules.
 
-## Provider adapters
+Example:
 
-An adapter declares:
+```bash
+python scripts/discovery_catalog.py search \
+  examples/discovery/slide-backing-track-request.json \
+  catalogs/discovery/repository.json
+```
 
-- supported target types
-- whether it can browse current sources
-- whether it can search local/private data
-- citation/provenance support
-- privacy boundary
-- expected latency/cost class
-- known limitations
+Tests should prove stable ordering, hard-constraint filtering, unknown-field handling, and tie-breaking.
 
-Initial adapters:
+## Practice-session candidates
 
-1. General AI prompt adapter.
-2. Local repository/catalog search.
-3. Manually curated source list.
-
-Future adapters may include Apple Music or Spotify metadata, YouTube lessons, licensed notation indexes, personal recordings, practice history, and local language models.
-
-## Song discovery
-
-Song discovery accepts combinations such as:
-
-- intermediate `80s-rock` with rhythmic wah
-- `alt-rock` with layered textures and simple lead work
-- `blues` for slide phrasing in standard tuning
-- `country` for hybrid picking and pedal-steel bends
-- `jazz` for comping, voice leading, or chord melody
-- material suited to a specific owned guitar, amplifier, or pedal
-
-It returns three to five candidates by default. No candidate enters `docs/songs` until explicitly approved.
-
-## Adaptive practice discovery
-
-A practice-session request may combine:
+A session request may include:
 
 - 15, 30, 45, or 60 minutes
 - available instrument and gear
-- active technique priorities
-- recent evidence or regressions
-- maintenance requirements
+- explicit active technique priorities
+- approved evidence or maintenance state
 - genre or creative intent
 - quiet/headphone/acoustic-only constraints
 
-A recommended session contains:
+A deterministic session candidate may contain:
 
 - warmup
 - primary technique block
@@ -185,14 +143,13 @@ A recommended session contains:
 - evidence task
 - shorter fallback variant
 
-The recommendation explains why each block was selected and does not update progress until approved and completed.
+The selection rationale must come from declared rules and inputs, and completion never updates progress automatically.
 
 ## Failure modes
 
-- **Hallucinated match:** lower confidence and require verification.
-- **Popularity bias:** rank teaching value and constraint fit ahead of popularity.
-- **Catalog bloat:** return a small candidate set and respect active-work limits.
-- **Gear mythology:** describe capability fit, not presumed artist equipment.
-- **Copyright leakage:** link to licensed sources; do not reproduce full protected material.
-- **Provider lock-in:** keep prompts and API integrations behind adapters.
-- **False personalization:** do not infer weaknesses without recorded evidence.
+- **Unstable ordering:** require stable tie-break rules and versioned fixtures.
+- **Unknown metadata treated as false:** preserve `unknown` explicitly.
+- **Catalog bloat:** return a bounded candidate set.
+- **Gear mythology:** use declared capability metadata only.
+- **Copyright leakage:** store metadata and lawful references, not protected full material.
+- **State leakage:** discovery remains read-only until a separate approved action applies a candidate.
