@@ -2,39 +2,37 @@
 
 ## Purpose
 
-The guitar practice system helps a player convert goals into repeatable practice, capture what happened, and review progress over time. It should support structured learning without making practice feel like data entry.
+The guitar practice system helps a player convert explicit goals into repeatable practice, capture what happened, evaluate evidence against declared gates, and plan future work without hiding decisions inside opaque automation.
 
-The first architecture decision is to model the practice workflow before selecting an app stack.
+The architecture models the practice workflow before selecting an app stack.
 
 ## System model
 
 ```mermaid
 flowchart LR
-    Goals[Goals] --> Planner[Practice Planner]
+    Goals[Goals] --> Planner[Deterministic Planner]
     Repertoire[Repertoire] --> Planner
     Exercises[Exercise Library] --> Planner
-    History[Practice History] --> Planner
+    State[Approved Progress State] --> Planner
 
-    Planner --> Plan[Session Plan]
-    Plan --> Practice[Practice Session]
-    Practice --> Log[Session Log]
-    Log --> History
-    History --> Review[Progress Review]
-    Review --> Goals
-
-    AI[AI Assistance] --> Planner
-    AI --> Exercises
-    Review --> AI
+    Planner --> Plan[Session Proposal]
+    Plan --> Approval[Approval]
+    Approval --> Practice[Practice Session]
+    Practice --> Evidence[Evidence / observations]
+    Evidence --> Assessment[Gate Evaluation]
+    Assessment --> Transition[Transition Proposal]
+    Transition --> State
 ```
 
-The loop is the product:
+The loop is:
 
-1. Define goals
-2. Plan practice
+1. Define goals and constraints
+2. Produce or choose a valid plan
 3. Practice
-4. Log useful evidence
-5. Review progress
-6. Adjust the next plan
+4. Capture useful evidence
+5. Evaluate explicit gates
+6. Approve state changes
+7. Recalculate due work
 
 ## Core concepts
 
@@ -44,82 +42,50 @@ A bounded unit of work. It may include warmups, drills, song sections, creative 
 
 Suggested fields:
 
-- Date/time
-- Duration
-- Focus areas
-- Exercises attempted
-- Songs or sections practiced
-- Tempo ranges
-- Notes
-- Friction points
-- Confidence or self-rating
-- Optional recording references
+- date/time and timezone
+- duration
+- focus areas
+- exercises attempted
+- songs or sections practiced
+- timing realization
+- notes and explicit observations
+- optional recording references
 
 ### Exercise
 
-A reusable activity intended to improve a specific skill.
-
-Examples:
-
-- Wah timing over sixteenth-note funk rhythm
-- Bend intonation drill
-- Chord transition loop
-- Muting and dynamics drill
-- Alternate picking sequence
-- Ear-training interval drill
+A reusable activity intended to improve a specific skill. Exercises include purpose, procedure, relevant constraints, stop conditions, and quality gates.
 
 ### Song / repertoire item
 
-A piece of music the player wants to learn, maintain, or reference.
-
-Suggested fields:
-
-- Title
-- Artist
-- Key
-- Tuning
-- Capo
-- Sections
-- Difficulty
-- Target tempo
-- Current status
-- Notes
-- External references
+A piece of music the player wants to learn, maintain, or reference. Sections may progress independently and should link to external lawful references rather than copied protected material.
 
 ### Practice plan
 
 A proposed set of activities for a time box.
 
-Inputs:
+Inputs may include:
 
-- Available time
-- Current goals
-- Recent practice history
-- Weak areas
-- Upcoming deadlines or songs
-- Desired style or mood
+- available time
+- explicit goals and priorities
+- approved progress state
+- maintenance due state
+- prerequisites
+- environment and gear constraints
+- recovery/load constraints supplied by the player
 
-Outputs:
+Outputs include:
 
-- Ordered activities
-- Time allocation
-- Target tempo or difficulty
-- Review prompt
-- Optional generated exercises
+- ordered activities
+- time allocation
+- timing realization
+- deterministic selection/exclusion reasons
+- conflicts or unresolved choices
+- evidence task
+- proposal version and stale-state semantics
 
-### Progress review
+### Assessment
 
-A periodic synthesis of logs and outcomes.
-
-Review should include both quantitative and qualitative signals:
-
-- Total time by focus area
-- Songs moved forward
-- Stale repertoire
-- Tempo gains
-- Repeated friction points
-- Technique confidence
-- Notes worth promoting into future plans
+Assessment evaluates supplied observations and evidence against explicit, versioned gates. It produces pass/fail/unknown/blocked/not-applicable results and may propose a progression transition. It does not infer missing observations.
 
 ## Data model sketch
 
@@ -127,190 +93,83 @@ Review should include both quantitative and qualitative signals:
 erDiagram
     PRACTICE_SESSION ||--o{ SESSION_ITEM : contains
     SESSION_ITEM }o--|| EXERCISE : references
-    SESSION_ITEM }o--|| SONG : references
-    SONG ||--o{ SONG_SECTION : has
-    PRACTICE_SESSION ||--o{ OBSERVATION : records
-    REVIEW ||--o{ OBSERVATION : summarizes
-    GOAL ||--o{ PRACTICE_PLAN : informs
-    PRACTICE_PLAN ||--o{ PLAN_ITEM : contains
-    PLAN_ITEM }o--|| EXERCISE : schedules
-    PLAN_ITEM }o--|| SONG_SECTION : targets
-
-    PRACTICE_SESSION {
-        string id
-        date practiced_at
-        int duration_minutes
-        string mood
-        string notes
-    }
-
-    SESSION_ITEM {
-        string id
-        string type
-        int duration_minutes
-        int tempo_start
-        int tempo_end
-        string result
-    }
-
-    EXERCISE {
-        string id
-        string name
-        string focus_area
-        string description
-        string difficulty
-    }
-
-    SONG {
-        string id
-        string title
-        string artist
-        string tuning
-        string status
-    }
-
-    SONG_SECTION {
-        string id
-        string name
-        string status
-        int target_tempo
-    }
-
-    OBSERVATION {
-        string id
-        string category
-        string note
-        string evidence_ref
-    }
-
-    GOAL {
-        string id
-        string name
-        string horizon
-        string status
-    }
+    SESSION_ITEM }o--|| SONG_SECTION : targets
+    PRACTICE_SESSION ||--o{ EVIDENCE : records
+    EVIDENCE }o--o{ GATE_RESULT : evaluated_by
+    ASSESSMENT_PROPOSAL ||--o{ GATE_RESULT : contains
+    GOAL ||--o{ SCHEDULE_PROPOSAL : informs
+    SCHEDULE_PROPOSAL ||--o{ PLAN_ITEM : contains
+    APPROVED_STATE ||--o{ SCHEDULE_PROPOSAL : constrains
 ```
 
-This is intentionally a sketch, not a committed database schema.
+This remains a domain sketch, not a committed persistence schema.
+
+## State and proposal semantics
+
+- Canonical state changes require explicit approval.
+- Proposals carry input-state and ruleset versions.
+- Applying a proposal is idempotent.
+- Stale proposals are rejected or revalidated.
+- Time-dependent rules use an injected clock and explicit timezone.
+- Replaying the same versioned inputs produces the same deterministic result.
+- Historical evidence and gate evaluations are append-only or superseded rather than silently rewritten.
 
 ## Candidate storage approaches
 
 ### Phase 1: file-based local-first data
 
-Use Markdown plus YAML/JSON for capture and review.
+Use Markdown plus YAML/JSON for capture, examples, and validation.
 
 Pros:
 
 - Easy to inspect and version
 - No app required
-- Good fit for AI-assisted summarization
+- Deterministic fixtures are straightforward
 - Works with Git
 
 Cons:
 
-- Weak validation unless schemas are added
 - Querying gets awkward as history grows
+- Validation must be explicit
 
 ### Phase 2: SQLite local database
 
-Use SQLite once the model stabilizes.
+Use SQLite when the model stabilizes and local querying provides enough value.
 
-Pros:
+### Phase 3: application-backed storage
 
-- Stronger querying
-- Good local-first default
-- Easy to export
-- Works for CLI, desktop, mobile, or web later
+A runtime may be added after the domain contracts prove useful. Public contracts should remain independent from a particular UI or persistence technology.
 
-Cons:
+## Integrations
 
-- More schema commitment
-- Requires migration strategy
-
-### Phase 3: app-backed storage
-
-Add a web/mobile app only after the capture and review loop proves useful.
-
-## AI-assisted workflows
-
-AI should assist the practice loop, not own it.
-
-```mermaid
-sequenceDiagram
-    participant Player
-    participant App
-    participant Context as Curated Context
-    participant AI
-    participant Library
-
-    Player->>App: Request practice plan
-    App->>Context: Select goals, recent logs, repertoire
-    Context->>AI: Provide bounded context
-    AI->>App: Draft plan and exercises
-    App->>Player: Show editable plan
-    Player->>App: Accept or modify
-    App->>Library: Save generated exercises if useful
-```
-
-Potential workflows:
-
-- Generate a 20-minute warmup based on recent weak areas
-- Create wah-focused rhythm drills over a target groove
-- Suggest song-section practice order
-- Summarize weekly practice logs
-- Identify neglected skills or stale repertoire
-- Convert musical goals into short practice blocks
-- Generate prompts for MIDI, backing tracks, or drum grooves
-
-## AI boundaries
-
-AI-generated output should be treated as draft material.
-
-Rules:
-
-- Do not send full private history by default
-- Use curated context packs
-- Show the context used for generation
-- Preserve user edits separately from generated drafts
-- Keep generated exercises attributable
-- Avoid pretending AI feedback is equivalent to a human teacher
-- Prefer explainable recommendations over opaque scoring
-
-## Future integrations
-
-Candidate integrations:
+Candidate deterministic integrations:
 
 - GarageBand drummer/backing-track workflows
 - MIDI generation/export
-- Guitar Pro or MuseScore references
-- YouTube playlist references
-- Recording files or DAW bounce references
-- Tuner/metronome data
-- Calendar reminders
-- Wearable or health signals only if explicitly useful and privacy-safe
+- MusicXML / Guitar Pro / MuseScore references
+- recording or DAW bounce references
+- tuner/metronome data
+- calendar-compatible schedule export
 
-Integration principle: external tools should attach references or artifacts; the core practice history should remain portable.
+External tools attach references or derived artifacts; core practice state remains portable.
 
 ## Security and privacy notes
 
-Practice data can reveal habits, schedule, location, recordings, and personal creative work. Treat it as private by default.
+Practice data can reveal habits, schedule, recordings, and personal creative work. Treat personal data as private by default.
 
 Considerations:
 
-- Local-first storage before cloud sync
-- Explicit export/import boundaries
-- No automatic upload of recordings
-- Redact sensitive notes before AI calls
-- Separate raw logs from AI context summaries
-- Keep API keys out of repo data
-- Avoid storing third-party copyrighted material directly
-- Track source references instead of copying tabs, lyrics, or full transcriptions
+- local-first storage
+- explicit export/import boundaries
+- no automatic upload of recordings
+- synthetic public fixtures only
+- secrets kept out of repository data
+- external references instead of copied copyrighted tabs, lyrics, or recordings
 
 ## Open architecture questions
 
-- Should the first runnable version be CLI, Markdown templates, or a small local web app?
-- What is the minimum useful practice log schema?
-- Should generated exercises be saved immediately or staged for review?
-- How should recordings be referenced without bloating the repo?
+- Which contracts need machine-readable schemas versus Markdown guidance?
+- Which workflows justify CLI support?
+- How should local recordings be referenced without bloating the repository?
 - What should be versioned in Git versus kept as local private state?
-- What level of metrics actually improves practice without creating overhead?
+- Which metrics improve practice without creating false precision?

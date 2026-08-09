@@ -2,27 +2,27 @@
 
 ## Purpose
 
-Turn a vague practice impulse into a concrete playable artifact.
+Turn a vague practice impulse into a concrete playable artifact using explicit source specs.
 
 Examples:
 
 - "I want more wah in my style"
-- "Give me a U2-ish delay rhythm exercise"
+- "I want a rhythmic delay exercise"
 - "I need a driving post-punk bass groove"
-- "Make an E-Bow drone texture I can loop over"
-- "Build a GarageBand drummer structure for this idea"
+- "I want an E-Bow drone texture I can loop over"
+- "I need a GarageBand drummer structure for this idea"
 
 ## Workflow
 
 ```mermaid
 flowchart TD
     A[Choose style / technique / reference] --> B[Create session brief]
-    B --> C[Generate practice material]
-    C --> D[Create backing structure or MIDI scaffold]
+    B --> C[Write explicit source spec]
+    C --> D[Render or assemble playable scaffold]
     D --> E[Move into GarageBand / Guitar Pro / MuseScore / Flow]
     E --> F[Practice / record / experiment]
     F --> G[Optional lightweight note]
-    G --> H[Generate next variation]
+    G --> H[Record next explicit change]
     H --> C
 ```
 
@@ -37,7 +37,7 @@ Good inputs:
 - reference traits: chiming delay, motorik bass, sparse arpeggios
 - constraint: 20 minutes, one chord vamp, no fast playing
 
-Avoid asking for a complete song immediately. Generate fragments first.
+Avoid trying to design a complete song immediately. Start with fragments.
 
 ## Step 2 — Create a session brief
 
@@ -50,15 +50,17 @@ The brief should answer:
 - What gear or DAW assumptions matter?
 - What output do I want?
 
-## Step 3 — Generate material
+## Step 3 — Write the source spec
 
-Use one of the prompt files:
+Use the smallest template that owns the intended artifact:
 
-- [`prompts/session-generator.md`](../prompts/session-generator.md)
-- [`prompts/backing-track-generator.md`](../prompts/backing-track-generator.md)
-- [`prompts/midi-scaffold-generator.md`](../prompts/midi-scaffold-generator.md)
-- [`prompts/rhythm-groove-generator.md`](../prompts/rhythm-groove-generator.md)
-- [`prompts/arrangement-expander.md`](../prompts/arrangement-expander.md)
+- [`templates/practice-session.md`](../templates/practice-session.md)
+- [`templates/backing-track.md`](../templates/backing-track.md)
+- [`templates/midi-sketch-spec.md`](../templates/midi-sketch-spec.md)
+- [`templates/rhythm-meter.md`](../templates/rhythm-meter.md)
+- [`templates/chord-progression.md`](../templates/chord-progression.md)
+
+The spec must contain the musical decisions required to reproduce the artifact. Missing information remains unconstrained rather than being inferred.
 
 ## Step 4 — Convert to a playable scaffold
 
@@ -76,9 +78,7 @@ Prefer a small useful loop over a large vague arrangement.
 
 ## Step 5 — Practice and record
 
-The system does not need to track everything. A quick voice memo, GarageBand project, or exported bounce is enough.
-
-Capture only what helps generate the next version.
+Capture only what helps evaluate the current goal and choose the next explicit change.
 
 ## Step 6 — Optional lightweight review
 
@@ -87,7 +87,7 @@ Use the three-question review:
 ```text
 What was useful?
 What should change?
-What should be generated next?
+What should be practised or created next?
 ```
 
-Then feed the answer back into the next prompt.
+Record the answer as source data for the next revision. No hidden inference is required.

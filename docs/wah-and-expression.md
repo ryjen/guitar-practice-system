@@ -59,7 +59,7 @@ Practice:
 4. Slow sweep over sustained version
 5. Call-response variation
 6. Record the best fragment
-7. Generate a backing-track spec from the fragment
+7. Write or update a backing-track spec from the accepted fragment
 
 ## Failure modes
 
@@ -68,8 +68,13 @@ Practice:
 - overusing extreme pedal positions
 - stacking too many effects before the phrase works dry
 
-## Prompt seed
+## Example practice specification
 
 ```text
-Generate a 20-minute expressive wah session for alternative rock guitar. Focus on accent wah, half-cocked tone, slow sweeps, and call-response phrasing. Avoid funk clichés. Include a backing-track structure and one MIDI bassline scaffold.
+Duration: 20 minutes
+Style lane: alternative rock
+Focus: accent wah, half-cocked tone, slow sweeps, call-response phrasing
+Constraint: avoid generic funk comping
+Application: one backing-track structure plus one MIDI bassline scaffold
+Evidence: one dry take and one wah take over the same phrase
 ```

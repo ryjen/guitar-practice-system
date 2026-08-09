@@ -5,9 +5,18 @@ on:
     paths:
       - "catalogs/discovery/**"
       - "docs/discovery/**"
+      - "docs/architecture.md"
+      - "docs/planning/**"
+      - "docs/system-overview.md"
+      - "docs/use-cases.md"
+      - "docs/practice-material-workflow.md"
+      - "docs/lightweight-review.md"
+      - "docs/wah-and-expression.md"
+      - "docs/ebow-and-sustain.md"
       - "examples/discovery/**"
       - "scripts/discovery*.py"
       - "scripts/adaptive_session.py"
+      - "scripts/check_public_boundary.py"
       - "tests/test_discovery*.py"
       - "tests/test_adaptive_session*.py"
       - ".github/workflows/validate-discovery.yml"
@@ -17,9 +26,18 @@ on:
     paths:
       - "catalogs/discovery/**"
       - "docs/discovery/**"
+      - "docs/architecture.md"
+      - "docs/planning/**"
+      - "docs/system-overview.md"
+      - "docs/use-cases.md"
+      - "docs/practice-material-workflow.md"
+      - "docs/lightweight-review.md"
+      - "docs/wah-and-expression.md"
+      - "docs/ebow-and-sustain.md"
       - "examples/discovery/**"
       - "scripts/discovery*.py"
       - "scripts/adaptive_session.py"
+      - "scripts/check_public_boundary.py"
       - "tests/test_discovery*.py"
       - "tests/test_adaptive_session*.py"
       - ".github/workflows/validate-discovery.yml"
@@ -40,11 +58,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Enforce public boundary
+        run: python scripts/check_public_boundary.py
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
       - name: Search repository catalog
         run: |
-          python scripts/discovery_catalog.py search \
+          python scripts/discovery_catalog.py \
             examples/discovery/slide-backing-track-request.json \
             catalogs/discovery/repository.json \
             > /tmp/discovery-result.json
@@ -54,6 +74,7 @@ jobs:
 
           result = json.loads(Path("/tmp/discovery-result.json").read_text())
           assert result["status"] == "complete"
+          assert result["catalog"] == "repository"
           assert result["candidates"][0]["source_id"] == "slide-slow-blues-a-60"
           PY
       - name: Generate adaptive session

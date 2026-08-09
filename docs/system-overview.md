@@ -2,7 +2,7 @@
 
 ## Mental model
 
-This repo is a **source-first practice-material generation system**.
+This repo is a **source-first practice-material system**.
 
 The durable source of truth is not a MIDI export, GarageBand project, or tab file. The durable source is a small, readable spec that explains:
 
@@ -12,22 +12,21 @@ The durable source of truth is not a MIDI export, GarageBand project, or tab fil
 - the section structure
 - the rhythm / bass / harmony scaffold
 - the export target
-- what should be generated next
+- what should be created or changed next
 
-Generated artifacts are useful, but disposable until curated.
+Rendered artifacts are useful, but disposable until curated.
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-    Input[Style / technique / reference / weakness] --> Brief[Session brief]
-    Brief --> Prompt[Prompt library]
-    Prompt --> Spec[Source spec]
+    Input[Style / technique / reference / audible problem] --> Brief[Session brief]
+    Brief --> Spec[Source spec]
     Spec --> Export[MIDI / MusicXML / DAW notes / tab draft]
     Export --> Practice[Practice / record / experiment]
     Practice --> Review[Optional lightweight review]
-    Review --> Next[Next generation request]
-    Next --> Prompt
+    Review --> Next[Next explicit change]
+    Next --> Spec
 ```
 
 ## Core objects
@@ -55,35 +54,24 @@ A small feedback loop with three questions only:
 ```text
 What was useful?
 What should change?
-What should be generated next?
+What should be created or practised next?
 ```
 
-## AI role
+## Deterministic generation boundary
 
-AI is used to draft practice material, not to decide taste automatically.
+Public generation means transforming an explicit approved spec into another reproducible artifact. Examples include:
 
-Good AI outputs:
+- rendering a MIDI scaffold from structured note/event data
+- creating MusicXML from an explicit notation source
+- validating arrangement manifests
+- deriving DAW import notes from declared track metadata
 
-- playable fragments
-- arrangement options
-- practice constraints
-- DAW setup notes
-- MIDI source specs
-- variations on accepted ideas
-
-Bad AI outputs:
-
-- vague advice
-- fake precision
-- imitation of artists instead of trait extraction
-- over-modeled practice analytics
-- generated artifacts without source specs
+The public core must not infer taste, weaknesses, priorities, or musical intent from hidden context. Inputs and transformations stay explicit and inspectable.
 
 ## Artifact policy
 
 | Artifact | Canonical? | Location |
 |---|---:|---|
-| Markdown prompt | Yes | `prompts/` |
 | Markdown template | Yes | `templates/` |
 | MIDI sketch spec | Yes | `templates/`, `examples/`, later `midi/specs/` |
 | Generated MIDI | No, unless curated | `generated/` by default |
@@ -95,7 +83,7 @@ Bad AI outputs:
 
 Start with Markdown specs. Add scripts only after the spec shape stabilizes.
 
-The first useful CLI helper should probably do one thing:
+The first useful CLI helper should do one thing:
 
 ```bash
 practice-material render-midi examples/midi-scaffold-example.md --out generated/example.mid

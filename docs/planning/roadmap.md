@@ -2,240 +2,141 @@
 
 ## Current status
 
-Early design / planning.
+Public reference core with active deterministic practice, evidence, timing, catalog, and artifact-generation workflows.
 
-The repo currently defines the project direction, architecture sketch, and initial use cases. No runtime or application framework has been selected.
+The roadmap covers only independently useful public capabilities. Private product direction is intentionally out of scope.
 
-## Roadmap summary
+## Near-term sequence
 
-```mermaid
-gantt
-    title Guitar Practice System Roadmap
-    dateFormat  YYYY-MM-DD
-    section Planning
-    Domain model and use cases       :done, p1, 2026-05-27, 7d
-    MVP schema                       :p2, after p1, 7d
-    Capture/review templates          :p3, after p2, 7d
-    section Prototype
-    Local-first logging workflow      :p4, after p3, 14d
-    Weekly review workflow            :p5, after p4, 14d
-    Exercise generation workflow      :p6, after p5, 14d
-    section Productization
-    Storage/runtime decision          :p7, after p6, 14d
-    App or CLI implementation          :p8, after p7, 30d
-```
-
-Dates are placeholders. The sequence matters more than the calendar.
+1. Stabilize deterministic practice scheduling and long-term progression contracts.
+2. Stabilize deterministic evidence assessment and progression gates.
+3. Exercise the multidimensional practice model through real sessions.
+4. Keep timing/metronome realizations integrated with session and evidence records.
+5. Improve deterministic repository-catalog filtering and candidate normalization.
+6. Validate MIDI, notation, backing-track, and DAW-neutral source workflows.
 
 ## Milestones
 
-### M0: Documentation baseline
-
-Goal: establish the project direction and avoid ambiguous implementation drift.
+### M1: Practice and progression contracts
 
 Deliverables:
 
-- README
-- Architecture document
-- ADR for project direction
-- Roadmap
-- Use cases
-
-Status: initial version complete.
-
-### M1: MVP data model
-
-Goal: define the smallest useful schema for tracking practice.
-
-Deliverables:
-
-- Practice session schema
-- Exercise schema
-- Song/repertoire schema
-- Practice plan schema
-- Review schema
-- Example data fixtures
+- practice session schema
+- goals and active-work state
+- maintenance and due-state rules
+- explicit dependency relationships
+- deterministic schedule proposal and approval contracts
+- replay, timezone, idempotency, and stale-state semantics
 
 Definition of done:
 
-- A week of realistic practice can be represented without obvious hacks
-- The schema supports both structured fields and freeform notes
-- Private/local-only data is clearly separated from repo examples
+- the same versioned state, rules, and clock produce the same proposal
+- missed sessions and maintenance are representable without hidden inference
+- canonical state changes remain approval-gated
 
-### M2: Capture workflow
-
-Goal: make it easy to log practice without interrupting practice.
+### M2: Evidence and assessment contracts
 
 Deliverables:
 
-- Practice log template
-- Quick-capture format
-- Example session logs
-- Basic validation script or checklist
+- versioned evidence schema
+- explicit observations
+- quality-gate definitions
+- pass/fail/unknown/blocked/not-applicable outcomes
+- immutable comparison and transition proposals
+- deterministic replay and supersession semantics
 
 Definition of done:
 
-- A session can be logged in under two minutes
-- Logs can reference songs, drills, and observations
-- Capture works without AI
+- gate outcomes are reproducible from explicit inputs
+- missing evidence remains unknown rather than becoming an inferred failure
+- progression proposals preserve provenance and require approval
 
-### M3: Review workflow
+### M3: Real-session validation
 
-Goal: turn logs into useful feedback.
+Goal: ensure the practice model helps actual playing rather than expanding ontology indefinitely.
 
 Deliverables:
 
-- Weekly review template
-- Progress summary format
-- Neglected-area detection
-- Repertoire status review
-- Basic charts or summary scripts, if useful
+- representative slide, wah, E-Bow, country, rhythm, and theory sessions
+- captured deviations and fatigue/stop observations
+- evidence records linked to session context
+- documentation fixes where repeated friction appears
 
-Definition of done:
+### M4: Deterministic catalog workflows
 
-- The system can answer: what improved, what stalled, what should come next?
-- Reviews produce actionable next-practice recommendations
-- Review output is editable by the player
-
-### M4: Exercise and practice-plan generation
-
-Goal: generate useful practice material from goals and history.
+Goal: support repository-local discovery without opaque ranking.
 
 Deliverables:
 
-- Prompt templates for exercise generation
-- Practice-plan generator spec
-- AI context-pack format
-- Generated exercise staging workflow
+- explicit filter and scoring rules
+- source/provenance fields
+- deterministic candidate ordering
+- synthetic fixtures
+- approval boundary before catalog or practice-state mutation
 
-Definition of done:
+### M5: Music artifact workflows
 
-- Generated plans cite the context they used
-- Generated exercises are staged before being added to the library
-- The player can reject, edit, or promote generated material
-
-### M5: Integration experiments
-
-Goal: connect the system to actual music-making tools without making them required.
+Goal: connect source specs to actual music-making tools while keeping sources portable.
 
 Candidate integrations:
 
 - GarageBand drummer notes
 - MIDI exercise export
-- MuseScore / Guitar Pro references
-- YouTube playlist references
-- Local recording references
-- Calendar reminders
+- MusicXML / MuseScore / Guitar Pro references
+- local recording references
+- calendar-compatible schedule export
 
 Definition of done:
 
-- Integrations attach useful artifacts or references
-- Core practice data remains portable
-- No copyrighted tabs, lyrics, or recordings are committed accidentally
+- integrations attach useful artifacts or references
+- core practice data remains portable
+- generated artifacts can be reproduced from explicit sources
+- copyrighted tabs, lyrics, or recordings are not committed accidentally
 
-### M6: Runtime decision
+## Runtime options
 
-Goal: choose the smallest durable implementation path.
-
-Options:
+The public core may remain a combination of:
 
 - Markdown/YAML plus scripts
 - CLI plus local files
-- SQLite-backed local app
-- Local web app
-- Mobile companion later
+- SQLite-backed local tooling
+- static web documentation
 
 Decision criteria:
 
-- Capture friction
-- Query/reporting needs
-- Data portability
-- Privacy posture
-- Maintenance cost
-- Fit with AI workflows
+- capture friction
+- deterministic replay
+- data portability
+- privacy posture
+- maintenance cost
+- ease of validation
 
-## MVP scope
+## Public scope
 
-The MVP should support:
+The public core should support:
 
-- Create and update practice goals
-- Maintain a small repertoire list
-- Maintain an exercise library
-- Log practice sessions
-- Run weekly reviews
-- Generate a practice plan from goals and recent history
-- Stage AI-generated exercises for review
+- practice goals and sessions
+- repertoire and technique references
+- deterministic scheduling and maintenance
+- evidence and gate evaluation
+- metronome/timing realizations
+- deterministic catalog filtering
+- source-first MIDI, notation, and backing-track transformations
+- import/export and conformance fixtures
 
-The MVP does not need:
+## Out of scope
 
-- User accounts
-- Cloud sync
-- Payments
-- Social features
-- Full notation editing
-- Full DAW integration
-- Real-time audio analysis
-
-## Later phases
-
-### AI coaching layer
-
-Add AI support for:
-
-- Practice-plan drafting
-- Weekly review summarization
-- Exercise generation
-- Weakness detection
-- Prompting reflection after sessions
-
-Guardrails:
-
-- Context must be explicit
-- Generated output must be reviewable
-- The canonical record remains user-controlled
-
-### Music artifact generation
-
-Add support for:
-
-- MIDI drill generation
-- Backing-track specs
-- Drum groove prompts
-- Chord progression exercises
-- Call-and-response drills
-
-### Rich application UI
-
-Consider once workflows stabilize:
-
-- Dashboard
-- Repertoire board
-- Practice timer
-- Session capture UI
-- Review timeline
-- Exercise browser
-
-### Recording and analysis
-
-Possible future capability:
-
-- Attach local recordings
-- Mark sections needing review
-- Track takes
-- Compare self-ratings over time
-- Optional pitch/rhythm analysis
-
-This should be privacy-sensitive and local-first unless explicitly changed.
+- opaque recommendation or ranking logic
+- inferred weaknesses or intent
+- opaque external recommendation services
+- private personalization or product experiments
+- user accounts, billing, entitlement, or marketplace behavior
+- autonomous mutation of canonical progress
 
 ## Open questions
 
-- What is the first implementation target: templates, CLI, SQLite, or web?
-- How much structure should a practice log require?
-- Should there be a fixed taxonomy of focus areas?
-- How should creative exploration be tracked without over-formalizing it?
-- What belongs in public repo examples versus private local data?
-- Should AI prompts live in the repo as versioned artifacts?
-- How should generated exercises be reviewed and promoted?
-- Should repertoire track songs, sections, riffs, or all three separately?
-- How should external references be stored?
-- What metrics are worth tracking long term?
+- Which public contracts need stable machine-readable schemas versus Markdown-only guidance?
+- Which deterministic workflows justify CLI support?
+- What metrics are useful without creating false precision?
+- Which catalog-ranking dimensions are explicit enough to remain reproducible?
+- Which generated artifacts deserve promotion to canonical curated assets?

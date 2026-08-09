@@ -54,8 +54,13 @@ Spec:
 - Treat silence as part of the phrase
 - Keep the harmonic role clear: root, fifth, suspension, or leading tone
 
-## Prompt seed
+## Example practice specification
 
 ```text
-Generate an E-Bow ambient rock practice session. Include a drone bed, a sparse counterline, and a transition texture. Provide a backing-track spec and a MIDI sketch for bass and drums only.
+Style lane: ambient rock
+Focus: E-Bow sustain and controlled transitions
+Tasks: drone bed, sparse counterline, transition texture
+Backing context: bass and drums only
+Evidence: one isolated sustain check and one musical-context take
+Space: leave explicit gaps between counterline phrases
 ```

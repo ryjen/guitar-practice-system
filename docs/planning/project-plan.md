@@ -2,50 +2,37 @@
 
 ## Core framing
 
-This repository is a **practice-material generation system**, not a practice tracker.
+This repository is a **source-first practice-material system**.
 
-The purpose is to help generate concrete things to practice:
+The purpose is to help create concrete things to practice from explicit musical decisions:
 
 - MIDI scaffolds
 - backing-track structures
-- rhythm and bassline prompts
+- rhythm and bassline specs
 - wah / delay / E-Bow exercises
 - GarageBand drummer specs
 - Guitar Pro / MuseScore starting points
 - song-section practice briefs
-- style-specific session prompts
+- style-specific session plans
 
-Progress tracking is intentionally secondary. It may exist as lightweight session notes, but it should not become the center of the system.
+Progress tracking exists only where it helps choose and validate useful musical work.
 
 ## Problem statement
 
-Most practice systems drift toward productivity mechanics: streaks, dashboards, analytics, and habit tracking. That can become a distraction from the actual goal: making better musical material and playing more.
+Many practice systems drift toward streaks, dashboards, analytics, and habit mechanics. This repo solves a narrower problem:
 
-This repo solves a narrower problem:
-
-> Given a style, technique, mood, reference, or weakness, quickly generate useful practice material that can be played, looped, arranged, exported, or expanded.
+> Given an explicit style, technique, musical goal, or recorded weakness, create useful practice material that can be played, looped, arranged, exported, reviewed, and reproduced.
 
 ## Phase plan
 
-### Phase 1 — Repo identity
+### Phase 1 — Repository identity
 
-- [x] Replace README with corrected project framing
+- [x] Define project framing
 - [x] Add system overview
 - [x] Add practice-material workflow
-- [x] Add style map
-- [x] Add Mermaid workflow diagram
+- [x] Add style map and workflow diagrams
 
-### Phase 2 — Prompt library
-
-- [x] Add session generator prompt
-- [x] Add backing-track generator prompt
-- [x] Add MIDI scaffold generator prompt
-- [x] Add rhythm groove generator prompt
-- [x] Add arrangement expander prompt
-- [x] Add Guitar Pro / MuseScore prompt
-- [x] Add YouTube playlist/reference prompt
-
-### Phase 3 — Templates
+### Phase 2 — Source templates
 
 - [x] Add session brief template
 - [x] Add song structure template
@@ -53,67 +40,57 @@ This repo solves a narrower problem:
 - [x] Add MIDI sketch spec template
 - [x] Add GarageBand drummer spec template
 - [x] Add lightweight review template
+- [x] Add technique, rhythm, progression, timing, and evidence templates
 
-### Phase 4 — Examples
+### Phase 3 — Worked examples
 
-- [x] Add U2-style wah/delay session
-- [x] Add post-punk driving bass session
-- [x] Add E-Bow ambient session
-- [x] Add GarageBand drummer example
-- [x] Add MIDI scaffold example
+- [x] Add representative wah, slide, E-Bow, rhythm, harmony, and backing-track examples
+- [x] Add GarageBand drummer and MIDI scaffold examples
+- [x] Add odd-meter and metronome-realization examples
 
-### Phase 5 — MIDI and notation workflow
+### Phase 4 — Deterministic transformations
 
 - [x] Keep specs source-first
 - [x] Ignore bulk generated artifacts
 - [x] Promote only curated MIDI or notation artifacts
 - [x] Add MusicXML / MuseScore / Guitar Pro guidance
+- [ ] Expand deterministic render/validation helpers only where stable source formats justify them
 
-### Phase 6 — Optional lightweight review
+### Phase 5 — Practice state and assessment
 
-- [x] Add review boundary doc
-- [x] Keep review to three prompts
-- [x] Link review output back to generation
+- [ ] Add deterministic long-term scheduling and maintenance contracts
+- [ ] Add versioned evidence gates and transition proposals
+- [ ] Add replay, stale-state, timezone, and idempotency semantics
+- [ ] Validate the model with real practice sessions
+
+### Phase 6 — Deterministic catalog discovery
+
+- [x] Add repository catalog and request/candidate contracts
+- [ ] Ensure ranking is explicit, versioned, and reproducible
+- [ ] Preserve unknown metadata rather than inferring it
+- [ ] Add stable tie-breaking and compatibility fixtures
 
 ## Decisions
 
 ### Generated MIDI
 
-Use source specs and generator code as canonical. Generated files should go under `generated/` and be ignored by default. Curated MIDI can be promoted later into `midi/curated/` with a matching Markdown source note.
+Use source specs and generator code as canonical. Generated files should go under `generated/` and be ignored by default. Curated MIDI can be promoted later with a matching source note.
 
-### First workflow
+### Workflow
 
-Use a prompt-first UX with small CLI helpers. Prompts generate session briefs and scaffold specs; scripts generate artifacts from accepted specs.
+Use explicit source specs with small deterministic CLI helpers. Scripts may render or validate accepted specs, but musical intent must remain visible in the source.
 
 ### GarageBand target
 
-GarageBand should be the primary worked example, but the underlying model should stay DAW-neutral.
+GarageBand is a useful worked example, while the underlying model stays DAW-neutral.
 
 ### Notation target
 
-Use Markdown specs now, likely MusicXML-first later. MuseScore and Guitar Pro should be consumers, not canonical formats.
+Use Markdown specs now and interoperable notation formats where useful. MuseScore and Guitar Pro are consumers, not canonical formats.
 
-### YouTube references
+### External references
 
-AI may suggest candidates, but only human-curated references should be promoted into repo docs.
-
-### Style scope
-
-Start with:
-
-- U2 / rhythmic delay
-- post-punk driving bass
-- ambient / E-Bow
-- expressive wah
-
-Adjacent future lanes:
-
-- shoegaze
-- new wave
-- goth rock
-- krautrock
-- cinematic western
-- art rock
+Only human-curated or explicitly imported references should be promoted into repository docs. Store metadata and lawful links rather than protected source material.
 
 ### Gear specificity
 
@@ -121,18 +98,18 @@ Gear-aware but optional. Describe musical intent first, gear second.
 
 ### Review layer
 
-Optional lightweight review only:
+Keep review bounded and actionable:
 
 ```text
 What was useful?
 What should change?
-What should be generated next?
+What should be practised or created next?
 ```
 
 ### Fragment vs song
 
-Use a fragment-to-arrangement workflow. Generate riffs, loops, drones, and grooves first; expand promising fragments into song forms.
+Use a fragment-to-arrangement workflow. Create riffs, loops, drones, grooves, and transitions first; expand promising fragments into song forms.
 
 ### Artist references
 
-Use references only to extract actionable traits, not to imitate directly.
+Use references only to extract documented musical traits and practice context, not to reproduce protected material.
