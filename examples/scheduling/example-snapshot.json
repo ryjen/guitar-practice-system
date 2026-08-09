@@ -1,0 +1,45 @@
+{
+  "record_type": "schedule-snapshot",
+  "contract_version": "scheduling/v1",
+  "snapshot_id": "snapshot-example",
+  "state_revision": 1,
+  "ruleset_version": "scheduling-rules-v1",
+  "generated_at": "2026-08-08T18:00:00-07:00",
+  "effective_date": "2026-08-08",
+  "timezone": "America/Vancouver",
+  "session_minutes": 30,
+  "minimum_block_minutes": 5,
+  "max_active_items": 2,
+  "self_reported_load": "normal",
+  "high_load_max_minutes": 20,
+  "weekly_budget": {
+    "max_sessions": 5,
+    "completed_sessions": 1,
+    "max_minutes": 180,
+    "completed_minutes": 30,
+    "max_same_target": 3
+  },
+  "items": [
+    {
+      "id": "slide-foundations",
+      "state": "active",
+      "priority": 1,
+      "target_minutes": 20,
+      "prerequisites": [],
+      "weekly_count": 1,
+      "min_recovery_hours": 24,
+      "last_practiced_at": "2026-08-07T16:00:00-07:00"
+    },
+    {
+      "id": "ebow-foundations",
+      "state": "maintenance",
+      "priority": 5,
+      "target_minutes": 10,
+      "prerequisites": [],
+      "maintenance_interval_days": 7,
+      "last_verified_date": "2026-07-30",
+      "weekly_count": 0,
+      "min_recovery_hours": 0
+    }
+  ]
+}

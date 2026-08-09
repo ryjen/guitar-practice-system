@@ -10,11 +10,11 @@ The export deliberately does **not** contain:
 
 - personal practice history or progress;
 - recordings or evidence records;
-- assessment results or scheduling state;
-- private-platform configuration;
-- inferred recommendations or AI-generated state.
+- personal assessment results or scheduling state;
+- consumer-specific configuration;
+- inferred recommendations or other opaque derived state.
 
-Those concerns remain outside this public repository contract.
+Those concerns remain outside this public export contract.
 
 ## Schema version
 
@@ -63,4 +63,4 @@ This keeps the canonical content boundary clear while avoiding cross-origin avai
 - Removing, renaming, or changing the meaning/type of a field requires a new schema version.
 - Stable IDs must not be repurposed for different sessions or techniques.
 - Presentation-specific HTML/CSS structure does not belong in this contract.
-- Private scheduling, assessment, personalization, or AI-derived state does not belong in this contract.
+- Personal scheduling state, assessment results, personalization, or opaque derived state do not belong in this contract.

@@ -1,0 +1,72 @@
+name: Validate Scheduling
+
+on:
+  pull_request:
+    paths:
+      - "contracts/scheduling/**"
+      - "docs/scheduling/**"
+      - "examples/scheduling/**"
+      - "scripts/scheduling.py"
+      - "scripts/check_public_boundary.py"
+      - "tests/test_scheduling.py"
+      - ".github/workflows/validate-scheduling.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "contracts/scheduling/**"
+      - "docs/scheduling/**"
+      - "examples/scheduling/**"
+      - "scripts/scheduling.py"
+      - "scripts/check_public_boundary.py"
+      - "tests/test_scheduling.py"
+      - ".github/workflows/validate-scheduling.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-scheduling-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Enforce public boundary
+        run: python scripts/check_public_boundary.py
+      - name: Run scheduling tests
+        run: python -m unittest discover -s tests -p 'test_scheduling.py' -v
+      - name: Generate deterministic proposal
+        run: |
+          python scripts/scheduling.py propose \
+            examples/scheduling/example-snapshot.json \
+            > /tmp/schedule-proposal.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          proposal = json.loads(Path("/tmp/schedule-proposal.json").read_text())
+          assert proposal["status"] == "complete"
+          assert proposal["requires_approval"] is True
+          assert [item["item_id"] for item in proposal["selected"]] == ["ebow-foundations", "slide-foundations"]
+          assert sum(item["minutes"] for item in proposal["selected"]) == 30
+          PY
+      - name: Verify approval replay
+        run: |
+          python scripts/scheduling.py check-approval \
+            /tmp/schedule-proposal.json \
+            examples/scheduling/example-snapshot.json \
+            > /tmp/approval-status.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("/tmp/approval-status.json").read_text())
+          assert result == {"status": "valid", "reasons": []}
+          PY
