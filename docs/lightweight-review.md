@@ -2,7 +2,7 @@
 
 ## Boundary
 
-Review is deliberately small. It exists only to improve the next practice material or select the next audible problem.
+Review is deliberately small. It exists only to improve the next practice material or select the next explicit audible problem.
 
 The repository should not become a quantified practice dashboard. Do not score every musical choice or capture data that will not change the next action.
 
@@ -11,7 +11,7 @@ The repository should not become a quantified practice dashboard. Do not score e
 ```text
 What remained useful or credible?
 What was the largest audible problem?
-What should change or be generated next?
+What should change or be practised next?
 ```
 
 ## Relevant-dimension checks
@@ -39,8 +39,8 @@ The bass loop made the wah accents easier to place. The first two phrases had cl
 What was the largest audible problem?
 The chorus became too dense. I entered before the sustained chord had decayed and filled the register needed by the keyboard part.
 
-What should change or be generated next?
-Keep the same rhythm and progression. Lower the tempo from 142 to 132 BPM, leave beat one open in the chorus, and generate a bridge variant built around E-Bow sustain.
+What should change or be practised next?
+Keep the same rhythm and progression. Lower the tempo from 142 to 132 BPM, leave beat one open in the chorus, and use an E-Bow sustain bridge variant.
 ```
 
 ## Anti-patterns
@@ -55,16 +55,16 @@ Avoid turning review into:
 - false precision around expression
 - productivity theatre
 
-## Link back to generation
+## Link back to source material
 
-Every review should be directly usable as prompt input.
+Every review should map directly to explicit source changes or the next practice action.
 
 Capture:
 
-- the reusable IDs that should remain unchanged
-- the realization overrides that should change
+- reusable IDs that should remain unchanged
+- realization overrides that should change
 - one primary audible defect
-- any constraint to add, remove, or simplify
+- constraints to add, remove, or simplify
 - the next requested artifact or session
 
-If a note does not help generate the next version, do not capture it.
+If a note does not help choose or reproduce the next version, do not capture it.
