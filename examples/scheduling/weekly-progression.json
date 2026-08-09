@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "snapshot_version": "practice-state:12",
+  "ruleset_version": "scheduling-rules:1",
+  "generated_at": "2026-08-08T19:00:00-07:00",
+  "effective_date": "2026-08-08",
+  "timezone": "America/Vancouver",
+  "week_start": 0,
+  "constraints": {
+    "max_active_items": 3,
+    "weekly_session_budget": 5,
+    "weekly_minute_budget": 150,
+    "default_session_minutes": 30,
+    "recovery_days": 1,
+    "high_load_recovery_days": 2,
+    "max_sessions_per_target_per_week": 3
+  },
+  "goals": [
+    {"id": "goal-slide", "target_id": "slide-foundations", "period": "weekly", "target_sessions": 2}
+  ],
+  "items": [
+    {
+      "id": "slide-foundations",
+      "target_type": "technique",
+      "state": "reliable-context",
+      "state_revision": "slide-foundations:8",
+      "approved_transition_proposal_id": "assessment-slide-abc",
+      "active": true,
+      "priority": 1,
+      "session_minutes": 30,
+      "maintenance_interval_days": 7,
+      "last_practice_date": "2026-08-05",
+      "last_verified_date": "2026-08-01",
+      "self_reported_load": "normal",
+      "plateau_observed": false,
+      "dependencies": []
+    },
+    {
+      "id": "country-hybrid-picking",
+      "target_type": "technique",
+      "state": "developing",
+      "state_revision": "country-hybrid-picking:2",
+      "approved_transition_proposal_id": null,
+      "active": true,
+      "priority": 2,
+      "session_minutes": 30,
+      "maintenance_interval_days": 14,
+      "last_practice_date": "2026-08-04",
+      "last_verified_date": "2026-07-30",
+      "self_reported_load": "normal",
+      "plateau_observed": false,
+      "dependencies": []
+    },
+    {
+      "id": "slide-open-tuning",
+      "target_type": "technique",
+      "state": "discovered",
+      "state_revision": "slide-open-tuning:1",
+      "approved_transition_proposal_id": null,
+      "active": false,
+      "priority": 3,
+      "session_minutes": 30,
+      "maintenance_interval_days": null,
+      "last_practice_date": null,
+      "last_verified_date": null,
+      "self_reported_load": "normal",
+      "plateau_observed": false,
+      "dependencies": [
+        {"target_id": "slide-foundations", "required_states": ["reliable-context", "maintained"]}
+      ]
+    },
+    {
+      "id": "ebow-control",
+      "target_type": "technique",
+      "state": "paused",
+      "state_revision": "ebow-control:4",
+      "approved_transition_proposal_id": null,
+      "active": false,
+      "priority": 4,
+      "session_minutes": 30,
+      "maintenance_interval_days": 14,
+      "last_practice_date": "2026-07-20",
+      "last_verified_date": "2026-07-20",
+      "self_reported_load": "normal",
+      "plateau_observed": false,
+      "dependencies": []
+    }
+  ],
+  "history": [
+    {"type": "completed", "target_id": "country-hybrid-picking", "date": "2026-08-04", "minutes": 30},
+    {"type": "missed", "target_id": "slide-foundations", "date": "2026-08-07"}
+  ]
+}
