@@ -5,6 +5,7 @@
   "oneOf": [
     {"$ref": "#/$defs/snapshot"},
     {"$ref": "#/$defs/proposal"},
+    {"$ref": "#/$defs/projectionReport"},
     {"$ref": "#/$defs/approval"},
     {"$ref": "#/$defs/completion"},
     {"$ref": "#/$defs/event"}
@@ -17,10 +18,7 @@
       "type": "string",
       "enum": ["candidate", "active", "verified", "maintenance", "paused", "retired"]
     },
-    "realization": {
-      "type": "object",
-      "additionalProperties": true
-    },
+    "realization": {"type": "object", "additionalProperties": true},
     "practiceGoal": {
       "type": "object",
       "additionalProperties": false,
@@ -109,16 +107,8 @@
         "self_reported_load": {"type": "string", "enum": ["normal", "high"]},
         "high_load_max_minutes": {"type": "integer", "minimum": 1, "maximum": 240},
         "weekly_budget": {"$ref": "#/$defs/weeklyBudget"},
-        "goals": {
-          "type": "array",
-          "maxItems": 256,
-          "items": {"$ref": "#/$defs/practiceGoal"}
-        },
-        "items": {
-          "type": "array",
-          "maxItems": 256,
-          "items": {"$ref": "#/$defs/workItem"}
-        }
+        "goals": {"type": "array", "maxItems": 256, "items": {"$ref": "#/$defs/practiceGoal"}},
+        "items": {"type": "array", "maxItems": 256, "items": {"$ref": "#/$defs/workItem"}}
       }
     },
     "selectedItem": {
@@ -145,7 +135,7 @@
     "progressionProjection": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["item_id", "state", "due_state", "overdue_days", "blocked", "paused", "retired", "missed"],
+      "required": ["item_id", "state", "due_state", "overdue_days", "blocked", "paused", "retired", "missed", "plateau_observed"],
       "properties": {
         "item_id": {"$ref": "#/$defs/id"},
         "dimension": {"$ref": "#/$defs/id"},
@@ -176,13 +166,30 @@
         "complete": {"type": "boolean"}
       }
     },
+    "projectionReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_type", "contract_version", "projection_id", "snapshot_id", "state_revision", "ruleset_version", "generated_at", "effective_date", "items", "goals"],
+      "properties": {
+        "record_type": {"const": "progression-projection"},
+        "contract_version": {"const": "scheduling/v1"},
+        "projection_id": {"$ref": "#/$defs/id"},
+        "snapshot_id": {"$ref": "#/$defs/id"},
+        "state_revision": {"type": "integer", "minimum": 0},
+        "ruleset_version": {"$ref": "#/$defs/id"},
+        "generated_at": {"$ref": "#/$defs/dateTime"},
+        "effective_date": {"$ref": "#/$defs/date"},
+        "items": {"type": "array", "maxItems": 256, "items": {"$ref": "#/$defs/progressionProjection"}},
+        "goals": {"type": "array", "maxItems": 256, "items": {"$ref": "#/$defs/goalProjection"}}
+      }
+    },
     "proposal": {
       "type": "object",
       "additionalProperties": false,
       "required": [
         "record_type", "contract_version", "proposal_id", "snapshot_id", "state_revision",
         "ruleset_version", "generated_at", "effective_date", "expires_after_date", "status",
-        "selected", "excluded", "conflicts", "requires_approval", "projection", "goal_projection"
+        "selected", "excluded", "conflicts", "requires_approval"
       ],
       "properties": {
         "record_type": {"const": "schedule-proposal"},
@@ -197,8 +204,6 @@
         "status": {"type": "string", "enum": ["complete", "no-op"]},
         "selected": {"type": "array", "maxItems": 64, "items": {"$ref": "#/$defs/selectedItem"}},
         "excluded": {"type": "array", "maxItems": 256, "items": {"$ref": "#/$defs/excludedItem"}},
-        "projection": {"type": "array", "maxItems": 256, "items": {"$ref": "#/$defs/progressionProjection"}},
-        "goal_projection": {"type": "array", "maxItems": 256, "items": {"$ref": "#/$defs/goalProjection"}},
         "conflicts": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
         "requires_approval": {"const": true}
       }
