@@ -1,0 +1,54 @@
+name: Validate Scheduling
+
+on:
+  pull_request:
+    paths:
+      - "docs/scheduling/**"
+      - "examples/scheduling/**"
+      - "templates/scheduling-state.json"
+      - "templates/schedule-proposal.json"
+      - "scripts/scheduling_core.py"
+      - "tests/test_scheduling_core.py"
+      - ".github/workflows/validate-scheduling.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/scheduling/**"
+      - "examples/scheduling/**"
+      - "templates/scheduling-state.json"
+      - "templates/schedule-proposal.json"
+      - "scripts/scheduling_core.py"
+      - "tests/test_scheduling_core.py"
+      - ".github/workflows/validate-scheduling.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-scheduling-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Generate scheduling fixture
+        run: |
+          python scripts/scheduling_core.py examples/scheduling/weekly-progression.json > /tmp/schedule.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('/tmp/schedule.json').read_text())
+          assert result['status'] == 'proposed'
+          assert result['selected'][0]['target_id'] == 'slide-foundations'
+          assert result['requires_approval'] is True
+          assert result['stale_when_snapshot_version_changes'] is True
+          PY
