@@ -10,10 +10,15 @@
   "selected": [],
   "excluded": [],
   "projection": [],
+  "goal_projection": [],
+  "conflicts": [],
+  "unresolved_choices": [],
   "remaining_budget": {"sessions": 0, "minutes": 0},
   "status": "proposed",
+  "approval_status": "pending",
   "requires_approval": true,
   "application_key": "",
   "stale_when_snapshot_version_changes": true,
+  "expires_after_effective_date": true,
   "input_fingerprint": ""
 }
