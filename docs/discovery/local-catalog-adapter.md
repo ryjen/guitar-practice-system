@@ -1,25 +1,27 @@
-# Local Discovery Catalog Adapter
+# Local Discovery Catalog
 
 ## Purpose
 
-`scripts/discovery_catalog.py` is the first executable Discovery adapter. It searches a local JSON catalog and normalizes untrusted provider output into the provider-neutral candidate contract.
+`scripts/discovery_catalog.py` searches a local JSON catalog using explicit constraints and deterministic ranking rules.
 
-It uses only the Python standard library and performs no network or domain-state writes.
+It uses only the Python standard library, performs no network access, and never writes domain state.
 
 ## Boundaries
 
-The adapter may:
+The catalog search may:
 
-- validate a Discovery request and local catalog
-- rank local records deterministically
+- validate a request and local catalog
+- apply hard required constraints
+- score optional matched constraints
+- rank records deterministically
 - report matched and unmet constraints
-- normalize provider candidates through a strict field allowlist
-- cap confidence according to retained evidence
+- retain repository provenance and licensing metadata
 - degrade safely when a catalog is unavailable or has no match
 
 It does not:
 
-- browse the web
+- browse external sources
+- normalize arbitrary external output
 - execute returned links, scripts, MIDI, DAW files, or downloads
 - write songs, progress, evidence, schedules, or gear state
 - approve or activate candidates
@@ -27,18 +29,18 @@ It does not:
 
 ## Repository catalog
 
-The initial catalog is [`catalogs/discovery/repository.json`](../../catalogs/discovery/repository.json). It indexes only existing repository-owned material:
+The initial catalog is [`catalogs/discovery/repository.json`](../../catalogs/discovery/repository.json). It indexes repository-owned material such as:
 
 - technique records
 - gear setups
 - original backing tracks
 
-The song catalog intentionally remains empty until a candidate is explicitly approved and promoted through the song-use-case layer.
+Catalog records are explicit metadata. Missing values remain unknown and do not receive inferred defaults.
 
 ## Search
 
 ```bash
-python scripts/discovery_catalog.py search \
+python scripts/discovery_catalog.py \
   examples/discovery/slide-backing-track-request.json \
   catalogs/discovery/repository.json
 ```
@@ -46,35 +48,15 @@ python scripts/discovery_catalog.py search \
 The result includes:
 
 - `complete` or `degraded` status
-- a deterministic request fingerprint
+- catalog and catalog version
+- deterministic request fingerprint
 - deterministic ephemeral candidate IDs
 - ranked candidates
 - matched and unmet constraints
-- evidence-backed confidence
+- source/provenance references
 - warnings
 
-`required_constraints` are hard filters. Other constraints affect ranking and remain visible as trade-offs.
-
-## Normalize provider output
-
-```bash
-python scripts/discovery_catalog.py normalize \
-  request.json \
-  provider-output.json \
-  --provider web-ai
-```
-
-Provider output may be either a candidate list or an object containing `candidates`.
-
-Normalization:
-
-- retains only candidate-contract fields
-- drops unsupported fields such as approval, progress, or active-state mutations
-- forces the requested target type
-- preserves warnings for dropped or changed data
-- removes malformed candidates
-- caps confidence at the strongest retained evidence state
-- never treats normalization as verification
+`required_constraints` are hard filters. Other constraints affect the documented score and remain visible as trade-offs.
 
 ## Request shape
 
@@ -115,7 +97,6 @@ Canonical top-level genres are `80s-rock`, `alt-rock`, `blues`, `country`, and `
       "techniques": ["slide"],
       "evidence": [
         {
-          "state": "verified",
           "source": "docs/example.md",
           "kind": "repository"
         }
@@ -126,17 +107,28 @@ Canonical top-level genres are `80s-rock`, `alt-rock`, `blues`, `country`, and `
 }
 ```
 
+## Ranking semantics
+
+For each candidate:
+
+- each matching requested list value contributes a fixed documented amount
+- matching scalar values contribute a fixed documented amount
+- tempo contributes only when the catalog BPM is inside the requested range
+- required-constraint misses remove the item
+- final ties are ordered by stable `source_id`
+
+The score is a reproducible sorting mechanism, not a quality or mastery judgment.
+
 ## Failure behaviour
 
 | Condition | Behaviour |
 |---|---|
-| Catalog path missing | Exit successfully with `degraded` status and no candidates |
-| Valid catalog with no match | Return `degraded` and no invented candidates |
+| Catalog path missing | Return `degraded` with no candidates |
+| Valid catalog with no match | Return `degraded` with no invented candidates |
 | Invalid request or catalog | Exit code 2 with an error on stderr |
-| Malformed provider candidate | Drop candidate and retain a warning |
-| Provider confidence without evidence | Cap confidence at `low` |
-| Unsupported provider fields | Drop fields and retain a warning |
+| Unknown optional metadata | Leave the corresponding constraint unmet or unconstrained |
+| Equal scores | Sort by stable source ID |
 
 ## Extension boundary
 
-Future adapters may add repository metadata extraction, curated external source lists, provider-specific retrieval, stronger schema validation, and cross-catalog deduplication. All providers must normalize through the same candidate and approval boundary.
+Public extensions may add deterministic repository metadata extraction, curated static catalogs, stronger schema validation, or cross-catalog deduplication. External retrieval, private ranking, or opaque recommendation behavior is outside this adapter.
