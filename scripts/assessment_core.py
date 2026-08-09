@@ -84,6 +84,24 @@ def validate_gate_set(gates: dict[str, Any]) -> None:
             raise AssessmentError(f"duplicate gate id: {gate_id}")
         seen.add(gate_id)
         nonempty(gate.get("dimension"), f"gate.{gate_id}.dimension")
+
+        applies = gate.get("applies_to_states")
+        if applies is not None:
+            if not isinstance(applies, list) or not applies or not all(state in STATES for state in applies):
+                raise AssessmentError(f"gate {gate_id} has invalid applies_to_states")
+
+        max_age = gate.get("max_age_days")
+        if max_age is not None and (isinstance(max_age, bool) or not isinstance(max_age, int) or max_age < 0):
+            raise AssessmentError(f"gate {gate_id} max_age_days must be a non-negative integer")
+
+        blocked_by = gate.get("blocked_by_observation")
+        if blocked_by is not None:
+            if not isinstance(blocked_by, dict):
+                raise AssessmentError(f"gate {gate_id} blocked_by_observation must be an object")
+            nonempty(blocked_by.get("field"), f"gate.{gate_id}.blocked_by_observation.field")
+            if "value" not in blocked_by:
+                raise AssessmentError(f"gate {gate_id} blocked_by_observation needs value")
+
         rule = gate.get("rule")
         if not isinstance(rule, dict) or rule.get("type") not in {"observation-equals", "evidence-count"}:
             raise AssessmentError(f"gate {gate_id} has unsupported rule")
@@ -114,7 +132,7 @@ def validate_request(request: dict[str, Any]) -> None:
     if proposed not in TRANSITIONS[current]:
         raise AssessmentError(f"invalid transition: {current} -> {proposed}")
     nonempty(request.get("state_revision"), "state_revision")
-    parse_date(request.get("as_of"), "as_of")
+    as_of = parse_date(request.get("as_of"), "as_of")
 
     evidence = request.get("evidence", [])
     if not isinstance(evidence, list):
@@ -129,7 +147,9 @@ def validate_request(request: dict[str, Any]) -> None:
         ids.add(evidence_id)
         if item.get("target_id") != request["target_id"]:
             raise AssessmentError("evidence target_id must match assessment target")
-        parse_date(item.get("date"), f"evidence.{evidence_id}.date")
+        evidence_date = parse_date(item.get("date"), f"evidence.{evidence_id}.date")
+        if evidence_date > as_of:
+            raise AssessmentError(f"evidence {evidence_id} is dated after as_of")
         nonempty(item.get("session_id"), f"evidence.{evidence_id}.session_id")
         nonempty(item.get("evidence_type"), f"evidence.{evidence_id}.evidence_type")
         nonempty(item.get("producer"), f"evidence.{evidence_id}.producer")
@@ -168,14 +188,14 @@ def evaluate_gate(gate: dict[str, Any], request: dict[str, Any], as_of: date) ->
 
     blocked_by = gate.get("blocked_by_observation")
     if isinstance(blocked_by, dict):
-        values = observation_values(request, blocked_by.get("field", ""))
-        if blocked_by.get("value") in values:
+        values = observation_values(request, blocked_by["field"])
+        if blocked_by["value"] in values:
             return {
                 "gate_id": gate_id,
                 "dimension": gate["dimension"],
                 "outcome": "blocked",
                 "reason": blocked_by.get("reason", "explicit blocking observation present"),
-                "used_evidence_ids": [item["id"] for item in request["evidence"] if item.get("observations", {}).get(blocked_by.get("field")) == blocked_by.get("value")],
+                "used_evidence_ids": [item["id"] for item in request["evidence"] if item.get("observations", {}).get(blocked_by["field"]) == blocked_by["value"]],
                 "missing": [],
             }
 
@@ -184,7 +204,7 @@ def evaluate_gate(gate: dict[str, Any], request: dict[str, Any], as_of: date) ->
     eligible = []
     for item in request["evidence"]:
         age = (as_of - parse_date(item["date"], "evidence.date")).days
-        if age >= 0 and (max_age is None or age <= max_age):
+        if max_age is None or age <= max_age:
             eligible.append(item)
 
     if rule["type"] == "observation-equals":
