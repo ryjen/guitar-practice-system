@@ -35,7 +35,7 @@ class SchedulingV2Tests(unittest.TestCase):
     def test_progression_states_match_assessment_core(self) -> None:
         self.assertEqual(assessment.STATES, scheduling.PROGRESSION_STATES)
 
-    def test_schema_uses_assessment_progression_states(self) -> None:
+    def test_schema_uses_assessment_progression_states_and_long_term_records(self) -> None:
         schema = json.loads((ROOT / "contracts" / "scheduling" / "v2" / "scheduling.schema.json").read_text(encoding="utf-8"))
         self.assertEqual(sorted(assessment.STATES), sorted(schema["$defs"]["progressionState"]["enum"]))
         for definition in (
@@ -51,6 +51,27 @@ class SchedulingV2Tests(unittest.TestCase):
             "event",
         ):
             self.assertIn(definition, schema["$defs"])
+
+        goal_fields = schema["$defs"]["practiceGoal"]["properties"]
+        for field in (
+            "weekly_target_minutes",
+            "weekly_completed_minutes",
+            "monthly_target_minutes",
+            "monthly_completed_minutes",
+        ):
+            self.assertIn(field, goal_fields)
+
+        projection_fields = schema["$defs"]["progressionProjection"]["properties"]
+        for field in (
+            "dimension_id",
+            "supporting_assessment_proposal_ids",
+            "target_realization_ids",
+            "maintenance_realization_ids",
+            "last_meaningful_practice_date",
+            "last_verification_date",
+            "plateau_observation_ids",
+        ):
+            self.assertIn(field, projection_fields)
 
     def test_scenario_fixtures(self) -> None:
         for case in FIXTURE_DATA["scenarios"]:
@@ -148,6 +169,9 @@ class SchedulingV2Tests(unittest.TestCase):
         snapshot, _ = self.scenario("normal progression")
         baseline = scheduling.propose(copy.deepcopy(snapshot))
         snapshot["progression"][0]["supporting_assessment_proposal_ids"] = ["assessment-1", "assessment-2"]
+        snapshot["progression"][0]["dimension_id"] = "timing"
+        snapshot["progression"][0]["target_realization_ids"] = ["slide-timing-target"]
+        snapshot["progression"][0]["maintenance_realization_ids"] = ["slide-timing-maintenance"]
         snapshot["state_revision"] += 1
         changed = scheduling.propose(snapshot)
         self.assertEqual(
