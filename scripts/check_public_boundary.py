@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -17,21 +18,21 @@ ALLOWLIST = {
     "scripts/check_public_boundary.py",
 }
 MARKERS = (
-    "guitar-practice-platform",
-    "AI-assisted",
-    "AI-generated",
-    "AI coaching",
-    "AI-related",
-    "OpenAI",
-    "LLM",
-    "prompt injection",
-    "prompt template",
-    "prompts/",
-    "model provider",
-    "model/provider",
-    "provider-specific",
-    "local language model",
-    "embeddings",
+    ("guitar-practice-platform", re.compile(r"guitar-practice-platform", re.IGNORECASE)),
+    ("AI-assisted", re.compile(r"\bAI-assisted\b", re.IGNORECASE)),
+    ("AI-generated", re.compile(r"\bAI-generated\b", re.IGNORECASE)),
+    ("AI coaching", re.compile(r"\bAI\s+coaching\b", re.IGNORECASE)),
+    ("AI-related", re.compile(r"\bAI-related\b", re.IGNORECASE)),
+    ("OpenAI", re.compile(r"\bOpenAI\b", re.IGNORECASE)),
+    ("LLM", re.compile(r"\bLLM\b", re.IGNORECASE)),
+    ("prompt injection", re.compile(r"\bprompt\s+injection\b", re.IGNORECASE)),
+    ("prompt template", re.compile(r"\bprompt\s+templates?\b", re.IGNORECASE)),
+    ("prompts/", re.compile(r"prompts/", re.IGNORECASE)),
+    ("model provider", re.compile(r"\bmodel\s+providers?\b", re.IGNORECASE)),
+    ("model/provider", re.compile(r"\bmodel/provider\b", re.IGNORECASE)),
+    ("provider-specific", re.compile(r"\bprovider-specific\b", re.IGNORECASE)),
+    ("local language model", re.compile(r"\blocal\s+language\s+models?\b", re.IGNORECASE)),
+    ("embeddings", re.compile(r"\bembeddings?\b", re.IGNORECASE)),
 )
 
 
@@ -58,8 +59,8 @@ def violations() -> list[str]:
         except UnicodeDecodeError:
             continue
         for line_number, line in enumerate(lines, start=1):
-            for marker in MARKERS:
-                if marker.lower() in line.lower():
+            for marker, pattern in MARKERS:
+                if pattern.search(line):
                     findings.append(f"{relative}:{line_number}: contains boundary marker {marker!r}")
     return findings
 
