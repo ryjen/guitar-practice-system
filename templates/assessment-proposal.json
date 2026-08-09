@@ -1,7 +1,9 @@
 {
   "version": 1,
   "proposal_id": "assessment-target-fingerprint",
+  "supersedes_proposal_id": null,
   "target_id": "target-id",
+  "transition_kind": "promotion",
   "current_state": "developing",
   "requested_state": "reliable-isolation",
   "proposed_state": null,
@@ -23,6 +25,7 @@
     }
   ],
   "supporting_evidence_ids": [],
+  "comparison_evidence_ids": [],
   "conflicting_evidence_ids": [],
   "missing_evidence": [],
   "transition_valid": false,
