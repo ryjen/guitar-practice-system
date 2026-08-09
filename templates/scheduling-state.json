@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "snapshot_version": "practice-state:1",
+  "ruleset_version": "scheduling-rules:1",
+  "generated_at": "2026-08-08T19:00:00-07:00",
+  "effective_date": "2026-08-08",
+  "timezone": "America/Vancouver",
+  "week_start": 0,
+  "constraints": {
+    "max_active_items": 3,
+    "weekly_session_budget": 5,
+    "weekly_minute_budget": 180,
+    "default_session_minutes": 30,
+    "recovery_days": 1,
+    "high_load_recovery_days": 2,
+    "max_sessions_per_target_per_week": 3
+  },
+  "goals": [
+    {"id": "goal-id", "target_id": "technique-id", "period": "weekly", "target_sessions": 2}
+  ],
+  "items": [
+    {
+      "id": "technique-id",
+      "target_type": "technique",
+      "state": "developing",
+      "state_revision": "technique-id:1",
+      "approved_transition_proposal_id": null,
+      "active": true,
+      "priority": 1,
+      "session_minutes": 30,
+      "maintenance_interval_days": 14,
+      "last_practice_date": null,
+      "last_verified_date": null,
+      "self_reported_load": "normal",
+      "plateau_observed": false,
+      "dependencies": []
+    }
+  ],
+  "history": [
+    {"type": "completed", "target_id": "technique-id", "date": "2026-08-04", "minutes": 30}
+  ]
+}
