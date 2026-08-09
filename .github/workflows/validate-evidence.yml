@@ -4,20 +4,30 @@ on:
   pull_request:
     paths:
       - "docs/evidence/**"
+      - "docs/assessment/**"
       - "examples/evidence/**"
+      - "examples/assessment/**"
       - "templates/evidence.json"
+      - "templates/assessment-*.json"
       - "scripts/evidence_feedback.py"
+      - "scripts/assessment_core.py"
       - "tests/test_evidence_feedback*.py"
+      - "tests/test_assessment_core.py"
       - ".github/workflows/validate-evidence.yml"
   push:
     branches:
       - main
     paths:
       - "docs/evidence/**"
+      - "docs/assessment/**"
       - "examples/evidence/**"
+      - "examples/assessment/**"
       - "templates/evidence.json"
+      - "templates/assessment-*.json"
       - "scripts/evidence_feedback.py"
+      - "scripts/assessment_core.py"
       - "tests/test_evidence_feedback*.py"
+      - "tests/test_assessment_core.py"
       - ".github/workflows/validate-evidence.yml"
 
 permissions:
@@ -55,4 +65,20 @@ jobs:
           assert target["reliability_eligible"] is True
           assert target["maintenance_status"] == "not-due"
           assert target["requires_approval"] is True
+          PY
+      - name: Evaluate assessment fixture
+        run: |
+          python scripts/assessment_core.py \
+            examples/assessment/slide-reliable-context.json \
+            templates/assessment-gate-set.json \
+            > /tmp/assessment.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("/tmp/assessment.json").read_text())
+          assert result["transition_valid"] is True
+          assert result["proposed_state"] == "reliable-context"
+          assert result["requires_approval"] is True
+          assert all(item["outcome"] == "pass" for item in result["gate_results"])
           PY
