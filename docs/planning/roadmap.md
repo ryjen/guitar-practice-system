@@ -128,7 +128,7 @@ The public core should support:
 
 - opaque recommendation or ranking logic
 - inferred weaknesses or intent
-- model/provider orchestration
+- opaque external recommendation services
 - private personalization or product experiments
 - user accounts, billing, entitlement, or marketplace behavior
 - autonomous mutation of canonical progress
