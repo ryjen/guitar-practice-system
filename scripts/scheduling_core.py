@@ -85,6 +85,8 @@ def validate_snapshot(snapshot: dict[str, Any]) -> None:
         if item.get("state") not in STATES:
             raise SchedulingError(f"item {item_id} has unsupported state")
         nonempty(item.get("state_revision"), f"item.{item_id}.state_revision")
+        if item.get("dimension") is not None:
+            nonempty(item.get("dimension"), f"item.{item_id}.dimension")
         priority = item.get("priority")
         if isinstance(priority, bool) or not isinstance(priority, int) or priority < 1:
             raise SchedulingError(f"item {item_id} priority must be a positive integer")
@@ -102,6 +104,9 @@ def validate_snapshot(snapshot: dict[str, Any]) -> None:
             raise SchedulingError(f"item {item_id} has unsupported self_reported_load")
         if not isinstance(item.get("plateau_observed", False), bool):
             raise SchedulingError(f"item {item_id} plateau_observed must be boolean")
+        for field in ("target_realization", "maintenance_realization"):
+            if item.get(field) is not None and not isinstance(item.get(field), dict):
+                raise SchedulingError(f"item {item_id} {field} must be an object or null")
         for field in ("last_practice_date", "last_verified_date"):
             if item.get(field) is not None and parse_date(item[field], f"item.{item_id}.{field}") > effective:
                 raise SchedulingError(f"item {item_id} {field} is after effective_date")
@@ -162,6 +167,16 @@ def item_status(item: dict[str, Any], effective: date) -> dict[str, Any]:
 def dependency_blockers(item: dict[str, Any], by_id: dict[str, dict[str, Any]]) -> list[str]:
     return sorted(dep["target_id"] for dep in item.get("dependencies", []) if by_id[dep["target_id"]]["state"] not in dep["required_states"])
 
+def unresolved_missed_targets(history: list[dict[str, Any]], week_start: date, effective: date) -> set[str]:
+    unresolved: set[str] = set()
+    ordered = sorted((event for event in history if week_start <= parse_date(event["date"], "history.date") <= effective and event["type"] in {"missed", "completed"}), key=lambda event: (event["date"], 0 if event["type"] == "missed" else 1))
+    for event in ordered:
+        if event["type"] == "missed":
+            unresolved.add(event["target_id"])
+        else:
+            unresolved.discard(event["target_id"])
+    return unresolved
+
 def goal_projection(snapshot: dict[str, Any], effective: date) -> list[dict[str, Any]]:
     history = snapshot.get("history", [])
     week_start, week_end = week_bounds(effective, snapshot.get("week_start", 0))
@@ -180,8 +195,9 @@ def propose(snapshot: dict[str, Any]) -> dict[str, Any]:
     items = snapshot["items"]
     by_id = {item["id"]: item for item in items}
     week_start, week_end = week_bounds(effective, snapshot.get("week_start", 0))
-    completed = [event for event in snapshot.get("history", []) if event["type"] == "completed" and week_start <= parse_date(event["date"], "history.date") <= week_end]
-    missed = {event["target_id"] for event in snapshot.get("history", []) if event["type"] == "missed" and week_start <= parse_date(event["date"], "history.date") <= effective}
+    history = snapshot.get("history", [])
+    completed = [event for event in history if event["type"] == "completed" and week_start <= parse_date(event["date"], "history.date") <= week_end]
+    missed = unresolved_missed_targets(history, week_start, effective)
     per_target = {item["id"]: 0 for item in items}
     for event in completed:
         per_target[event["target_id"]] += 1
@@ -217,7 +233,7 @@ def propose(snapshot: dict[str, Any]) -> dict[str, Any]:
         if status["maintenance_due"]: selection_reasons.append("maintenance-due")
         if catch_up: selection_reasons.append("missed-session-catch-up")
         selection_reasons.append(f"explicit-priority:{item['priority']}")
-        row = {"target_id": item["id"], **status, "catch_up": catch_up, "eligible": eligible, "blockers": blockers, "reasons": reasons, "selection_reasons": selection_reasons, "rank_key": list(rank)}
+        row = {"target_id": item["id"], "dimension": item.get("dimension"), "state": item["state"], "state_revision": item["state_revision"], "approved_transition_proposal_id": item.get("approved_transition_proposal_id"), "active": item["active"], "paused": item["state"] == "paused", "retired": item["state"] == "retired", "blocked": bool(blockers), "plateau_observed": item.get("plateau_observed", False), "target_realization": item.get("target_realization"), "maintenance_realization": item.get("maintenance_realization"), **status, "catch_up": catch_up, "eligible": eligible, "blockers": blockers, "reasons": reasons, "selection_reasons": selection_reasons, "rank_key": list(rank)}
         status_rows.append(row)
         if eligible:
             candidates.append((rank, item))
