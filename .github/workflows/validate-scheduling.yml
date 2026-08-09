@@ -6,6 +6,7 @@ on:
       - "docs/scheduling/**"
       - "examples/scheduling/**"
       - "templates/scheduling-state.json"
+      - "templates/scheduling-records.json"
       - "templates/schedule-proposal.json"
       - "scripts/scheduling_core.py"
       - "tests/test_scheduling_core.py"
@@ -17,6 +18,7 @@ on:
       - "docs/scheduling/**"
       - "examples/scheduling/**"
       - "templates/scheduling-state.json"
+      - "templates/scheduling-records.json"
       - "templates/schedule-proposal.json"
       - "scripts/scheduling_core.py"
       - "tests/test_scheduling_core.py"
@@ -51,4 +53,6 @@ jobs:
           assert result['selected'][0]['target_id'] == 'slide-foundations'
           assert result['requires_approval'] is True
           assert result['stale_when_snapshot_version_changes'] is True
+          assert result['approval_status'] == 'pending'
+          assert result['goal_projection'][0]['goal_id'] == 'goal-slide'
           PY
