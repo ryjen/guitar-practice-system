@@ -31,7 +31,11 @@
           "maxItems": 128,
           "uniqueItems": true,
           "items": {"$ref": "#/$defs/id"}
-        }
+        },
+        "weekly_target_minutes": {"type": "integer", "minimum": 0, "maximum": 10080},
+        "weekly_completed_minutes": {"type": "integer", "minimum": 0, "maximum": 10080},
+        "monthly_target_minutes": {"type": "integer", "minimum": 0, "maximum": 44640},
+        "monthly_completed_minutes": {"type": "integer", "minimum": 0, "maximum": 44640}
       }
     },
     "activeWorkItem": {
@@ -83,9 +87,20 @@
       ],
       "properties": {
         "item_id": {"$ref": "#/$defs/id"},
+        "dimension_id": {"$ref": "#/$defs/id"},
         "state": {"$ref": "#/$defs/progressionState"},
         "state_revision": {"$ref": "#/$defs/id"},
         "supporting_assessment_proposal_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/id"}
+        },
+        "target_realization_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/id"}
+        },
+        "maintenance_realization_ids": {
           "type": "array",
           "uniqueItems": true,
           "items": {"$ref": "#/$defs/id"}
