@@ -1,0 +1,107 @@
+{
+  "id": "hard-rock-riff-bed-em-112",
+  "title": "Hard-Rock Riff Practice Bed",
+  "purpose": "Provide an original sparse 80s/hard-rock harmonic and rhythmic bed for palm-muted riff articulation, section changes, fills, and lead-over-riff practice without encoding the target guitar riff itself.",
+  "linked_techniques": [
+    "muted-rhythm-articulation"
+  ],
+  "linked_songs": [],
+  "key_signature": "Emin",
+  "tempo_bpm": 112,
+  "meter": [
+    4,
+    4
+  ],
+  "feel": "straight hard-rock pulse; guitar supplies the muted riff and syncopation",
+  "count_in_bars": 1,
+  "loop": {
+    "start_marker": "RIFF-A",
+    "end_marker": "END"
+  },
+  "sections": [
+    {
+      "name": "RIFF-A",
+      "bars": 8,
+      "chords": [
+        "E5",
+        "E5",
+        "G5",
+        "A5",
+        "E5",
+        "E5",
+        "D5",
+        "A5"
+      ]
+    },
+    {
+      "name": "LIFT-B",
+      "bars": 8,
+      "chords": [
+        "C5",
+        "D5",
+        "E5",
+        "E5",
+        "C5",
+        "D5",
+        "A5",
+        "B5"
+      ]
+    },
+    {
+      "name": "RIFF-C",
+      "bars": 8,
+      "chords": [
+        "E5",
+        "G5",
+        "A5",
+        "E5",
+        "E5",
+        "D5",
+        "A5",
+        "B5"
+      ]
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Drums",
+      "role": "drums",
+      "channel": 9,
+      "velocity": 88,
+      "instrument_intent": "firm dry rock kit defining pulse and backbeat; avoid fills that compete with guitar riff articulation"
+    },
+    {
+      "name": "Bass",
+      "role": "bass",
+      "channel": 0,
+      "program": 34,
+      "velocity": 84,
+      "instrument_intent": "supportive electric bass reinforcing roots and fifths while leaving rhythmic detail to guitar"
+    }
+  ],
+  "variants": {
+    "tempo_bpm": [
+      88,
+      100,
+      112,
+      124
+    ],
+    "keys": [
+      "Emin",
+      "Dmin"
+    ],
+    "density": [
+      "drums-only",
+      "drums-bass"
+    ]
+  },
+  "provenance": {
+    "type": "original",
+    "notes": "Original hard-rock practice harmony. No commercial riff, melody, or song MIDI is reproduced."
+  },
+  "outputs": {
+    "midi": "generated/backing-tracks/hard-rock-riff-bed-em-112.mid",
+    "audio": null,
+    "daw_project": null
+  }
+}
