@@ -1,0 +1,116 @@
+{
+  "id": "melodic-ballad-bed-g-72",
+  "title": "Melodic Ballad Lead Practice Bed",
+  "purpose": "Provide an original spacious ballad progression for sustained lead phrasing, bends, vibrato, dynamics, call-and-response, and deliberate silence.",
+  "linked_techniques": [
+    "lead-phrasing"
+  ],
+  "linked_songs": [],
+  "key_signature": "G",
+  "tempo_bpm": 72,
+  "meter": [
+    4,
+    4
+  ],
+  "feel": "slow straight ballad with long phrase windows and explicit guitar space",
+  "count_in_bars": 1,
+  "loop": {
+    "start_marker": "VERSE-A",
+    "end_marker": "END"
+  },
+  "sections": [
+    {
+      "name": "VERSE-A",
+      "bars": 8,
+      "chords": [
+        "G",
+        "D",
+        "Em",
+        "C",
+        "G",
+        "D",
+        "C",
+        "D"
+      ]
+    },
+    {
+      "name": "CHORUS-B",
+      "bars": 8,
+      "chords": [
+        "C",
+        "G",
+        "D",
+        "Em",
+        "C",
+        "G",
+        "D",
+        "D"
+      ]
+    },
+    {
+      "name": "RESPONSE-C",
+      "bars": 8,
+      "chords": [
+        "Em",
+        "C",
+        "G",
+        "D",
+        "Em",
+        "C",
+        "D",
+        "G"
+      ]
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Drums",
+      "role": "drums",
+      "channel": 9,
+      "velocity": 66,
+      "instrument_intent": "restrained kit maintaining pulse without fills that crowd sustained lead phrases"
+    },
+    {
+      "name": "Bass",
+      "role": "bass",
+      "channel": 0,
+      "program": 33,
+      "velocity": 68,
+      "instrument_intent": "round supportive bass; keep movement predictable so lead phrasing remains the focus"
+    },
+    {
+      "name": "Keys",
+      "role": "keys",
+      "channel": 1,
+      "program": 4,
+      "velocity": 46,
+      "instrument_intent": "soft electric-piano whole-bar voicings with low density and clear upper-register space for guitar"
+    }
+  ],
+  "variants": {
+    "tempo_bpm": [
+      60,
+      66,
+      72,
+      80
+    ],
+    "keys": [
+      "G",
+      "D",
+      "A"
+    ],
+    "density": [
+      "bass-keys",
+      "full"
+    ]
+  },
+  "provenance": {
+    "type": "original",
+    "notes": "Original common-practice ballad harmony designed for lead phrasing and intentional space."
+  },
+  "outputs": {
+    "midi": "generated/backing-tracks/melodic-ballad-bed-g-72.mid",
+    "audio": null,
+    "daw_project": null
+  }
+}
