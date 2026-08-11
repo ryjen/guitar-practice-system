@@ -107,7 +107,7 @@ Generated `.mid` files remain ignored build artifacts by default.
 
 See [backing-track-daw-routing.md](backing-track-daw-routing.md) for the intended instrument assignments, routing, guitar-space rules, and the explicit GarageBand/REAPER verification matrix.
 
-The routing document defines the target interpretation only. It does not mark DAW interoperability as verified until the generated files are imported into those applications.
+The slide asset has now been successfully imported in both REAPER and GarageBand at its intended 60 BPM. Other catalog assets remain structurally validated but do not need individual cross-DAW verification before they can be used as practice scaffolds.
 
 ## DAW import checklist
 
@@ -128,15 +128,15 @@ DAWs interpret some metadata differently. The portable contract is the MIDI file
 
 | ID | Technique | Form | Source/generator status | DAW verification |
 |---|---|---|---|---|
-| `slide-slow-blues-a-60` | `slide-foundations` | Two 12-bar choruses | Implemented | Pending GarageBand + REAPER |
-| `ebow-ambient-bed-d-56` | E-Bow sustain and layering | `DRONE` + `LIFT`, 16 bars | Implemented | Pending GarageBand + REAPER |
-| `wah-rhythmic-groove-em-96` | rhythmic/expressive wah | `GROOVE-A` + `LEAD-B`, 16 bars | Implemented | Pending GarageBand + REAPER |
-| `country-i-iv-v-g-100` | hybrid/country picking | I-IV-V + turnaround, 16 bars | Implemented | Pending GarageBand + REAPER |
-| `country-rock-form-a-108` | country picking + rhythm/fill switching | 28-bar multi-section form | Implemented | Pending GarageBand + REAPER |
-| `hard-rock-riff-bed` | muted rhythm articulation | Riff sections | Planned | Not applicable yet |
-| `melodic-ballad-bed` | lead phrasing | Verse/chorus form | Planned | Not applicable yet |
+| `slide-slow-blues-a-60` | `slide-foundations` | Two 12-bar choruses | Implemented | Verified REAPER + GarageBand |
+| `ebow-ambient-bed-d-56` | E-Bow sustain and layering | `DRONE` + `LIFT`, 16 bars | Implemented | Optional |
+| `wah-rhythmic-groove-em-96` | rhythmic/expressive wah | `GROOVE-A` + `LEAD-B`, 16 bars | Implemented | Optional |
+| `country-i-iv-v-g-100` | hybrid/country picking | I-IV-V + turnaround, 16 bars | Implemented | Optional |
+| `country-rock-form-a-108` | country picking + rhythm/fill switching | 28-bar multi-section form | Implemented | Optional |
+| `hard-rock-riff-bed-em-112` | muted rhythm articulation | `RIFF-A` + `LIFT-B` + `RIFF-C`, 24 bars | Implemented | Optional |
+| `melodic-ballad-bed-g-72` | lead phrasing | `VERSE-A` + `CHORUS-B` + `RESPONSE-C`, 24 bars | Implemented | Optional |
 
-The first five manifests are also exercised as a catalog by `tests/test_midi_workflow.py`; adding another manifest automatically brings it under generation/metadata validation.
+Every committed manifest is exercised as a catalog by `tests/test_midi_workflow.py`; adding another manifest automatically brings it under generation/metadata validation.
 
 ## Practice intent
 
@@ -155,6 +155,14 @@ Use this as the cleaner diagnostic context for alternating bass, hybrid picking,
 ### Country-rock form
 
 The named `RHYTHM-A`, `FILL-B`, `RHYTHM-C`, and `TURNAROUND` sections make role switching explicit. The goal is to stop continuous fill-playing and practice leaving arrangement space while moving deliberately between accompaniment and short lead vocabulary.
+
+### Hard-rock riff bed
+
+The support arrangement provides a firm pulse and power-chord landmarks but intentionally does not encode the target guitar riff. Use `RIFF-A` and `RIFF-C` for palm-muted articulation and riff consistency, then use `LIFT-B` for opening the dynamics or switching to fills/lead work. The guitar owns syncopation, muting, accents, and riff identity.
+
+### Melodic ballad bed
+
+Use the long harmonic windows for sustained bends, vibrato, dynamic arcs, call-and-response, delayed entries, early releases, and explicit rests. `RESPONSE-C` is especially useful for leaving one phrase unanswered rather than filling every bar.
 
 ## Trade-offs
 
