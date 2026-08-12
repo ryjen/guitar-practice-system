@@ -3,27 +3,27 @@ name: Validate Pages Frontend
 on:
   pull_request:
     paths:
-      - "catalogs/practice-cockpit.json"
+      - "catalogs/practice-data.json"
       - "docs/index.html"
       - "docs/assets/**"
       - "docs/data/**"
       - "docs/.nojekyll"
-      - "scripts/export_practice_cockpit.py"
+      - "scripts/export_practice_data.py"
       - "tests/test_pages_frontend.py"
-      - "tests/test_practice_cockpit_export.py"
+      - "tests/test_practice_data_export.py"
       - ".github/workflows/validate-pages.yml"
   push:
     branches:
       - main
     paths:
-      - "catalogs/practice-cockpit.json"
+      - "catalogs/practice-data.json"
       - "docs/index.html"
       - "docs/assets/**"
       - "docs/data/**"
       - "docs/.nojekyll"
-      - "scripts/export_practice_cockpit.py"
+      - "scripts/export_practice_data.py"
       - "tests/test_pages_frontend.py"
-      - "tests/test_practice_cockpit_export.py"
+      - "tests/test_practice_data_export.py"
       - ".github/workflows/validate-pages.yml"
 
 permissions:
@@ -45,11 +45,11 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22"
-      - name: Validate cockpit export is current
-        run: python scripts/export_practice_cockpit.py --check
+      - name: Validate practice data export is current
+        run: python scripts/export_practice_data.py --check
       - name: Run frontend contract tests
         run: python -m unittest discover -s tests -p "test_pages_frontend.py" -v
-      - name: Run cockpit export tests
-        run: python -m unittest discover -s tests -p "test_practice_cockpit_export.py" -v
+      - name: Run practice data export tests
+        run: python -m unittest discover -s tests -p "test_practice_data_export.py" -v
       - name: Check JavaScript syntax
         run: node --check docs/assets/app.js
