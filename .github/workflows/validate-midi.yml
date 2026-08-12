@@ -4,7 +4,13 @@ on:
   pull_request:
     paths:
       - "backing-tracks/**"
+      - "contracts/backing-tracks/**"
+      - "docs/groove-engine.md"
+      - "scripts/groove_engine.py"
+      - "scripts/generate_backing_tracks.py"
       - "scripts/midi_workflow.py"
+      - "tests/test_groove_engine.py"
+      - "tests/test_generate_backing_tracks.py"
       - "tests/test_midi_workflow.py"
       - ".github/workflows/validate-midi.yml"
   push:
@@ -12,7 +18,13 @@ on:
       - main
     paths:
       - "backing-tracks/**"
+      - "contracts/backing-tracks/**"
+      - "docs/groove-engine.md"
+      - "scripts/groove_engine.py"
+      - "scripts/generate_backing_tracks.py"
       - "scripts/midi_workflow.py"
+      - "tests/test_groove_engine.py"
+      - "tests/test_generate_backing_tracks.py"
       - "tests/test_midi_workflow.py"
       - ".github/workflows/validate-midi.yml"
 
@@ -34,7 +46,9 @@ jobs:
           python-version: "3.12"
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
-      - name: Generate and validate example
+      - name: Generate and validate backing-track catalog
+        run: python scripts/generate_backing_tracks.py
+      - name: Validate legacy MIDI entry point
         run: |
           python scripts/midi_workflow.py generate \
             backing-tracks/slide-slow-blues/manifest.json \
