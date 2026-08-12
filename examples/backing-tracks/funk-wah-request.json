@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "id": "funk-wah-pocket-em-96",
+  "title": "Funk/Wah Pocket Practice",
+  "purpose": "Practice wah timing, muted sixteenth-note articulation, and phrase placement over a stable pocket.",
+  "key_signature": "Emin",
+  "tempo_bpm": 96,
+  "meter": [4, 4],
+  "groove_preset": "funk-wah-16",
+  "count_in_bars": 1,
+  "form": {
+    "bars": 8,
+    "progression": ["Em7", "A7"],
+    "section_name": "POCKET"
+  },
+  "instrumentation": ["drums", "bass"],
+  "arrangement": {
+    "bar_cycle": {
+      "length": 4,
+      "mute_bars": [3]
+    }
+  }
+}
