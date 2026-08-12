@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 """Deterministic groove-aware backing-track MIDI generation.
 
-This module adds a reusable groove domain model above ``midi_workflow``.
-Backing-track manifests remain the source of truth; a drum track may opt into
-an explicit ``groove`` object while legacy manifests keep the existing MIDI
-renderer behavior.
+Backing-track manifests remain the source of truth. Drum tracks may opt into an
+explicit ``groove`` object while legacy manifests keep the existing renderer.
 """
 
 from __future__ import annotations
@@ -58,6 +56,8 @@ class GrooveSpec:
     seed: int
     count_in: str
     instruments: tuple[GrooveInstrument, ...]
+    bar_cycle_length: int | None = None
+    bar_cycle_mute_bars: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -77,13 +77,7 @@ def steps_per_bar(meter: list[int] | tuple[int, int], subdivision: int) -> int:
     return product // denominator
 
 
-def _int_field(
-    value: Any,
-    *,
-    name: str,
-    minimum: int,
-    maximum: int,
-) -> int:
+def _int_field(value: Any, *, name: str, minimum: int, maximum: int) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise midi_workflow.ManifestError(f"{name} must be an integer")
     if not minimum <= value <= maximum:
@@ -105,6 +99,30 @@ def _step_list(value: Any, *, name: str, maximum: int) -> tuple[int, ...]:
             f"{name} steps must be between 0 and {maximum - 1}"
         )
     return tuple(sorted(value))
+
+
+def _parse_bar_cycle(raw: Any) -> tuple[int | None, tuple[int, ...]]:
+    if raw is None:
+        return None, ()
+    if not isinstance(raw, dict):
+        raise midi_workflow.ManifestError("groove.bar_cycle must be an object")
+    unknown = set(raw) - {"length", "mute_bars"}
+    if unknown:
+        raise midi_workflow.ManifestError(
+            f"groove.bar_cycle has unsupported fields: {sorted(unknown)}"
+        )
+    length = _int_field(
+        raw.get("length"),
+        name="groove.bar_cycle.length",
+        minimum=1,
+        maximum=64,
+    )
+    mute_bars = _step_list(
+        raw.get("mute_bars", []),
+        name="groove.bar_cycle.mute_bars",
+        maximum=length,
+    )
+    return length, mute_bars
 
 
 def parse_groove(
@@ -153,12 +171,13 @@ def parse_groove(
         minimum=0,
         maximum=2_147_483_647,
     )
-
     count_in = raw.get("count_in", "click")
     if not isinstance(count_in, str) or count_in not in COUNT_IN_MODES:
         raise midi_workflow.ManifestError(
             f"groove.count_in must be one of {sorted(COUNT_IN_MODES)}"
         )
+
+    bar_cycle_length, bar_cycle_mute_bars = _parse_bar_cycle(raw.get("bar_cycle"))
 
     instruments_raw = raw.get("instruments")
     if not isinstance(instruments_raw, dict) or not instruments_raw:
@@ -237,6 +256,8 @@ def parse_groove(
         seed=seed,
         count_in=count_in,
         instruments=tuple(instruments),
+        bar_cycle_length=bar_cycle_length,
+        bar_cycle_mute_bars=bar_cycle_mute_bars,
     )
 
 
@@ -266,6 +287,12 @@ def _stable_rng(seed: int, *, bar_index: int, note: int, step: int) -> random.Ra
     return random.Random(mixed)
 
 
+def _bar_is_muted(spec: GrooveSpec, bar_index: int) -> bool:
+    if spec.bar_cycle_length is None:
+        return False
+    return bar_index % spec.bar_cycle_length in spec.bar_cycle_mute_bars
+
+
 def render_bar(
     spec: GrooveSpec,
     *,
@@ -274,6 +301,11 @@ def render_bar(
     bar_ticks: int,
     tempo_bpm: int,
 ) -> list[GrooveHit]:
+    if bar_index < 0:
+        raise midi_workflow.ManifestError("bar_index cannot be negative")
+    if _bar_is_muted(spec, bar_index):
+        return []
+
     bar_steps = steps_per_bar(meter, spec.subdivision)
     if bar_ticks % bar_steps:
         raise midi_workflow.ManifestError(
@@ -338,16 +370,14 @@ def _count_in_hits(
     if spec.count_in == "none":
         return []
     numerator, _ = meter
-    hits: list[GrooveHit] = []
-    for beat in range(numerator):
-        hits.append(
-            GrooveHit(
-                tick=beat * beat_ticks,
-                note=GENERAL_MIDI_DRUMS["side_stick"],
-                velocity=96 if beat == 0 else 78,
-            )
+    return [
+        GrooveHit(
+            tick=beat * beat_ticks,
+            note=GENERAL_MIDI_DRUMS["side_stick"],
+            velocity=96 if beat == 0 else 78,
         )
-    return hits
+        for beat in range(numerator)
+    ]
 
 
 def generate_drum_track(
