@@ -2,7 +2,9 @@
 """Generate and validate every committed backing-track manifest.
 
 Generated MIDI remains a local build artifact under ``generated/backing-tracks``.
-The manifest is authoritative for the output path.
+The manifest is authoritative for the output path. Groove-aware manifests are
+rendered through ``groove_engine``; legacy manifests retain the existing
+deterministic MIDI behavior through the same adapter.
 """
 
 from __future__ import annotations
@@ -12,6 +14,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import groove_engine
 import midi_workflow
 
 
@@ -55,7 +58,7 @@ def generate_all(
     results: list[dict[str, Any]] = []
     for manifest_path in manifests:
         output = manifest_output_path(manifest_path, repo_root)
-        midi_workflow.generate(manifest_path, output)
+        groove_engine.generate(manifest_path, output)
         report = midi_workflow.validate_output(manifest_path, output)
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         results.append(
