@@ -8,8 +8,10 @@ on:
       - "catalogs/practice-data.json"
       - "contracts/backing-tracks/**"
       - "docs/backing-track-form.md"
+      - "docs/backing-track-request.md"
       - "docs/groove-engine.md"
       - "docs/groove-catalog.md"
+      - "examples/backing-tracks/**"
       - "scripts/backing_track_engine.py"
       - "scripts/build_practice_artifacts.py"
       - "scripts/export_practice_data.py"
@@ -17,8 +19,10 @@ on:
       - "scripts/groove_catalog.py"
       - "scripts/generate_backing_tracks.py"
       - "scripts/midi_workflow.py"
+      - "scripts/resolve_backing_track_request.py"
       - "scripts/check_public_boundary.py"
       - "tests/test_backing_track_engine.py"
+      - "tests/test_backing_track_request.py"
       - "tests/test_build_practice_artifacts.py"
       - "tests/test_groove_engine.py"
       - "tests/test_groove_catalog.py"
@@ -34,8 +38,10 @@ on:
       - "catalogs/practice-data.json"
       - "contracts/backing-tracks/**"
       - "docs/backing-track-form.md"
+      - "docs/backing-track-request.md"
       - "docs/groove-engine.md"
       - "docs/groove-catalog.md"
+      - "examples/backing-tracks/**"
       - "scripts/backing_track_engine.py"
       - "scripts/build_practice_artifacts.py"
       - "scripts/export_practice_data.py"
@@ -43,8 +49,10 @@ on:
       - "scripts/groove_catalog.py"
       - "scripts/generate_backing_tracks.py"
       - "scripts/midi_workflow.py"
+      - "scripts/resolve_backing_track_request.py"
       - "scripts/check_public_boundary.py"
       - "tests/test_backing_track_engine.py"
+      - "tests/test_backing_track_request.py"
       - "tests/test_build_practice_artifacts.py"
       - "tests/test_groove_engine.py"
       - "tests/test_groove_catalog.py"
@@ -74,6 +82,20 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Validate groove catalog
         run: python scripts/groove_catalog.py validate
+      - name: Resolve backing-track request example
+        run: |
+          python scripts/resolve_backing_track_request.py \
+            examples/backing-tracks/funk-wah-request.json \
+            --output /tmp/funk-wah-spec.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          spec = json.loads(Path("/tmp/funk-wah-spec.json").read_text())
+          assert spec["id"] == "funk-wah-pocket-em-96"
+          assert [track["role"] for track in spec["tracks"]] == ["drums", "bass"]
+          assert spec["sections"][0]["bars"] == 8
+          PY
       - name: Generate and validate backing-track catalog
         run: python scripts/generate_backing_tracks.py
       - name: Validate legacy MIDI entry point
