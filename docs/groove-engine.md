@@ -116,6 +116,32 @@ The generator:
 
 Generated MIDI remains a build artifact rather than committed source.
 
+## Reproducible CI artifact bundle
+
+CI packages the generated MIDI with the ordinary public source metadata required to
+inspect and reproduce it. Reproduce the same bundle locally from a clean checkout:
+
+```bash
+python3 scripts/build_practice_artifacts.py \
+  --source-sha "$(git rev-parse HEAD)" \
+  --output-dir generated/practice-artifacts
+```
+
+The bundle contains:
+
+- generated Type 1 MIDI under `generated/backing-tracks/`;
+- backing-track manifests and groove catalog data;
+- public backing-track/groove contracts;
+- a freshly validated practice-cockpit export;
+- `provenance.json` with the source SHA, Python runtime, generator-source hashes, and
+  SHA-256 hashes for the payload; and
+- `SHA256SUMS` covering the payload and provenance manifest.
+
+The bundle deliberately excludes wall-clock timestamps from deterministic content.
+CI builds the bundle twice from the same revision and requires byte-for-byte equality
+before uploading it as a workflow artifact. Uploaded CI bundles are retained for 14
+days; tagged long-lived distribution belongs to the separate release workflow.
+
 ## External supervisor boundary
 
 The integration point is declarative data, not execution authority:
