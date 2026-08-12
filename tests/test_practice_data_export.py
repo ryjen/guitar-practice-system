@@ -5,19 +5,19 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-MODULE_PATH = ROOT / "scripts" / "export_practice_cockpit.py"
-spec = importlib.util.spec_from_file_location("export_practice_cockpit", MODULE_PATH)
+MODULE_PATH = ROOT / "scripts" / "export_practice_data.py"
+spec = importlib.util.spec_from_file_location("export_practice_data", MODULE_PATH)
 module = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 spec.loader.exec_module(module)
 
 
-class PracticeCockpitExportTests(unittest.TestCase):
+class PracticeDataExportTests(unittest.TestCase):
     def setUp(self):
         self.catalog = module.load_catalog()
 
     def test_generated_export_matches_canonical_catalog(self):
-        output = ROOT / "docs" / "data" / "practice-cockpit.json"
+        output = ROOT / "docs" / "data" / "practice-data.json"
         with output.open(encoding="utf-8") as handle:
             exported = json.load(handle)
         self.assertEqual(exported, self.catalog)

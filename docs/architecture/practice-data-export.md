@@ -1,10 +1,10 @@
-# Practice cockpit public export
+# Practice data public export
 
-The practice cockpit export is a versioned, static projection of public practice content for browser-facing consumers such as Entrobert Music.
+The practice data export is a versioned, static projection of public practice content for browser-facing consumers such as Entrobert Music.
 
 ## Ownership
 
-`catalogs/practice-cockpit.json` is the canonical public catalog for the fields represented by this contract. The generated artifact at `docs/data/practice-cockpit.json` is a portable distribution copy.
+`catalogs/practice-data.json` is the canonical public catalog for the fields represented by this contract. The generated copy at `docs/data/practice-data.json` is a portable distribution copy.
 
 The export deliberately does **not** contain:
 
@@ -31,24 +31,24 @@ Consumers must reject unsupported schema versions rather than silently guessing 
 From the repository root:
 
 ```sh
-python scripts/export_practice_cockpit.py
+python scripts/export_practice_data.py
 ```
 
 CI verifies the checked-in export is semantically identical to the canonical catalog:
 
 ```sh
-python scripts/export_practice_cockpit.py --check
+python scripts/export_practice_data.py --check
 ```
 
 The exporter also validates unique IDs, required fields, duration totals, repository-relative source references, and strictly increasing slow/medium/fast tempo ladders.
 
 ## Downstream consumption
 
-A downstream static site should **vendor the generated artifact into its own source tree** during an explicit update. The deployed site should not depend on GitHub or this repository at runtime.
+A downstream static site should **vendor the generated data into its own source tree** during an explicit update. The deployed site should not depend on GitHub or this repository at runtime.
 
 Recommended flow:
 
-1. fetch or copy `docs/data/practice-cockpit.json` at a reviewed commit;
+1. fetch or copy `docs/data/practice-data.json` at a reviewed commit;
 2. store the vendored copy in the downstream repository;
 3. validate `schemaVersion` before build;
 4. map data fields into the downstream presentation layer;

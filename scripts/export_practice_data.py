@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate and export the public practice cockpit catalog."""
+"""Validate and export the public practice data catalog."""
 
 from __future__ import annotations
 
@@ -8,8 +8,8 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "catalogs" / "practice-cockpit.json"
-DEFAULT_OUTPUT = ROOT / "docs" / "data" / "practice-cockpit.json"
+SOURCE = ROOT / "catalogs" / "practice-data.json"
+DEFAULT_OUTPUT = ROOT / "docs" / "data" / "practice-data.json"
 
 
 class CatalogError(ValueError):

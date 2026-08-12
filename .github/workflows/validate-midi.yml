@@ -5,12 +5,12 @@ on:
     paths:
       - "backing-tracks/**"
       - "catalogs/grooves/**"
-      - "catalogs/practice-cockpit.json"
+      - "catalogs/practice-data.json"
       - "contracts/backing-tracks/**"
       - "docs/groove-engine.md"
       - "docs/groove-catalog.md"
       - "scripts/build_practice_artifacts.py"
-      - "scripts/export_practice_cockpit.py"
+      - "scripts/export_practice_data.py"
       - "scripts/groove_engine.py"
       - "scripts/groove_catalog.py"
       - "scripts/generate_backing_tracks.py"
@@ -28,12 +28,12 @@ on:
     paths:
       - "backing-tracks/**"
       - "catalogs/grooves/**"
-      - "catalogs/practice-cockpit.json"
+      - "catalogs/practice-data.json"
       - "contracts/backing-tracks/**"
       - "docs/groove-engine.md"
       - "docs/groove-catalog.md"
       - "scripts/build_practice_artifacts.py"
-      - "scripts/export_practice_cockpit.py"
+      - "scripts/export_practice_data.py"
       - "scripts/groove_engine.py"
       - "scripts/groove_catalog.py"
       - "scripts/generate_backing_tracks.py"
@@ -75,21 +75,14 @@ jobs:
           python scripts/midi_workflow.py generate \
             backing-tracks/slide-slow-blues/manifest.json \
             generated/backing-tracks/slide-slow-blues-a-60.mid
-      - name: Build deterministic practice artifact bundle
+      - name: Build deterministic practice bundle
         run: |
           python scripts/build_practice_artifacts.py \
             --source-sha "${{ github.sha }}" \
-            --output-dir generated/practice-artifacts
+            --output-dir generated/practice-bundle
       - name: Verify reproducible bundle
         run: |
           python scripts/build_practice_artifacts.py \
             --source-sha "${{ github.sha }}" \
-            --output-dir generated/practice-artifacts-replay
-          diff -qr generated/practice-artifacts generated/practice-artifacts-replay
-      - name: Upload practice artifact bundle
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: practice-artifacts-${{ github.sha }}
-          path: generated/practice-artifacts/
-          if-no-files-found: error
-          retention-days: 14
+            --output-dir generated/practice-bundle-replay
+          diff -qr generated/practice-bundle generated/practice-bundle-replay
