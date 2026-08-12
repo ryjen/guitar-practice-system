@@ -149,6 +149,25 @@ def validate_manifest(manifest: dict[str, Any]) -> None:
         resolve_track(track, manifest["meter"])
 
 
+def _count_in_hits(
+    spec: groove_engine.GrooveSpec,
+    *,
+    meter: list[int],
+    beat_ticks: int,
+) -> list[groove_engine.GrooveHit]:
+    if spec.count_in == "none":
+        return []
+    numerator, _ = meter
+    return [
+        groove_engine.GrooveHit(
+            tick=beat * beat_ticks,
+            note=groove_engine.GENERAL_MIDI_DRUMS["side_stick"],
+            velocity=96 if beat == 0 else 78,
+        )
+        for beat in range(numerator)
+    ]
+
+
 def _generate_groove_drum_track(
     track: dict[str, Any],
     *,
@@ -179,11 +198,7 @@ def _generate_groove_drum_track(
         if absolute_bar in muted_bars:
             hits: list[groove_engine.GrooveHit] = []
         elif absolute_bar < count_in_bars and spec.count_in != "groove":
-            hits = groove_engine._count_in_hits(
-                spec,
-                meter=meter,
-                beat_ticks=beat_ticks,
-            )
+            hits = _count_in_hits(spec, meter=meter, beat_ticks=beat_ticks)
         else:
             musical_bar = max(0, absolute_bar - count_in_bars)
             hits = groove_engine.render_bar(
