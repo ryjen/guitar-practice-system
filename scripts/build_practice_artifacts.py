@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Build a deterministic public practice-artifact bundle.
+"""Build a deterministic public practice-data bundle.
 
 The bundle is derived entirely from repository-owned canonical sources. Generated
 MIDI remains non-canonical build output; this script packages it with the public
 metadata needed to understand and reproduce it, plus deterministic provenance and
-checksums.
+checksums. CI uses the bundle only for validation and does not upload it.
 """
 
 from __future__ import annotations
@@ -16,12 +16,12 @@ import shutil
 import sys
 from pathlib import Path
 
-import export_practice_cockpit
+import export_practice_data
 import generate_backing_tracks
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUTPUT = ROOT / "generated" / "practice-artifacts"
+DEFAULT_OUTPUT = ROOT / "generated" / "practice-bundle"
 PUBLIC_SOURCE_DIRS = (
     Path("backing-tracks"),
     Path("catalogs/grooves"),
@@ -29,7 +29,7 @@ PUBLIC_SOURCE_DIRS = (
 )
 GENERATOR_INPUTS = (
     Path("scripts/build_practice_artifacts.py"),
-    Path("scripts/export_practice_cockpit.py"),
+    Path("scripts/export_practice_data.py"),
     Path("scripts/generate_backing_tracks.py"),
     Path("scripts/groove_catalog.py"),
     Path("scripts/groove_engine.py"),
@@ -97,8 +97,7 @@ def build_bundle(output: Path, source_sha: str) -> None:
     output.mkdir(parents=True)
 
     copy_public_sources(output)
-
-    export_practice_cockpit.export(output / "exports" / "practice-cockpit.json")
+    export_practice_data.export(output / "exports" / "practice-data.json")
     generate_backing_tracks.generate_all(repo_root=output)
 
     provenance = build_provenance(output, source_sha)
@@ -115,7 +114,7 @@ def main() -> int:
         "--output-dir",
         type=Path,
         default=DEFAULT_OUTPUT,
-        help="bundle directory (default: generated/practice-artifacts)",
+        help="bundle directory (default: generated/practice-bundle)",
     )
     parser.add_argument("--source-sha", required=True)
     args = parser.parse_args()
