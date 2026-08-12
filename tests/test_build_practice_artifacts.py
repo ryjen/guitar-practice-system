@@ -36,9 +36,14 @@ class PracticeArtifactBundleTests(unittest.TestCase):
 
             provenance = json.loads((first / "provenance.json").read_text())
             self.assertEqual(provenance["sourceGitSha"], source_sha)
+            self.assertIn("scripts/backing_track_engine.py", provenance["generatorInputs"])
             self.assertIn("scripts/generate_backing_tracks.py", provenance["generatorInputs"])
             self.assertIn(
                 "generated/backing-tracks/slide-slow-blues-a-60.mid",
+                provenance["artifacts"],
+            )
+            self.assertIn(
+                "generated/backing-tracks/call-response-gap-em-92.mid",
                 provenance["artifacts"],
             )
             self.assertTrue((first / "exports/practice-cockpit.json").exists())
