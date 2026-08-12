@@ -19,8 +19,8 @@ focused on drums and the low-level MIDI workflow remains unaware of preset catal
 
 ## Referencing a groove preset
 
-A drum track may reference one stable public catalog ID instead of embedding the
-full `GrooveSpec`:
+A drum track may reference one stable public catalog ID instead of storing the
+full `GrooveSpec` inline:
 
 ```json
 {
