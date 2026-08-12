@@ -1,0 +1,56 @@
+{
+  "id": "call-response-gap-em-92",
+  "title": "Call / Response Gap Practice",
+  "purpose": "Practice internal time and phrasing against two bars of accompaniment followed by two bars of full-band space.",
+  "linked_techniques": ["phrasing", "internal-time"],
+  "linked_songs": [],
+  "key_signature": "Emin",
+  "tempo_bpm": 92,
+  "meter": [4, 4],
+  "feel": "straight restrained rock pocket with deliberate full-band gaps",
+  "count_in_bars": 1,
+  "arrangement": {
+    "bar_cycle": {
+      "length": 4,
+      "mute_bars": [2, 3]
+    }
+  },
+  "sections": [
+    {
+      "name": "CALL-RESPONSE",
+      "bars": 8,
+      "chords": ["Em", "Em", "Em", "Em", "Em", "Em", "Em", "Em"]
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Drums",
+      "role": "drums",
+      "channel": 9,
+      "velocity": 88,
+      "groove_preset": "alt-rock",
+      "instrument_intent": "steady reference groove during call bars; completely silent during response-space bars"
+    },
+    {
+      "name": "Bass",
+      "role": "bass",
+      "channel": 0,
+      "program": 34,
+      "velocity": 80,
+      "instrument_intent": "simple roots and fifths that stop with the drums during response-space bars"
+    }
+  ],
+  "variants": {
+    "tempo_bpm": [72, 82, 92, 102],
+    "density": ["drums-only", "drums-bass"]
+  },
+  "provenance": {
+    "type": "original",
+    "notes": "Original practice vamp using a public deterministic groove preset and arrangement-wide gap cycle."
+  },
+  "outputs": {
+    "midi": "generated/backing-tracks/call-response-gap-em-92.mid",
+    "audio": null,
+    "daw_project": null
+  }
+}
