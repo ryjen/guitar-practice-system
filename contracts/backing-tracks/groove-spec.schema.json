@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ryjen.github.io/guitar-practice-system/contracts/backing-tracks/groove-spec.schema.json",
+  "title": "GrooveSpec",
+  "description": "Deterministic drum-groove contract for backing-track manifests.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "subdivision",
+    "instruments"
+  ],
+  "properties": {
+    "subdivision": {
+      "type": "integer",
+      "enum": [
+        4,
+        8,
+        16,
+        32
+      ]
+    },
+    "swing": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 0.5,
+      "default": 0.0
+    },
+    "humanize_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 30,
+      "default": 0
+    },
+    "velocity_variance": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 24,
+      "default": 0
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647,
+      "default": 0
+    },
+    "count_in": {
+      "type": "string",
+      "enum": [
+        "click",
+        "groove",
+        "none"
+      ],
+      "default": "click"
+    },
+    "instruments": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "enum": [
+          "kick",
+          "side_stick",
+          "snare",
+          "clap",
+          "closed_hat",
+          "pedal_hat",
+          "open_hat",
+          "low_tom",
+          "mid_tom",
+          "high_tom",
+          "crash",
+          "ride"
+        ]
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/instrument"
+      }
+    }
+  },
+  "$defs": {
+    "steps": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "instrument": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "steps": {
+          "$ref": "#/$defs/steps"
+        },
+        "velocity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 127
+        },
+        "accent_steps": {
+          "$ref": "#/$defs/steps"
+        },
+        "accent_velocity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 127
+        },
+        "variation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "every_bars",
+            "steps"
+          ],
+          "properties": {
+            "every_bars": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 64
+            },
+            "steps": {
+              "$ref": "#/$defs/steps"
+            }
+          }
+        }
+      }
+    }
+  }
+}
