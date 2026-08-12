@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import build_practice_artifacts  # noqa: E402
 
 
-class PracticeArtifactBundleTests(unittest.TestCase):
+class PracticeBundleTests(unittest.TestCase):
     def test_bundle_is_reproducible_and_self_describing(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -41,7 +41,7 @@ class PracticeArtifactBundleTests(unittest.TestCase):
                 "generated/backing-tracks/slide-slow-blues-a-60.mid",
                 provenance["artifacts"],
             )
-            self.assertTrue((first / "exports/practice-cockpit.json").exists())
+            self.assertTrue((first / "exports/practice-data.json").exists())
             self.assertTrue((first / "SHA256SUMS").exists())
 
     def test_source_sha_is_required(self) -> None:
