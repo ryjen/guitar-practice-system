@@ -85,10 +85,15 @@ def _int_field(value: Any, *, name: str, minimum: int, maximum: int) -> int:
     return value
 
 
-def _non_empty_string(value: Any, name: str) -> str:
+def _non_empty_string(value: Any, name: str, *, maximum: int) -> str:
     if not isinstance(value, str) or not value.strip():
         raise midi_workflow.ManifestError(f"{name} must be a non-empty string")
-    return value.strip()
+    normalized = value.strip()
+    if len(normalized) > maximum:
+        raise midi_workflow.ManifestError(
+            f"{name} must be at most {maximum} characters"
+        )
+    return normalized
 
 
 def _unknown_fields(data: dict[str, Any], allowed: set[str], name: str) -> None:
@@ -122,7 +127,11 @@ def _validate_progression(value: Any, *, bars: int) -> list[str]:
 
     result: list[str] = []
     for index, chord in enumerate(progression):
-        chord = _non_empty_string(chord, f"form.progression[{index}]")
+        chord = _non_empty_string(
+            chord,
+            f"form.progression[{index}]",
+            maximum=16,
+        )
         if chord.upper() != "N.C.":
             midi_workflow.chord_notes(chord)
         result.append(chord)
@@ -171,13 +180,17 @@ def validate_request(request: dict[str, Any]) -> None:
             f"request.version must be {REQUEST_VERSION}"
         )
 
-    request_id = _non_empty_string(request.get("id"), "id")
+    request_id = _non_empty_string(request.get("id"), "id", maximum=64)
     if not ID_PATTERN.fullmatch(request_id):
         raise midi_workflow.ManifestError("id must be lowercase kebab-case")
-    _non_empty_string(request.get("title"), "title")
-    _non_empty_string(request.get("purpose"), "purpose")
+    _non_empty_string(request.get("title"), "title", maximum=120)
+    _non_empty_string(request.get("purpose"), "purpose", maximum=500)
 
-    key_signature = _non_empty_string(request.get("key_signature"), "key_signature")
+    key_signature = _non_empty_string(
+        request.get("key_signature"),
+        "key_signature",
+        maximum=16,
+    )
     midi_workflow.key_signature_payload(key_signature)
 
     meter = _validate_meter(request.get("meter"))
@@ -194,7 +207,11 @@ def validate_request(request: dict[str, Any]) -> None:
         maximum=4,
     )
 
-    preset_id = _non_empty_string(request.get("groove_preset"), "groove_preset")
+    preset_id = _non_empty_string(
+        request.get("groove_preset"),
+        "groove_preset",
+        maximum=64,
+    )
     preset = groove_catalog.get_preset(preset_id)
     if preset["meter"] != meter:
         raise midi_workflow.ManifestError(
@@ -213,7 +230,11 @@ def validate_request(request: dict[str, Any]) -> None:
     bars = _int_field(form.get("bars"), name="form.bars", minimum=1, maximum=128)
     _validate_progression(form.get("progression"), bars=bars)
     if "section_name" in form:
-        _non_empty_string(form["section_name"], "form.section_name")
+        _non_empty_string(
+            form["section_name"],
+            "form.section_name",
+            maximum=64,
+        )
 
     _validate_instrumentation(request.get("instrumentation"))
     _validate_arrangement(request.get("arrangement"))
@@ -223,11 +244,31 @@ def resolve_request(request: dict[str, Any]) -> dict[str, Any]:
     """Resolve a validated request into a deterministic BackingTrackSpec dictionary."""
     validate_request(request)
 
-    preset_id = request["groove_preset"]
+    request_id = _non_empty_string(request["id"], "id", maximum=64)
+    title = _non_empty_string(request["title"], "title", maximum=120)
+    purpose = _non_empty_string(request["purpose"], "purpose", maximum=500)
+    key_signature = _non_empty_string(
+        request["key_signature"],
+        "key_signature",
+        maximum=16,
+    )
+    meter = _validate_meter(request["meter"])
+    tempo_bpm = request["tempo_bpm"]
+    count_in_bars = request.get("count_in_bars", 1)
+    preset_id = _non_empty_string(
+        request["groove_preset"],
+        "groove_preset",
+        maximum=64,
+    )
     preset = groove_catalog.get_preset(preset_id)
     form = request["form"]
     bars = form["bars"]
     progression = _validate_progression(form["progression"], bars=bars)
+    section_name = _non_empty_string(
+        form.get("section_name", "PRACTICE"),
+        "form.section_name",
+        maximum=64,
+    )
     chords = [progression[index % len(progression)] for index in range(bars)]
     roles = _validate_instrumentation(request["instrumentation"])
 
@@ -239,19 +280,19 @@ def resolve_request(request: dict[str, Any]) -> dict[str, Any]:
         tracks.append(track)
 
     spec: dict[str, Any] = {
-        "id": request["id"],
-        "title": request["title"],
-        "purpose": request["purpose"],
+        "id": request_id,
+        "title": title,
+        "purpose": purpose,
         "linked_techniques": list(preset["practice_intents"]),
         "linked_songs": [],
-        "key_signature": request["key_signature"],
-        "tempo_bpm": request["tempo_bpm"],
-        "meter": list(request["meter"]),
+        "key_signature": key_signature,
+        "tempo_bpm": tempo_bpm,
+        "meter": meter,
         "feel": preset["description"],
-        "count_in_bars": request.get("count_in_bars", 1),
+        "count_in_bars": count_in_bars,
         "sections": [
             {
-                "name": form.get("section_name", "PRACTICE"),
+                "name": section_name,
                 "bars": bars,
                 "chords": chords,
             }
@@ -262,7 +303,7 @@ def resolve_request(request: dict[str, Any]) -> dict[str, Any]:
             "notes": "Resolved deterministically from BackingTrackRequest version 1.",
         },
         "outputs": {
-            "midi": f"generated/backing-tracks/{request['id']}.mid",
+            "midi": f"generated/backing-tracks/{request_id}.mid",
             "audio": None,
             "daw_project": None,
         },
