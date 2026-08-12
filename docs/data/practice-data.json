@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "durationAllocations": {
+    "15": [4, 7, 4],
+    "30": [8, 14, 8],
+    "45": [12, 21, 12]
+  },
+  "sessions": [
+    {
+      "id": "slide-intonation-before-vocabulary",
+      "technique": "Slide",
+      "key": "A minor",
+      "meter": "4/4",
+      "title": "Intonation before vocabulary",
+      "intent": "Make pitch arrival, muting, and release credible before adding speed or density.",
+      "useCase": {"title": "Slow-blues response phrases", "copy": "Two-bar answers over a sparse 12-bar scaffold."},
+      "gear": {"title": "Clear attack, long decay", "copy": "Low-gain compression, restrained drive, short delay, clean headroom."},
+      "space": "Leave beat four empty after every answer.",
+      "tempo": {"slow": 52, "medium": 64, "fast": 72, "pulse": "quarter-note", "beatsPerBar": 4},
+      "stages": [
+        {"title": "Arrival drill", "copy": "Match target pitch, then remove visual correction."},
+        {"title": "Two-note answers", "copy": "Use one stable tone and one expressive arrival."},
+        {"title": "Record evidence", "copy": "Capture three passes and identify the largest defect."}
+      ],
+      "source": {"label": "Open slow-blues backing-track source", "path": "backing-tracks/slide-slow-blues/manifest.json"}
+    },
+    {
+      "id": "wah-rhythm-before-sweep-range",
+      "technique": "Wah",
+      "key": "E minor",
+      "meter": "4/4",
+      "title": "Rhythm before sweep range",
+      "intent": "Treat the pedal as a timing and articulation device rather than a continuous effect.",
+      "useCase": {"title": "Muted sixteenth-note hook", "copy": "One-bar call-and-response over a restrained rock groove."},
+      "gear": {"title": "Controlled midrange motion", "copy": "Compressor before wah, modest drive, noise gate only as needed."},
+      "space": "Mute the final eighth note of every second bar.",
+      "tempo": {"slow": 72, "medium": 84, "fast": 96, "pulse": "quarter-note", "beatsPerBar": 4},
+      "stages": [
+        {"title": "Quarter-note centres", "copy": "Land the pedal consistently on the beat."},
+        {"title": "Syncopated accents", "copy": "Move only on selected sixteenth-note attacks."},
+        {"title": "Record evidence", "copy": "Check whether pedal motion strengthens or obscures the groove."}
+      ],
+      "source": {"label": "Open wah technique setup source", "path": "docs/gear/technique-setups.md"}
+    },
+    {
+      "id": "ebow-activation-and-phrase",
+      "technique": "E-Bow",
+      "key": "D major",
+      "meter": "6/8",
+      "title": "Activation without the swell becoming the phrase",
+      "intent": "Control entry timing, string changes, and decay so the sustained line serves the arrangement.",
+      "useCase": {"title": "Drone and counterline", "copy": "A sparse upper-register response over a D–G movement."},
+      "gear": {"title": "Stable sustain, low noise", "copy": "Clean guitar, restrained compression, long but quiet delay return."},
+      "space": "Wait one full dotted quarter before answering.",
+      "tempo": {"slow": 48, "medium": 56, "fast": 64, "pulse": "dotted-quarter", "beatsPerBar": 2},
+      "stages": [
+        {"title": "Activation point", "copy": "Produce repeatable entries at three dynamic levels."},
+        {"title": "String transition", "copy": "Cross strings without an uncontrolled volume spike."},
+        {"title": "Record evidence", "copy": "Review entry timing, pitch centre, and arrangement space."}
+      ],
+      "source": {"label": "Open E-Bow and sustain source", "path": "docs/ebow-and-sustain.md"}
+    },
+    {
+      "id": "hybrid-picking-country-colour-layer",
+      "technique": "Hybrid picking",
+      "key": "A major",
+      "meter": "4/4",
+      "title": "Country articulation as a colour layer",
+      "intent": "Add snap, separation, and chord-tone targeting without turning the session into a separate curriculum.",
+      "useCase": {"title": "Eighties-rock turnaround", "copy": "Apply selective double-stops and open-string pull-offs to a familiar rock cadence."},
+      "gear": {"title": "Fast clean response", "copy": "Strat or PRS split-coil sound, light compression, minimal ambience."},
+      "space": "Cap each phrase at six notes and leave the next beat empty.",
+      "tempo": {"slow": 76, "medium": 92, "fast": 104, "pulse": "quarter-note", "beatsPerBar": 4},
+      "stages": [
+        {"title": "String-pair control", "copy": "Alternate pick and fingers without volume imbalance."},
+        {"title": "Chord-tone target", "copy": "Resolve each lick to the next chord, not the scale box."},
+        {"title": "Record evidence", "copy": "Decide whether the country layer supports or distracts from the core sound."}
+      ],
+      "source": {"label": "Open country-over-eighties-rock session source", "path": "examples/musical-dimensions/country-over-eighties-rock-session.md"}
+    }
+  ],
+  "techniques": [
+    {"id": "slide", "name": "Slide", "copy": "Pitch, vibrato, muting, arrival, and release.", "items": ["Intonation gates", "Position-independent phrasing", "Brass / glass / ring slide"]},
+    {"id": "wah", "name": "Wah", "copy": "Rhythmic control, vowel shape, accents, and range.", "items": ["Beat-centred motion", "Syncopated articulation", "Noise-aware gain staging"]},
+    {"id": "ebow", "name": "E-Bow", "copy": "Activation, sustain, drones, counterlines, and texture.", "items": ["Dynamic entries", "String transitions", "Arrangement role"]},
+    {"id": "country-branch", "name": "Country branch", "copy": "Hybrid picking, snap, voice leading, and vocabulary.", "items": ["Selective layering", "Double-stops", "Chord-tone resolution"]}
+  ]
+}
