@@ -1,1 +1,359 @@
-{"version":1,"presets":[{"id":"blues-shuffle","title":"Blues Shuffle","description":"Triplet-feel shuffle with a clear backbeat and restrained four-bar lift.","meter":[4,4],"default_tempo_bpm":78,"tempo_range_bpm":[55,130],"tags":["blues","shuffle","swing"],"practice_intents":["phrasing","slide","timing","call-and-response"],"groove":{"subdivision":8,"swing":0.333,"humanize_ms":6,"velocity_variance":4,"seed":101,"count_in":"click","instruments":{"kick":{"steps":[0,3,4,6],"velocity":92,"accent_steps":[0,4],"accent_velocity":104},"snare":{"steps":[2,6],"velocity":98,"accent_steps":[2,6],"accent_velocity":108},"closed_hat":{"steps":[0,1,2,3,4,5,6,7],"velocity":64,"accent_steps":[0,4],"accent_velocity":78},"open_hat":{"steps":[],"velocity":74,"variation":{"every_bars":4,"steps":[7]}}}}},{"id":"country-train","title":"Country Train Beat","description":"Straight train-style country pulse with a stable boom-chick foundation.","meter":[4,4],"default_tempo_bpm":112,"tempo_range_bpm":[80,160],"tags":["country","train-beat","straight"],"practice_intents":["alternate-picking","hybrid-picking","fills","timing"],"groove":{"subdivision":16,"swing":0.0,"humanize_ms":4,"velocity_variance":3,"seed":202,"count_in":"click","instruments":{"kick":{"steps":[0,8],"velocity":98,"accent_steps":[0],"accent_velocity":108},"side_stick":{"steps":[4,12],"velocity":88,"accent_steps":[4,12],"accent_velocity":96},"closed_hat":{"steps":[0,2,4,6,8,10,12,14],"velocity":62,"accent_steps":[0,8],"accent_velocity":76},"snare":{"steps":[],"velocity":92,"variation":{"every_bars":4,"steps":[15]}}}}},{"id":"funk-wah-16","title":"Funk/Wah Sixteenth Groove","description":"Syncopated sixteenth-note pocket with ghosted snare detail and space for wah articulation.","meter":[4,4],"default_tempo_bpm":96,"tempo_range_bpm":[75,125],"tags":["funk","wah","sixteenth","syncopation"],"practice_intents":["wah","muting","syncopation","dynamics"],"groove":{"subdivision":16,"swing":0.0,"humanize_ms":7,"velocity_variance":5,"seed":303,"count_in":"click","instruments":{"kick":{"steps":[0,3,6,8,11,14],"velocity":92,"accent_steps":[0,8],"accent_velocity":104},"snare":{"steps":[2,4,7,10,12,15],"velocity":48,"accent_steps":[4,12],"accent_velocity":108},"closed_hat":{"steps":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],"velocity":58,"accent_steps":[0,4,8,12],"accent_velocity":78},"open_hat":{"steps":[],"velocity":80,"variation":{"every_bars":4,"steps":[15]}}}}},{"id":"jazz-swing","title":"Jazz Swing","description":"Light swung ride pattern with hi-hat on two and four and feathered kick.","meter":[4,4],"default_tempo_bpm":120,"tempo_range_bpm":[70,220],"tags":["jazz","swing","ride"],"practice_intents":["comping","ii-v-i","phrasing","time-feel"],"groove":{"subdivision":8,"swing":0.333,"humanize_ms":8,"velocity_variance":5,"seed":404,"count_in":"click","instruments":{"ride":{"steps":[0,2,3,4,6,7],"velocity":66,"accent_steps":[0,4],"accent_velocity":82},"pedal_hat":{"steps":[2,6],"velocity":72,"accent_steps":[2,6],"accent_velocity":82},"kick":{"steps":[0,4],"velocity":42,"accent_steps":[0],"accent_velocity":50},"snare":{"steps":[],"velocity":62,"variation":{"every_bars":4,"steps":[7]}}}}},{"id":"alt-rock","title":"Alt-Rock Pocket","description":"Dry straight-eighth alternative-rock groove with controlled syncopated kick.","meter":[4,4],"default_tempo_bpm":108,"tempo_range_bpm":[85,145],"tags":["alt-rock","rock","straight"],"practice_intents":["riffing","dynamics","octaves","lead-rhythm"],"groove":{"subdivision":16,"swing":0.0,"humanize_ms":6,"velocity_variance":4,"seed":505,"count_in":"click","instruments":{"kick":{"steps":[0,6,8,14],"velocity":100,"accent_steps":[0,8],"accent_velocity":110},"snare":{"steps":[4,12],"velocity":104,"accent_steps":[4,12],"accent_velocity":114},"closed_hat":{"steps":[0,2,4,6,8,10,12,14],"velocity":66,"accent_steps":[0,8],"accent_velocity":80},"crash":{"steps":[],"velocity":104,"variation":{"every_bars":8,"steps":[0]}}}}},{"id":"80s-rock","title":"80s Arena Rock","description":"Large straight rock pocket with driving eighths, section crashes, and a simple tom turnaround.","meter":[4,4],"default_tempo_bpm":116,"tempo_range_bpm":[90,145],"tags":["80s-rock","hard-rock","arena","straight"],"practice_intents":["power-chords","palm-muting","lead","section-changes"],"groove":{"subdivision":16,"swing":0.0,"humanize_ms":5,"velocity_variance":4,"seed":606,"count_in":"click","instruments":{"kick":{"steps":[0,6,8,10,14],"velocity":106,"accent_steps":[0,8],"accent_velocity":116},"snare":{"steps":[4,12],"velocity":110,"accent_steps":[4,12],"accent_velocity":120},"closed_hat":{"steps":[0,2,4,6,8,10,12,14],"velocity":72,"accent_steps":[0,8],"accent_velocity":86},"crash":{"steps":[],"velocity":112,"variation":{"every_bars":8,"steps":[0]}},"high_tom":{"steps":[],"velocity":94,"variation":{"every_bars":8,"steps":[12]}},"mid_tom":{"steps":[],"velocity":96,"variation":{"every_bars":8,"steps":[13]}},"low_tom":{"steps":[],"velocity":100,"variation":{"every_bars":8,"steps":[14,15]}}}}},{"id":"odd-7-8","title":"7/8 Grouped 2+2+3","description":"Seven-eight groove grouped 2+2+3 with explicit pulse accents for odd-meter internalization.","meter":[7,8],"default_tempo_bpm":92,"tempo_range_bpm":[60,135],"grouping":"2+2+3","tags":["odd-meter","7-8","2+2+3"],"practice_intents":["odd-meter","phrasing","accent-control","internal-time"],"groove":{"subdivision":16,"swing":0.0,"humanize_ms":3,"velocity_variance":3,"seed":707,"count_in":"click","instruments":{"kick":{"steps":[0,4,8],"velocity":94,"accent_steps":[0,4,8],"accent_velocity":104},"snare":{"steps":[6,12],"velocity":98,"accent_steps":[6,12],"accent_velocity":108},"closed_hat":{"steps":[0,2,4,6,8,10,12],"velocity":62,"accent_steps":[0,4,8],"accent_velocity":82}}}},{"id":"call-response-2x2","title":"Two-Bar Call / Two-Bar Space","description":"Two bars of a simple rock pulse followed by two silent bars for internal-time and response practice.","meter":[4,4],"default_tempo_bpm":92,"tempo_range_bpm":[60,130],"tags":["call-response","gap","internal-time","space"],"practice_intents":["phrasing","internal-time","space","timing"],"groove":{"subdivision":8,"swing":0.0,"humanize_ms":0,"velocity_variance":0,"seed":808,"count_in":"click","bar_cycle":{"length":4,"mute_bars":[2,3]},"instruments":{"kick":{"steps":[0,4],"velocity":96,"accent_steps":[0],"accent_velocity":104},"snare":{"steps":[2,6],"velocity":98,"accent_steps":[2,6],"accent_velocity":106},"closed_hat":{"steps":[0,1,2,3,4,5,6,7],"velocity":62,"accent_steps":[0,4],"accent_velocity":74}}}}]}
+{
+  "version": 1,
+  "presets": [
+    {
+      "id": "blues-shuffle",
+      "title": "Blues Shuffle",
+      "description": "Triplet-feel shuffle with a clear backbeat and restrained four-bar lift.",
+      "meter": [4, 4],
+      "default_tempo_bpm": 78,
+      "tempo_range_bpm": [55, 130],
+      "tags": ["blues", "shuffle", "swing"],
+      "practice_intents": ["phrasing", "slide", "timing", "call-and-response"],
+      "groove": {
+        "subdivision": 8,
+        "swing": 0.333,
+        "humanize_ms": 6,
+        "velocity_variance": 4,
+        "seed": 101,
+        "count_in": "click",
+        "instruments": {
+          "kick": {
+            "steps": [0, 3, 4, 6],
+            "velocity": 92,
+            "accent_steps": [0, 4],
+            "accent_velocity": 104
+          },
+          "snare": {
+            "steps": [2, 6],
+            "velocity": 98,
+            "accent_steps": [2, 6],
+            "accent_velocity": 108
+          },
+          "closed_hat": {
+            "steps": [0, 1, 2, 3, 4, 5, 6, 7],
+            "velocity": 64,
+            "accent_steps": [0, 4],
+            "accent_velocity": 78
+          },
+          "open_hat": {
+            "steps": [],
+            "velocity": 74,
+            "variation": {"every_bars": 4, "steps": [7]}
+          }
+        }
+      }
+    },
+    {
+      "id": "country-train",
+      "title": "Country Train Beat",
+      "description": "Straight train-style country pulse with a stable boom-chick foundation.",
+      "meter": [4, 4],
+      "default_tempo_bpm": 112,
+      "tempo_range_bpm": [80, 160],
+      "tags": ["country", "train-beat", "straight"],
+      "practice_intents": ["alternate-picking", "hybrid-picking", "fills", "timing"],
+      "groove": {
+        "subdivision": 16,
+        "swing": 0.0,
+        "humanize_ms": 4,
+        "velocity_variance": 3,
+        "seed": 202,
+        "count_in": "click",
+        "instruments": {
+          "kick": {
+            "steps": [0, 8],
+            "velocity": 98,
+            "accent_steps": [0],
+            "accent_velocity": 108
+          },
+          "side_stick": {
+            "steps": [4, 12],
+            "velocity": 88,
+            "accent_steps": [4, 12],
+            "accent_velocity": 96
+          },
+          "closed_hat": {
+            "steps": [0, 2, 4, 6, 8, 10, 12, 14],
+            "velocity": 62,
+            "accent_steps": [0, 8],
+            "accent_velocity": 76
+          },
+          "snare": {
+            "steps": [],
+            "velocity": 92,
+            "variation": {"every_bars": 4, "steps": [15]}
+          }
+        }
+      }
+    },
+    {
+      "id": "funk-wah-16",
+      "title": "Funk/Wah Sixteenth Groove",
+      "description": "Syncopated sixteenth-note pocket with ghosted snare detail and space for wah articulation.",
+      "meter": [4, 4],
+      "default_tempo_bpm": 96,
+      "tempo_range_bpm": [75, 125],
+      "tags": ["funk", "wah", "sixteenth", "syncopation"],
+      "practice_intents": ["wah", "muting", "syncopation", "dynamics"],
+      "groove": {
+        "subdivision": 16,
+        "swing": 0.0,
+        "humanize_ms": 7,
+        "velocity_variance": 5,
+        "seed": 303,
+        "count_in": "click",
+        "instruments": {
+          "kick": {
+            "steps": [0, 3, 6, 8, 11, 14],
+            "velocity": 92,
+            "accent_steps": [0, 8],
+            "accent_velocity": 104
+          },
+          "snare": {
+            "steps": [2, 4, 7, 10, 12, 15],
+            "velocity": 48,
+            "accent_steps": [4, 12],
+            "accent_velocity": 108
+          },
+          "closed_hat": {
+            "steps": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+            "velocity": 58,
+            "accent_steps": [0, 4, 8, 12],
+            "accent_velocity": 78
+          },
+          "open_hat": {
+            "steps": [],
+            "velocity": 80,
+            "variation": {"every_bars": 4, "steps": [15]}
+          }
+        }
+      }
+    },
+    {
+      "id": "jazz-swing",
+      "title": "Jazz Swing",
+      "description": "Light swung ride pattern with hi-hat on two and four and feathered kick.",
+      "meter": [4, 4],
+      "default_tempo_bpm": 120,
+      "tempo_range_bpm": [70, 220],
+      "tags": ["jazz", "swing", "ride"],
+      "practice_intents": ["comping", "ii-v-i", "phrasing", "time-feel"],
+      "groove": {
+        "subdivision": 8,
+        "swing": 0.333,
+        "humanize_ms": 8,
+        "velocity_variance": 5,
+        "seed": 404,
+        "count_in": "click",
+        "instruments": {
+          "ride": {
+            "steps": [0, 2, 3, 4, 6, 7],
+            "velocity": 66,
+            "accent_steps": [0, 4],
+            "accent_velocity": 82
+          },
+          "pedal_hat": {
+            "steps": [2, 6],
+            "velocity": 72,
+            "accent_steps": [2, 6],
+            "accent_velocity": 82
+          },
+          "kick": {
+            "steps": [0, 4],
+            "velocity": 42,
+            "accent_steps": [0],
+            "accent_velocity": 50
+          },
+          "snare": {
+            "steps": [],
+            "velocity": 62,
+            "variation": {"every_bars": 4, "steps": [7]}
+          }
+        }
+      }
+    },
+    {
+      "id": "alt-rock",
+      "title": "Alt-Rock Pocket",
+      "description": "Dry straight-eighth alternative-rock groove with controlled syncopated kick.",
+      "meter": [4, 4],
+      "default_tempo_bpm": 108,
+      "tempo_range_bpm": [85, 145],
+      "tags": ["alt-rock", "rock", "straight"],
+      "practice_intents": ["riffing", "dynamics", "octaves", "lead-rhythm"],
+      "groove": {
+        "subdivision": 16,
+        "swing": 0.0,
+        "humanize_ms": 6,
+        "velocity_variance": 4,
+        "seed": 505,
+        "count_in": "click",
+        "instruments": {
+          "kick": {
+            "steps": [0, 6, 8, 14],
+            "velocity": 100,
+            "accent_steps": [0, 8],
+            "accent_velocity": 110
+          },
+          "snare": {
+            "steps": [4, 12],
+            "velocity": 104,
+            "accent_steps": [4, 12],
+            "accent_velocity": 114
+          },
+          "closed_hat": {
+            "steps": [0, 2, 4, 6, 8, 10, 12, 14],
+            "velocity": 66,
+            "accent_steps": [0, 8],
+            "accent_velocity": 80
+          },
+          "crash": {
+            "steps": [],
+            "velocity": 104,
+            "variation": {"every_bars": 8, "steps": [0]}
+          }
+        }
+      }
+    },
+    {
+      "id": "80s-rock",
+      "title": "80s Arena Rock",
+      "description": "Large straight rock pocket with driving eighths, section crashes, and a simple tom turnaround.",
+      "meter": [4, 4],
+      "default_tempo_bpm": 116,
+      "tempo_range_bpm": [90, 145],
+      "tags": ["80s-rock", "hard-rock", "arena", "straight"],
+      "practice_intents": ["power-chords", "palm-muting", "lead", "section-changes"],
+      "groove": {
+        "subdivision": 16,
+        "swing": 0.0,
+        "humanize_ms": 5,
+        "velocity_variance": 4,
+        "seed": 606,
+        "count_in": "click",
+        "instruments": {
+          "kick": {
+            "steps": [0, 6, 8, 10, 14],
+            "velocity": 106,
+            "accent_steps": [0, 8],
+            "accent_velocity": 116
+          },
+          "snare": {
+            "steps": [4, 12],
+            "velocity": 110,
+            "accent_steps": [4, 12],
+            "accent_velocity": 120
+          },
+          "closed_hat": {
+            "steps": [0, 2, 4, 6, 8, 10, 12, 14],
+            "velocity": 72,
+            "accent_steps": [0, 8],
+            "accent_velocity": 86
+          },
+          "crash": {
+            "steps": [],
+            "velocity": 112,
+            "variation": {"every_bars": 8, "steps": [0]}
+          },
+          "high_tom": {
+            "steps": [],
+            "velocity": 94,
+            "variation": {"every_bars": 8, "steps": [12]}
+          },
+          "mid_tom": {
+            "steps": [],
+            "velocity": 96,
+            "variation": {"every_bars": 8, "steps": [13]}
+          },
+          "low_tom": {
+            "steps": [],
+            "velocity": 100,
+            "variation": {"every_bars": 8, "steps": [14, 15]}
+          }
+        }
+      }
+    },
+    {
+      "id": "odd-7-8",
+      "title": "7/8 Grouped 2+2+3",
+      "description": "Seven-eight groove grouped 2+2+3 with explicit pulse accents for odd-meter internalization.",
+      "meter": [7, 8],
+      "default_tempo_bpm": 92,
+      "tempo_range_bpm": [60, 135],
+      "grouping": "2+2+3",
+      "tags": ["odd-meter", "7-8", "2+2+3"],
+      "practice_intents": ["odd-meter", "phrasing", "accent-control", "internal-time"],
+      "groove": {
+        "subdivision": 16,
+        "swing": 0.0,
+        "humanize_ms": 3,
+        "velocity_variance": 3,
+        "seed": 707,
+        "count_in": "click",
+        "instruments": {
+          "kick": {
+            "steps": [0, 4, 8],
+            "velocity": 94,
+            "accent_steps": [0, 4, 8],
+            "accent_velocity": 104
+          },
+          "snare": {
+            "steps": [6, 12],
+            "velocity": 98,
+            "accent_steps": [6, 12],
+            "accent_velocity": 108
+          },
+          "closed_hat": {
+            "steps": [0, 2, 4, 6, 8, 10, 12],
+            "velocity": 62,
+            "accent_steps": [0, 4, 8],
+            "accent_velocity": 82
+          }
+        }
+      }
+    },
+    {
+      "id": "call-response-2x2",
+      "title": "Two-Bar Call / Two-Bar Space",
+      "description": "Two bars of a simple rock pulse followed by two silent bars for internal-time and response practice.",
+      "meter": [4, 4],
+      "default_tempo_bpm": 92,
+      "tempo_range_bpm": [60, 130],
+      "tags": ["call-response", "gap", "internal-time", "space"],
+      "practice_intents": ["phrasing", "internal-time", "space", "timing"],
+      "groove": {
+        "subdivision": 8,
+        "swing": 0.0,
+        "humanize_ms": 0,
+        "velocity_variance": 0,
+        "seed": 808,
+        "count_in": "click",
+        "bar_cycle": {
+          "length": 4,
+          "mute_bars": [2, 3]
+        },
+        "instruments": {
+          "kick": {
+            "steps": [0, 4],
+            "velocity": 96,
+            "accent_steps": [0],
+            "accent_velocity": 104
+          },
+          "snare": {
+            "steps": [2, 6],
+            "velocity": 98,
+            "accent_steps": [2, 6],
+            "accent_velocity": 106
+          },
+          "closed_hat": {
+            "steps": [0, 1, 2, 3, 4, 5, 6, 7],
+            "velocity": 62,
+            "accent_steps": [0, 4],
+            "accent_velocity": 74
+          }
+        }
+      }
+    }
+  ]
+}
