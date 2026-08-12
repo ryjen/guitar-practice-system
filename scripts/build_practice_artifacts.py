@@ -28,6 +28,7 @@ PUBLIC_SOURCE_DIRS = (
     Path("contracts/backing-tracks"),
 )
 GENERATOR_INPUTS = (
+    Path("scripts/backing_track_engine.py"),
     Path("scripts/build_practice_artifacts.py"),
     Path("scripts/export_practice_data.py"),
     Path("scripts/generate_backing_tracks.py"),
