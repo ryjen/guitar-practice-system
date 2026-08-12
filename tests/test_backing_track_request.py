@@ -46,6 +46,26 @@ class BackingTrackRequestTests(unittest.TestCase):
         second = resolve_backing_track_request.resolve_request(reordered)
         self.assertEqual(first, second)
 
+    def test_trims_bounded_metadata_and_rejects_oversize_text(self) -> None:
+        request = json.loads(json.dumps(self.request))
+        request["title"] = "  Funk/Wah Pocket Practice  "
+        request["purpose"] = "  Practice the pocket.  "
+        request["key_signature"] = " Emin "
+        request["groove_preset"] = " funk-wah-16 "
+        request["form"]["section_name"] = " POCKET "
+        spec = resolve_backing_track_request.resolve_request(request)
+
+        self.assertEqual("Funk/Wah Pocket Practice", spec["title"])
+        self.assertEqual("Practice the pocket.", spec["purpose"])
+        self.assertEqual("Emin", spec["key_signature"])
+        self.assertEqual("POCKET", spec["sections"][0]["name"])
+        self.assertEqual("funk-wah-16", spec["tracks"][0]["groove_preset"])
+
+        request = json.loads(json.dumps(self.request))
+        request["purpose"] = "x" * 501
+        with self.assertRaisesRegex(midi_workflow.ManifestError, "at most 500"):
+            resolve_backing_track_request.resolve_request(request)
+
     def test_rejects_unknown_request_field(self) -> None:
         request = json.loads(json.dumps(self.request))
         request["free_form_instruction"] = "make it better"
