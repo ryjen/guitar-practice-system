@@ -54,7 +54,7 @@ python3 scripts/groove_catalog.py show blues-shuffle
 
 ## Bar cycles and gap practice
 
-`GrooveSpec.bar_cycle` can mute deterministic bars inside a repeating cycle:
+`GrooveSpec.bar_cycle` can mute deterministic drum bars inside a repeating cycle:
 
 ```json
 {
@@ -65,12 +65,16 @@ python3 scripts/groove_catalog.py show blues-shuffle
 }
 ```
 
-Bar indexes are zero-based within the cycle. The example therefore plays bars
-1-2 and leaves bars 3-4 silent before repeating. Count-in bars are not part of the
-cycle.
+Bar indexes are zero-based within the cycle. The example therefore plays drum bars
+1-2 and leaves drum bars 3-4 silent before repeating. Count-in bars are not part of
+the cycle.
 
-This supports internal-time, gap, and call/response exercises without teaching
-the renderer any special musical workflow.
+The cycle masks drum events only. Arrangement-wide gaps that also mute bass, keys,
+or other backing parts belong at the `BackingTrackSpec` / form layer rather than in
+`GrooveSpec`. This keeps beat construction independent from arrangement policy.
+
+The drum-only cycle still supports internal-time, gap, and call/response exercises
+without teaching the renderer any special musical workflow.
 
 ## Extension rules
 
