@@ -68,7 +68,111 @@
       "role": "drums",
       "channel": 9,
       "velocity": 88,
-      "instrument_intent": "firm dry rock kit defining pulse and backbeat; avoid fills that compete with guitar riff articulation"
+      "instrument_intent": "firm dry rock kit defining pulse and backbeat; avoid fills that compete with guitar riff articulation",
+      "groove": {
+        "subdivision": 16,
+        "swing": 0.0,
+        "humanize_ms": 5,
+        "velocity_variance": 4,
+        "seed": 112,
+        "count_in": "click",
+        "instruments": {
+          "kick": {
+            "steps": [
+              0,
+              6,
+              8,
+              14
+            ],
+            "velocity": 104,
+            "accent_steps": [
+              0
+            ],
+            "accent_velocity": 112
+          },
+          "snare": {
+            "steps": [
+              4,
+              12
+            ],
+            "velocity": 108,
+            "accent_steps": [
+              4,
+              12
+            ],
+            "accent_velocity": 116
+          },
+          "closed_hat": {
+            "steps": [
+              0,
+              2,
+              4,
+              6,
+              8,
+              10,
+              12,
+              14
+            ],
+            "velocity": 72,
+            "accent_steps": [
+              0,
+              8
+            ],
+            "accent_velocity": 84
+          },
+          "open_hat": {
+            "steps": [],
+            "velocity": 78,
+            "variation": {
+              "every_bars": 4,
+              "steps": [
+                14
+              ]
+            }
+          },
+          "crash": {
+            "steps": [],
+            "velocity": 108,
+            "variation": {
+              "every_bars": 8,
+              "steps": [
+                0
+              ]
+            }
+          },
+          "high_tom": {
+            "steps": [],
+            "velocity": 92,
+            "variation": {
+              "every_bars": 8,
+              "steps": [
+                12
+              ]
+            }
+          },
+          "mid_tom": {
+            "steps": [],
+            "velocity": 94,
+            "variation": {
+              "every_bars": 8,
+              "steps": [
+                13
+              ]
+            }
+          },
+          "low_tom": {
+            "steps": [],
+            "velocity": 98,
+            "variation": {
+              "every_bars": 8,
+              "steps": [
+                14,
+                15
+              ]
+            }
+          }
+        }
+      }
     },
     {
       "name": "Bass",
