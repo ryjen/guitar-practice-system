@@ -63,11 +63,18 @@ class ProgressionCatalogTests(unittest.TestCase):
         ):
             progression_catalog.resolve_progression("jazz-blues-12", "Amin")
 
-    def test_committed_jazz_blues_request_matches_catalog_and_renders(self) -> None:
+    def test_committed_jazz_blues_artifacts_match_catalog_and_render(self) -> None:
+        expected = progression_catalog.resolve_progression("jazz-blues-12", "C")
+
         request_path = ROOT / "examples" / "backing-tracks" / "jazz-blues-12-request.json"
         request = json.loads(request_path.read_text(encoding="utf-8"))
-        expected = progression_catalog.resolve_progression("jazz-blues-12", "C")
         self.assertEqual(expected, request["form"]["progression"])
+
+        backing_manifest_path = ROOT / "backing-tracks" / "jazz-blues-12" / "manifest.json"
+        backing_manifest = json.loads(backing_manifest_path.read_text(encoding="utf-8"))
+        self.assertEqual(expected, backing_manifest["sections"][0]["chords"])
+        self.assertEqual("walking", backing_manifest["tracks"][1]["bass"]["style"])
+        backing_track_engine.validate_manifest(backing_manifest)
 
         spec = resolve_backing_track_request.resolve_request(request)
         self.assertEqual(12, spec["sections"][0]["bars"])
