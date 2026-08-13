@@ -3,35 +3,57 @@
 ## Reusable progression
 
 - **ID:** `progression-jazz-major-ii-v-i`
+- **Catalog:** `catalogs/progressions/catalog.json`
 - **Intent:** hear and connect predominant, dominant, and tonic motion
 - **Tonal-centre behaviour:** functional
-- **Roman numerals:** `ii7 | V7 | Imaj7`
-- **Harmonic functions:** predominant | dominant | tonic
-- **Bars:** three or four bars depending on realization
+- **Abstract Roman numerals:** `ii7 | V7 | Imaj7`
+- **Catalog realization:** `ii7 | V7 | Imaj7 | Imaj7`
+- **Harmonic functions:** predominant | dominant | tonic | tonic
+- **Bars:** four in the executable practice realization
 
-The reusable identity does not own a key, tempo, fretboard position, or voicing.
+The first three bars define the harmonic identity. The repeated tonic bar gives time to hear resolution, inspect guide tones, leave space, and prepare the next key. The reusable identity does not own a key, tempo, fretboard position, or voicing.
+
+Resolve one key directly:
+
+```bash
+python3 scripts/progression_catalog.py resolve progression-jazz-major-ii-v-i C
+```
 
 ## Traversal strategy
 
-- **Order:** C, F, B♭, E♭, A♭, D♭, G♭/F♯, B, E, A, D, G
-- **Relationship:** each new tonic is a fourth above the previous tonic
+- **Canonical order:** C, F, B♭, E♭, A♭, D♭, G♭, B, E, A, D, G
+- **Enharmonic alias:** F♯ may be supplied as the start key and normalizes to the G♭ position
+- **Relationship:** each new tonic is a fourth above the previous tonic, with the G♭/B boundary using the practical enharmonic spelling above
 - **Initial scope:** four adjacent keys per session
 - **Expansion:** add keys only after voice leading remains controlled
 
+Generate the first four tonic positions:
+
+```bash
+python3 scripts/progression_catalog.py fourths \
+  progression-jazz-major-ii-v-i \
+  --start-key C \
+  --count 4
+```
+
+The traversal resolver is bounded to one through twelve positions and may start anywhere in the canonical sequence. It wraps deterministically.
+
 ## Reference realization
 
-| Tonic | ii7 | V7 | Imaj7 |
-|---|---|---|---|
-| C | Dm7 | G7 | Cmaj7 |
-| F | Gm7 | C7 | Fmaj7 |
-| B♭ | Cm7 | F7 | B♭maj7 |
-| E♭ | Fm7 | B♭7 | E♭maj7 |
+| Tonic | ii7 | V7 | Imaj7 | Imaj7 |
+|---|---|---|---|---|
+| C | Dm7 | G7 | Cmaj7 | Cmaj7 |
+| F | Gm7 | C7 | Fmaj7 | Fmaj7 |
+| B♭ | Cm7 | F7 | B♭maj7 | B♭maj7 |
+| E♭ | Fm7 | B♭7 | E♭maj7 | E♭maj7 |
+
+A committed backing-track request for the first position is available at `examples/backing-tracks/ii-v-i-c-request.json`. It uses the same progression preset, so the concrete chord list is resolved rather than duplicated.
 
 ## Practice session
 
 - **Primary goal:** hear guide-tone resolution while moving through four keys
 - **Duration:** 20 minutes
-- **Tempo:** 60 BPM
+- **Tempo:** 60 BPM for isolated voicing work; the committed swing backing-track request uses 80 BPM to remain inside the validated groove range
 - **Meter:** 4/4
 - **Harmonic rhythm:** one chord per bar; repeat tonic for a fourth bar
 - **Fretboard view:** nearest available shell voicings; CAGED labels optional
