@@ -144,6 +144,11 @@ def _velocity(base: int, kick_velocity: int, follow: bool) -> int:
     return max(1, min(127, adjusted))
 
 
+def _duration(*, window: int, remaining: int, gate_percent: int) -> int:
+    gated = max(1, round(max(1, window) * gate_percent / 100))
+    return min(gated, max(1, remaining))
+
+
 def render_bar(
     spec: BassSpec,
     *,
@@ -172,14 +177,16 @@ def render_bar(
         for beat in range(beats):
             tick = beat * beat_ticks
             note = pattern[beat % len(pattern)]
-            duration = max(24, round(beat_ticks * spec.gate_percent / 100))
-            duration = min(duration, max(24, bar_ticks - tick - 1))
             hits.append(
                 BassHit(
                     tick=tick,
                     note=note,
                     velocity=base_velocity,
-                    duration=duration,
+                    duration=_duration(
+                        window=beat_ticks,
+                        remaining=bar_ticks - tick,
+                        gate_percent=spec.gate_percent,
+                    ),
                 )
             )
         return hits
@@ -202,9 +209,6 @@ def render_bar(
             if index + 1 < len(kick_hits)
             else min(bar_ticks, kick.tick + beat_ticks)
         )
-        available = max(25, next_tick - kick.tick)
-        duration = max(24, round(available * spec.gate_percent / 100))
-        duration = min(duration, max(24, bar_ticks - kick.tick - 1))
         hits.append(
             BassHit(
                 tick=kick.tick,
@@ -220,7 +224,11 @@ def render_bar(
                     kick.velocity,
                     spec.follow_kick_velocity,
                 ),
-                duration=duration,
+                duration=_duration(
+                    window=next_tick - kick.tick,
+                    remaining=bar_ticks - kick.tick,
+                    gate_percent=spec.gate_percent,
+                ),
             )
         )
     return hits
