@@ -14,6 +14,7 @@ import backing_track_engine
 import bass_engine
 import groove_catalog
 import midi_workflow
+import progression_catalog
 
 
 REQUEST_VERSION = 1
@@ -45,7 +46,7 @@ TOP_LEVEL_FIELDS = {
     "instrumentation",
     "arrangement",
 }
-FORM_FIELDS = {"bars", "progression", "section_name"}
+FORM_FIELDS = {"bars", "progression", "progression_preset", "section_name"}
 
 TRACK_TEMPLATES: dict[str, dict[str, Any]] = {
     "drums": {
@@ -149,6 +150,48 @@ def _validate_progression(value: Any, *, bars: int) -> list[str]:
             midi_workflow.chord_notes(chord)
         result.append(chord)
     return result
+
+
+def _resolve_form_chords(
+    form: dict[str, Any],
+    *,
+    bars: int,
+    key_signature: str,
+    meter: list[int],
+) -> tuple[list[str], str | None]:
+    has_progression = "progression" in form
+    has_preset = "progression_preset" in form
+    if has_progression == has_preset:
+        raise midi_workflow.ManifestError(
+            "form must contain exactly one of progression or progression_preset"
+        )
+
+    if has_progression:
+        progression = _validate_progression(form["progression"], bars=bars)
+        chords = [progression[index % len(progression)] for index in range(bars)]
+        return chords, None
+
+    preset_id = _non_empty_string(
+        form["progression_preset"],
+        "form.progression_preset",
+        maximum=64,
+    )
+    if not ID_PATTERN.fullmatch(preset_id):
+        raise midi_workflow.ManifestError(
+            "form.progression_preset must be lowercase kebab-case"
+        )
+    preset = progression_catalog.get_preset(preset_id)
+    if preset["meter"] != meter:
+        raise midi_workflow.ManifestError(
+            f"progression preset {preset_id!r} uses meter "
+            f"{preset['meter'][0]}/{preset['meter'][1]}, not {meter[0]}/{meter[1]}"
+        )
+    if preset["bars"] != bars:
+        raise midi_workflow.ManifestError(
+            f"form.bars {bars} does not match progression preset "
+            f"{preset_id!r} length {preset['bars']}"
+        )
+    return progression_catalog.resolve_progression(preset_id, key_signature), preset_id
 
 
 def _validate_instrumentation(value: Any) -> tuple[str, ...]:
@@ -257,7 +300,12 @@ def validate_request(request: dict[str, Any]) -> None:
     form = _require(request.get("form"), dict, "form")
     _unknown_fields(form, FORM_FIELDS, "form")
     bars = _int_field(form.get("bars"), name="form.bars", minimum=1, maximum=128)
-    _validate_progression(form.get("progression"), bars=bars)
+    _resolve_form_chords(
+        form,
+        bars=bars,
+        key_signature=key_signature,
+        meter=meter,
+    )
     if "section_name" in form:
         _non_empty_string(
             form["section_name"],
@@ -298,13 +346,17 @@ def resolve_request(request: dict[str, Any]) -> dict[str, Any]:
     preset = groove_catalog.get_preset(preset_id)
     form = request["form"]
     bars = form["bars"]
-    progression = _validate_progression(form["progression"], bars=bars)
+    chords, progression_preset = _resolve_form_chords(
+        form,
+        bars=bars,
+        key_signature=key_signature,
+        meter=meter,
+    )
     section_name = _non_empty_string(
         form.get("section_name", "PRACTICE"),
         "form.section_name",
         maximum=64,
     )
-    chords = [progression[index % len(progression)] for index in range(bars)]
     roles = _validate_instrumentation(request["instrumentation"])
 
     tracks: list[dict[str, Any]] = []
@@ -320,6 +372,13 @@ def resolve_request(request: dict[str, Any]) -> dict[str, Any]:
                 )
             }
         tracks.append(track)
+
+    provenance: dict[str, Any] = {
+        "type": "request",
+        "notes": "Resolved deterministically from BackingTrackRequest version 1.",
+    }
+    if progression_preset is not None:
+        provenance["progression_preset"] = progression_preset
 
     spec: dict[str, Any] = {
         "id": request_id,
@@ -340,10 +399,7 @@ def resolve_request(request: dict[str, Any]) -> dict[str, Any]:
             }
         ],
         "tracks": tracks,
-        "provenance": {
-            "type": "request",
-            "notes": "Resolved deterministically from BackingTrackRequest version 1.",
-        },
+        "provenance": provenance,
         "outputs": {
             "midi": f"generated/backing-tracks/{request_id}.mid",
             "audio": None,
