@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 import backing_track_engine
+import bass_engine
 import groove_catalog
 import midi_workflow
 
@@ -18,6 +19,17 @@ import midi_workflow
 REQUEST_VERSION = 1
 ID_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SUPPORTED_INSTRUMENTATION = ("drums", "bass", "keys", "pad")
+SUPPORTED_REQUEST_BASS_STYLES = ("auto",) + tuple(sorted(bass_engine.SUPPORTED_STYLES))
+AUTO_BASS_STYLE_BY_PRESET = {
+    "blues-shuffle": "kick-root-fifth",
+    "country-train": "kick-root-fifth",
+    "funk-wah-16": "kick-root-octave",
+    "jazz-swing": "walking",
+    "alt-rock": "kick-root",
+    "80s-rock": "kick-root-fifth",
+    "odd-7-8": "kick-root-fifth",
+    "call-response-2x2": "kick-root",
+}
 TOP_LEVEL_FIELDS = {
     "version",
     "id",
@@ -27,6 +39,7 @@ TOP_LEVEL_FIELDS = {
     "tempo_bpm",
     "meter",
     "groove_preset",
+    "bass_style",
     "count_in_bars",
     "form",
     "instrumentation",
@@ -48,7 +61,7 @@ TRACK_TEMPLATES: dict[str, dict[str, Any]] = {
         "channel": 0,
         "program": 34,
         "velocity": 80,
-        "instrument_intent": "simple roots and fifths supporting the guitar practice part",
+        "instrument_intent": "bounded bass accompaniment supporting the guitar practice part",
     },
     "keys": {
         "name": "Keys",
@@ -171,6 +184,22 @@ def _validate_arrangement(value: Any) -> dict[str, Any] | None:
     return json.loads(json.dumps(arrangement))
 
 
+def _resolve_bass_style(value: Any, *, preset_id: str) -> str:
+    style = "auto" if value is None else value
+    if not isinstance(style, str) or style not in SUPPORTED_REQUEST_BASS_STYLES:
+        raise midi_workflow.ManifestError(
+            f"bass_style must be one of {list(SUPPORTED_REQUEST_BASS_STYLES)}"
+        )
+    if style != "auto":
+        return style
+    resolved = AUTO_BASS_STYLE_BY_PRESET.get(preset_id)
+    if resolved is None:
+        raise midi_workflow.ManifestError(
+            f"groove preset {preset_id!r} has no automatic bass style"
+        )
+    return resolved
+
+
 def validate_request(request: dict[str, Any]) -> None:
     _require(request, dict, "request")
     _unknown_fields(request, TOP_LEVEL_FIELDS, "request")
@@ -236,7 +265,13 @@ def validate_request(request: dict[str, Any]) -> None:
             maximum=64,
         )
 
-    _validate_instrumentation(request.get("instrumentation"))
+    roles = _validate_instrumentation(request.get("instrumentation"))
+    if "bass_style" in request and "bass" not in roles:
+        raise midi_workflow.ManifestError(
+            "bass_style requires bass in instrumentation"
+        )
+    if "bass" in roles:
+        _resolve_bass_style(request.get("bass_style"), preset_id=preset_id)
     _validate_arrangement(request.get("arrangement"))
 
 
@@ -277,6 +312,13 @@ def resolve_request(request: dict[str, Any]) -> dict[str, Any]:
         track = json.loads(json.dumps(TRACK_TEMPLATES[role]))
         if role == "drums":
             track["groove_preset"] = preset_id
+        elif role == "bass":
+            track["bass"] = {
+                "style": _resolve_bass_style(
+                    request.get("bass_style"),
+                    preset_id=preset_id,
+                )
+            }
         tracks.append(track)
 
     spec: dict[str, Any] = {
