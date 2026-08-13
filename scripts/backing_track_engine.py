@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Resolve backing-track specs into deterministic Type 1 MIDI.
 
-This layer composes the existing MIDI renderer, GrooveSpec renderer, and named
-groove catalog. It owns backing-track-level concerns such as preset references
-and arrangement-wide gap cycles; the lower-level groove engine remains focused
-on drum timing and feel.
+This layer composes the existing MIDI renderer, GrooveSpec renderer, named groove
+catalog, and bass accompaniment engine. It owns backing-track-level concerns such
+as preset references and arrangement-wide gap cycles.
 """
 
 from __future__ import annotations
@@ -15,6 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import bass_engine
 import groove_catalog
 import groove_engine
 import midi_workflow
@@ -118,6 +118,8 @@ def resolve_track(track: dict[str, Any], meter: list[int]) -> dict[str, Any]:
         raise midi_workflow.ManifestError(
             "groove and groove_preset are only supported on drum tracks"
         )
+    if "bass" in track and track["role"] != "bass":
+        raise midi_workflow.ManifestError("bass spec is only supported on bass tracks")
 
     resolved = json.loads(json.dumps(track))
     if has_preset:
@@ -139,14 +141,48 @@ def resolve_track(track: dict[str, Any], meter: list[int]) -> dict[str, Any]:
             meter=meter,
             default_velocity=int(resolved.get("velocity", 78)),
         )
+    if "bass" in resolved:
+        bass_engine.parse_bass(resolved["bass"])
     return resolved
+
+
+def _groove_specs(
+    tracks: list[dict[str, Any]],
+    meter: list[int],
+) -> list[groove_engine.GrooveSpec]:
+    return [
+        groove_engine.parse_groove(
+            track["groove"],
+            meter=meter,
+            default_velocity=int(track.get("velocity", 78)),
+        )
+        for track in tracks
+        if track["role"] == "drums" and "groove" in track
+    ]
+
+
+def _reference_groove(
+    tracks: list[dict[str, Any]],
+    meter: list[int],
+) -> groove_engine.GrooveSpec | None:
+    specs = _groove_specs(tracks, meter)
+    return specs[0] if len(specs) == 1 else None
 
 
 def validate_manifest(manifest: dict[str, Any]) -> None:
     midi_workflow.validate_manifest(manifest)
     parse_arrangement_cycle(manifest)
-    for track in manifest["tracks"]:
-        resolve_track(track, manifest["meter"])
+    resolved = [resolve_track(track, manifest["meter"]) for track in manifest["tracks"]]
+    groove_specs = _groove_specs(resolved, manifest["meter"])
+
+    for track in resolved:
+        if track["role"] != "bass" or "bass" not in track:
+            continue
+        spec = bass_engine.parse_bass(track["bass"])
+        if bass_engine.requires_groove(spec) and len(groove_specs) != 1:
+            raise midi_workflow.ManifestError(
+                f"bass style {spec.style!r} requires exactly one groove-aware drum track"
+            )
 
 
 def _count_in_hits(
@@ -289,10 +325,14 @@ def generate(manifest_path: Path, output_path: Path) -> None:
         "N.C." if index in muted_bars else chord
         for index, chord in enumerate(chords)
     ]
+    resolved_tracks = [
+        resolve_track(track, manifest["meter"])
+        for track in manifest["tracks"]
+    ]
+    reference_groove = _reference_groove(resolved_tracks, manifest["meter"])
 
     tracks = [midi_workflow.conductor_track(manifest, bar_ticks)]
-    for source_track in manifest["tracks"]:
-        track = resolve_track(source_track, manifest["meter"])
+    for track in resolved_tracks:
         if track["role"] == "drums" and "groove" in track:
             tracks.append(
                 _generate_groove_drum_track(
@@ -314,6 +354,19 @@ def generate(manifest_path: Path, output_path: Path) -> None:
                     bar_ticks=bar_ticks,
                     beat_ticks=beat_ticks,
                     muted_bars=muted_bars,
+                )
+            )
+        elif track["role"] == "bass" and "bass" in track:
+            tracks.append(
+                bass_engine.generate_track(
+                    track,
+                    chords=masked_chords,
+                    count_in_bars=manifest["count_in_bars"],
+                    meter=manifest["meter"],
+                    bar_ticks=bar_ticks,
+                    beat_ticks=beat_ticks,
+                    tempo_bpm=manifest["tempo_bpm"],
+                    groove=reference_groove,
                 )
             )
         else:
