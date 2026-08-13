@@ -25,7 +25,9 @@ DEFAULT_OUTPUT = ROOT / "generated" / "practice-bundle"
 PUBLIC_SOURCE_DIRS = (
     Path("backing-tracks"),
     Path("catalogs/grooves"),
+    Path("catalogs/progressions"),
     Path("contracts/backing-tracks"),
+    Path("contracts/progressions"),
 )
 GENERATOR_INPUTS = (
     Path("scripts/backing_track_engine.py"),
@@ -36,6 +38,7 @@ GENERATOR_INPUTS = (
     Path("scripts/groove_catalog.py"),
     Path("scripts/groove_engine.py"),
     Path("scripts/midi_workflow.py"),
+    Path("scripts/progression_catalog.py"),
 )
 
 
