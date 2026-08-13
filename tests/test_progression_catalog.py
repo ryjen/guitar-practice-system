@@ -68,7 +68,8 @@ class ProgressionCatalogTests(unittest.TestCase):
 
         request_path = ROOT / "examples" / "backing-tracks" / "jazz-blues-12-request.json"
         request = json.loads(request_path.read_text(encoding="utf-8"))
-        self.assertEqual(expected, request["form"]["progression"])
+        self.assertEqual("jazz-blues-12", request["form"]["progression_preset"])
+        self.assertNotIn("progression", request["form"])
 
         backing_manifest_path = ROOT / "backing-tracks" / "jazz-blues-12" / "manifest.json"
         backing_manifest = json.loads(backing_manifest_path.read_text(encoding="utf-8"))
@@ -79,6 +80,7 @@ class ProgressionCatalogTests(unittest.TestCase):
         spec = resolve_backing_track_request.resolve_request(request)
         self.assertEqual(12, spec["sections"][0]["bars"])
         self.assertEqual(expected, spec["sections"][0]["chords"])
+        self.assertEqual("jazz-blues-12", spec["provenance"]["progression_preset"])
         self.assertEqual(
             ["drums", "bass", "keys"],
             [track["role"] for track in spec["tracks"]],
