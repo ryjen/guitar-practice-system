@@ -28,9 +28,9 @@ A `BackingTrackRequest` may reference a progression by stable ID instead of copy
   "key_signature": "C",
   "meter": [4, 4],
   "form": {
-    "bars": 12,
-    "progression_preset": "jazz-blues-12",
-    "section_name": "JAZZ-BLUES-12"
+    "bars": 4,
+    "progression_preset": "progression-jazz-major-ii-v-i",
+    "section_name": "II-V-I"
   }
 }
 ```
@@ -39,13 +39,60 @@ The request resolver checks the preset meter and exact form length, then transpo
 
 This keeps the catalog authoritative for reusable progression identity while the resolved `BackingTrackSpec` still contains ordinary concrete chord symbols.
 
-## Current twelve-bar presets
+## Current presets
 
 | ID | Identity |
 |---|---|
 | `blues-12-dominant` | standard dominant twelve-bar blues |
 | `blues-12-quick-change` | dominant blues with IV in bar 2 |
 | `jazz-blues-12` | jazz-blues practice form with fixed opening and VI-II-V-I ending |
+| `progression-jazz-major-ii-v-i` | four-bar major ii-V-I with repeated tonic resolution |
+
+## Major ii-V-I identity
+
+`progression-jazz-major-ii-v-i` promotes the existing documented worked example into executable catalog data:
+
+```text
+| ii7 | V7 | Imaj7 | Imaj7 |
+```
+
+The first three bars are the harmonic identity. The repeated tonic bar is a practice realization that leaves time to hear resolution, inspect guide-tone movement, and prepare the next key.
+
+In C:
+
+```text
+Dm7 | G7 | Cmaj7 | Cmaj7
+```
+
+In F:
+
+```text
+Gm7 | C7 | Fmaj7 | Fmaj7
+```
+
+The committed backing-track request `examples/backing-tracks/ii-v-i-c-request.json` uses the same preset with the `jazz-swing` groove, walking bass, and light keys.
+
+## Circle-of-fourths traversal
+
+The progression resolver provides a bounded major-key fourths traversal for transposition and voice-leading practice.
+
+Canonical order:
+
+```text
+C → F → Bb → Eb → Ab → Db → Gb → B → E → A → D → G
+```
+
+`F#` is accepted as an enharmonic start-key alias and normalized to the canonical `Gb` position. A traversal contains between one and twelve positions and may start anywhere in the sequence. It wraps deterministically at the end.
+
+Examples:
+
+```text
+start C, count 4 → C, F, Bb, Eb
+start A, count 4 → A, D, G, C
+start F#, count 2 → Gb, B
+```
+
+The traversal changes only the tonic used to resolve the progression. It does not change groove, tempo, instrumentation, voicing, or fretboard position.
 
 ## Jazz blues identity
 
@@ -96,6 +143,21 @@ List presets:
 
 ```bash
 python3 scripts/progression_catalog.py list
+```
+
+Resolve ii-V-I in C:
+
+```bash
+python3 scripts/progression_catalog.py resolve progression-jazz-major-ii-v-i C
+```
+
+Resolve four adjacent positions through the circle of fourths:
+
+```bash
+python3 scripts/progression_catalog.py fourths \
+  progression-jazz-major-ii-v-i \
+  --start-key C \
+  --count 4
 ```
 
 Resolve jazz blues in C:
