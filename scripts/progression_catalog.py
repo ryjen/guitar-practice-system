@@ -34,6 +34,22 @@ FLAT_NAMES = ("C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B")
 FLAT_KEYS = {"F", "BB", "EB", "AB", "DB", "GB", "CB"}
 KEY_ROOTS = dict(midi_workflow.NOTE_NAMES)
 KEY_ROOTS["CB"] = 11
+CIRCLE_OF_FOURTHS_MAJOR = (
+    "C",
+    "F",
+    "Bb",
+    "Eb",
+    "Ab",
+    "Db",
+    "Gb",
+    "B",
+    "E",
+    "A",
+    "D",
+    "G",
+)
+CIRCLE_KEY_LOOKUP = {key.upper(): key for key in CIRCLE_OF_FOURTHS_MAJOR}
+CIRCLE_KEY_LOOKUP["F#"] = "Gb"
 
 
 class ProgressionError(midi_workflow.ManifestError):
@@ -191,12 +207,10 @@ def _major_key_root(key_signature: str) -> tuple[int, bool]:
     return KEY_ROOTS[normalized], normalized in FLAT_KEYS
 
 
-def resolve_progression(
-    preset_id: str,
+def _resolve_preset_in_key(
+    preset: dict[str, Any],
     key_signature: str,
-    path: Path = DEFAULT_CATALOG,
 ) -> list[str]:
-    preset = get_preset(preset_id, path)
     tonic, prefer_flats = _major_key_root(key_signature)
     names = FLAT_NAMES if prefer_flats else SHARP_NAMES
     chords: list[str] = []
@@ -206,6 +220,58 @@ def resolve_progression(
         midi_workflow.chord_notes(chord)
         chords.append(chord)
     return chords
+
+
+def resolve_progression(
+    preset_id: str,
+    key_signature: str,
+    path: Path = DEFAULT_CATALOG,
+) -> list[str]:
+    preset = get_preset(preset_id, path)
+    return _resolve_preset_in_key(preset, key_signature)
+
+
+def _canonical_circle_key(key_signature: str) -> str:
+    normalized = (
+        _string(key_signature, "start_key", 8)
+        .upper()
+        .replace("♭", "B")
+        .replace("♯", "#")
+    )
+    canonical = CIRCLE_KEY_LOOKUP.get(normalized)
+    if canonical is None:
+        raise ProgressionError(
+            f"start_key must be one of {list(CIRCLE_OF_FOURTHS_MAJOR)} or F#"
+        )
+    return canonical
+
+
+def resolve_circle_of_fourths(
+    preset_id: str,
+    *,
+    start_key: str = "C",
+    count: int = 12,
+    path: Path = DEFAULT_CATALOG,
+) -> list[dict[str, Any]]:
+    """Resolve a progression through a bounded major-key circle-of-fourths traversal."""
+    if isinstance(count, bool) or not isinstance(count, int) or not 1 <= count <= 12:
+        raise ProgressionError("count must be an integer between 1 and 12")
+
+    preset = get_preset(preset_id, path)
+    canonical_start = _canonical_circle_key(start_key)
+    start_index = CIRCLE_OF_FOURTHS_MAJOR.index(canonical_start)
+    positions: list[dict[str, Any]] = []
+    for offset in range(count):
+        key_signature = CIRCLE_OF_FOURTHS_MAJOR[
+            (start_index + offset) % len(CIRCLE_OF_FOURTHS_MAJOR)
+        ]
+        positions.append(
+            {
+                "key_signature": key_signature,
+                "chords": _resolve_preset_in_key(preset, key_signature),
+            }
+        )
+    return positions
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -218,6 +284,10 @@ def main(argv: list[str] | None = None) -> int:
     resolve = subparsers.add_parser("resolve")
     resolve.add_argument("preset_id")
     resolve.add_argument("key_signature")
+    fourths = subparsers.add_parser("fourths")
+    fourths.add_argument("preset_id")
+    fourths.add_argument("--start-key", default="C")
+    fourths.add_argument("--count", type=int, default=12)
     args = parser.parse_args(argv)
 
     try:
@@ -230,11 +300,25 @@ def main(argv: list[str] | None = None) -> int:
                 print(preset["id"])
         elif args.command == "show":
             print(json.dumps(get_preset(args.preset_id), indent=2, sort_keys=True))
-        else:
+        elif args.command == "resolve":
             payload = {
                 "preset": args.preset_id,
                 "key_signature": args.key_signature,
                 "chords": resolve_progression(args.preset_id, args.key_signature),
+            }
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            positions = resolve_circle_of_fourths(
+                args.preset_id,
+                start_key=args.start_key,
+                count=args.count,
+            )
+            payload = {
+                "preset": args.preset_id,
+                "traversal": "circle-of-fourths",
+                "start_key": positions[0]["key_signature"],
+                "count": len(positions),
+                "positions": positions,
             }
             print(json.dumps(payload, indent=2, sort_keys=True))
     except (OSError, json.JSONDecodeError, ProgressionError) as exc:
