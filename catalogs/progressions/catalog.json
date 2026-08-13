@@ -34,6 +34,16 @@
         "opening": ["I7", "I7", "IV7", "IV7"],
         "ending": ["VI7", "II7", "V7", "I7"]
       }
+    },
+    {
+      "id": "progression-jazz-major-ii-v-i",
+      "title": "Major ii-V-I",
+      "family": "jazz-major-cadence",
+      "description": "Four-bar major ii-V-I practice realization with a repeated tonic bar for hearing and voice-leading work.",
+      "bars": 4,
+      "meter": [4, 4],
+      "changes": ["IIm7", "V7", "Imaj7", "Imaj7"],
+      "tags": ["jazz", "major", "ii-v-i", "cadence"]
     }
   ]
 }
