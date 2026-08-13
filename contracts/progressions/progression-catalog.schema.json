@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ryjen.github.io/guitar-practice-system/contracts/progressions/progression-catalog.schema.json",
+  "title": "ProgressionCatalog",
+  "description": "Versioned catalog of reusable deterministic chord-progression forms.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "presets"],
+  "properties": {
+    "version": {"const": 1},
+    "presets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/preset"}
+    }
+  },
+  "$defs": {
+    "preset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "family", "description", "bars", "meter", "changes", "tags"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "title": {"type": "string", "minLength": 1, "maxLength": 120},
+        "family": {"type": "string", "minLength": 1, "maxLength": 64},
+        "description": {"type": "string", "minLength": 1, "maxLength": 300},
+        "bars": {"type": "integer", "minimum": 1, "maximum": 128},
+        "meter": {
+          "type": "array",
+          "prefixItems": [
+            {"type": "integer", "minimum": 1},
+            {"type": "integer", "enum": [1, 2, 4, 8, 16]}
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "changes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "type": "string",
+            "pattern": "^[#b]?(?:I|II|III|IV|V|VI|VII)(?:7|maj7|m7|5|m)?$"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 48}
+        },
+        "invariants": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "opening": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "ending": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        }
+      }
+    }
+  }
+}
