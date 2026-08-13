@@ -58,7 +58,7 @@ class ProgressionCatalogTests(unittest.TestCase):
 
     def test_minor_key_is_rejected_for_major_key_preset_resolution(self) -> None:
         with self.assertRaisesRegex(
-            midi_workflow.ManifestError,
+            progression_catalog.ProgressionError,
             "require a major key signature",
         ):
             progression_catalog.resolve_progression("jazz-blues-12", "Amin")
