@@ -102,7 +102,7 @@ class BassEngineTests(unittest.TestCase):
 
     def test_bass_spec_rejects_unsupported_fields_and_invalid_walking_follow(self) -> None:
         with self.assertRaisesRegex(midi_workflow.ManifestError, "unsupported fields"):
-            bass_engine.parse_bass({"style": "kick-root", "free": true})
+            bass_engine.parse_bass({"style": "kick-root", "free": True})
 
         with self.assertRaisesRegex(midi_workflow.ManifestError, "cannot follow kick velocity"):
             bass_engine.parse_bass(
