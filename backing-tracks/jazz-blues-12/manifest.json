@@ -1,0 +1,76 @@
+{
+  "id": "jazz-blues-12-c-110",
+  "title": "Jazz Blues 12-Bar Practice",
+  "purpose": "Practice guide-tone movement, dominant-blues phrasing, and the VI-II-V-I turnaround over a stable twelve-bar form.",
+  "linked_techniques": ["phrasing", "guide-tones", "arpeggios", "timing"],
+  "linked_songs": [],
+  "key_signature": "C",
+  "tempo_bpm": 110,
+  "meter": [4, 4],
+  "feel": "light swing with a clear walking pulse and room for guitar phrasing",
+  "count_in_bars": 1,
+  "sections": [
+    {
+      "name": "JAZZ-BLUES-12",
+      "bars": 12,
+      "chords": [
+        "C7",
+        "C7",
+        "F7",
+        "F7",
+        "C7",
+        "C7",
+        "G7",
+        "C7",
+        "A7",
+        "D7",
+        "G7",
+        "C7"
+      ]
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Drums",
+      "role": "drums",
+      "channel": 9,
+      "velocity": 78,
+      "groove_preset": "jazz-swing",
+      "instrument_intent": "light swing reference with room for comping and lead phrasing"
+    },
+    {
+      "name": "Bass",
+      "role": "bass",
+      "channel": 0,
+      "program": 34,
+      "velocity": 74,
+      "bass": {
+        "style": "walking",
+        "gate_percent": 82,
+        "follow_kick_velocity": false
+      },
+      "instrument_intent": "walking harmonic reference emphasizing the twelve-bar form"
+    },
+    {
+      "name": "Keys",
+      "role": "keys",
+      "channel": 1,
+      "program": 4,
+      "velocity": 60,
+      "instrument_intent": "light chord support leaving register and rhythmic space for guitar"
+    }
+  ],
+  "variants": {
+    "tempo_bpm": [80, 95, 110, 125],
+    "density": ["drums-bass", "drums-bass-keys"]
+  },
+  "provenance": {
+    "type": "original",
+    "notes": "Original twelve-bar jazz-blues practice backing track aligned with the jazz-blues-12 progression preset."
+  },
+  "outputs": {
+    "midi": "generated/backing-tracks/jazz-blues-12-c-110.mid",
+    "audio": null,
+    "daw_project": null
+  }
+}

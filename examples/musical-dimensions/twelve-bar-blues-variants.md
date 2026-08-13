@@ -9,15 +9,15 @@
 
 ## Standard dominant blues
 
-- **ID:** `progression-blues-twelve-bar-dominant`
+- **ID:** `blues-12-dominant`
 - **Roman numerals:** `I7 | I7 | I7 | I7 | IV7 | IV7 | I7 | I7 | V7 | IV7 | I7 | V7`
 - **Reference key:** A
 - **Chords:** A7 | A7 | A7 | A7 | D7 | D7 | A7 | A7 | E7 | D7 | A7 | E7
 
 ## Quick-change blues
 
-- **ID:** `progression-blues-twelve-bar-quick-change`
-- **Relationship:** variant of `progression-blues-twelve-bar-dominant`
+- **ID:** `blues-12-quick-change`
+- **Relationship:** variant of `blues-12-dominant`
 - **Change:** bar 2 moves to IV7 before returning to I7
 - **Roman numerals:** `I7 | IV7 | I7 | I7 | IV7 | IV7 | I7 | I7 | V7 | IV7 | I7 | V7`
 
@@ -32,13 +32,35 @@ The quick change creates earlier motion without changing the overall form.
 
 This is one practical minor-blues realization, not the only canonical form.
 
-## Jazz-blues extension
+## Jazz blues — canonical 12-bar practice form
 
-- **ID:** `progression-blues-twelve-bar-jazz-basic`
-- **Roman numerals:** `I7 | IV7 | I7 | vi7 II7 | IV7 | ♯iv°7 | I7 vi7 | ii7 V7 | iii7 VI7 | ii7 V7 | I7 VI7 | ii7 V7`
-- **Purpose:** introduce turnarounds, secondary dominants, diminished passing motion, and denser harmonic rhythm
+- **ID:** `jazz-blues-12`
+- **Roman numerals:** `I7 | I7 | IV7 | IV7 | I7 | I7 | V7 | I7 | VI7 | II7 | V7 | I7`
+- **Reference key:** C
+- **Chords:** C7 | C7 | F7 | F7 | C7 | C7 | G7 | C7 | A7 | D7 | G7 | C7
+- **Purpose:** preserve a clear blues identity while introducing a circle-of-fifths turnaround suitable for jazz phrasing and guide-tone practice
 
-Do not treat the jazz form as a replacement for the simpler blues identities. It is a derived vocabulary layer.
+The defining boundaries of this practice form are deliberate:
+
+```text
+opening: I7 | I7 | IV7 | IV7
+ending:  VI7 | II7 | V7 | I7
+```
+
+Do not replace those opening or ending blocks when referring to `jazz-blues-12`. Denser jazz-blues vocabulary belongs to optional enrichment over the form rather than changing its identity.
+
+### Optional jazz enrichment
+
+Once the canonical form is secure, useful later passes include:
+
+- **Guide tones:** connect thirds and sevenths through every change.
+- **ii-V vocabulary:** practise short ii-V phrases as melodic language without rewriting the form.
+- **Secondary-dominant awareness:** hear VI7 and II7 as forward-moving dominants in the final four bars.
+- **Diminished colour:** introduce diminished language over dominant tension as an improvisation target rather than changing the canonical bar map.
+- **Turnaround anticipation:** phrase toward VI7 in bar 9 and resolve clearly through II7-V7-I7.
+- **Blues/jazz mixture:** alternate blues-scale vocabulary with chord-tone and guide-tone targeting.
+
+This keeps one stable twelve-bar map while allowing progressively richer jazz language.
 
 ## Comparative session
 
@@ -71,7 +93,8 @@ Do not treat the jazz form as a replacement for the simpler blues identities. It
 - Identify bars 5, 9, and 11 without counting from the beginning.
 - Sing roots through one chorus.
 - Hear whether bar 2 remains tonic or changes to subdominant.
-- Distinguish the minor-blues ♭VI7–V7 motion from the dominant-blues V7–IV7 motion.
+- Hear the jazz-blues VI7-II7-V7-I7 turnaround as a connected four-bar motion.
+- Distinguish the minor-blues ♭VI7-V7 motion from dominant-blues and jazz-blues endings.
 
 ## Evidence
 

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "presets": [
+    {
+      "id": "blues-12-dominant",
+      "title": "12-Bar Dominant Blues",
+      "family": "twelve-bar-blues",
+      "description": "Standard dominant-blues reference form for comparison with related twelve-bar variants.",
+      "bars": 12,
+      "meter": [4, 4],
+      "changes": ["I7", "I7", "I7", "I7", "IV7", "IV7", "I7", "I7", "V7", "IV7", "I7", "V7"],
+      "tags": ["blues", "dominant", "twelve-bar"]
+    },
+    {
+      "id": "blues-12-quick-change",
+      "title": "12-Bar Quick-Change Blues",
+      "family": "twelve-bar-blues",
+      "description": "Dominant blues with an early move to IV in bar two.",
+      "bars": 12,
+      "meter": [4, 4],
+      "changes": ["I7", "IV7", "I7", "I7", "IV7", "IV7", "I7", "I7", "V7", "IV7", "I7", "V7"],
+      "tags": ["blues", "quick-change", "twelve-bar"]
+    },
+    {
+      "id": "jazz-blues-12",
+      "title": "12-Bar Jazz Blues",
+      "family": "twelve-bar-blues",
+      "description": "Jazz-blues practice form with a two-bar tonic opening, two bars of IV, and a VI-II-V-I turnaround.",
+      "bars": 12,
+      "meter": [4, 4],
+      "changes": ["I7", "I7", "IV7", "IV7", "I7", "I7", "V7", "I7", "VI7", "II7", "V7", "I7"],
+      "tags": ["jazz", "blues", "turnaround", "twelve-bar"],
+      "invariants": {
+        "opening": ["I7", "I7", "IV7", "IV7"],
+        "ending": ["VI7", "II7", "V7", "I7"]
+      }
+    }
+  ]
+}
