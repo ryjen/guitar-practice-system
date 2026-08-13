@@ -24,6 +24,7 @@ class ProgressionCatalogTests(unittest.TestCase):
         self.assertEqual(len(ids), len(set(ids)))
         self.assertIn("jazz-blues-12", ids)
         self.assertIn("progression-jazz-major-ii-v-i", ids)
+        self.assertIn("progression-major-i-iv-v", ids)
 
         twelve_bar_blues = [
             preset
@@ -35,6 +36,10 @@ class ProgressionCatalogTests(unittest.TestCase):
         self.assertEqual(
             4,
             progression_catalog.get_preset("progression-jazz-major-ii-v-i")["bars"],
+        )
+        self.assertEqual(
+            8,
+            progression_catalog.get_preset("progression-major-i-iv-v")["bars"],
         )
 
     def test_jazz_blues_opening_and_ending_are_fixed(self) -> None:
@@ -77,6 +82,17 @@ class ProgressionCatalogTests(unittest.TestCase):
         self.assertEqual(
             ["Gm7", "C7", "Fmaj7", "Fmaj7"],
             progression_catalog.resolve_progression(preset_id, "F"),
+        )
+
+    def test_major_i_iv_v_resolves_in_g_and_a(self) -> None:
+        preset_id = "progression-major-i-iv-v"
+        self.assertEqual(
+            ["G", "G", "C", "C", "G", "D", "G", "D"],
+            progression_catalog.resolve_progression(preset_id, "G"),
+        )
+        self.assertEqual(
+            ["A", "A", "D", "D", "A", "E", "A", "E"],
+            progression_catalog.resolve_progression(preset_id, "A"),
         )
 
     def test_circle_of_fourths_is_deterministic_and_bounded(self) -> None:
@@ -205,6 +221,43 @@ class ProgressionCatalogTests(unittest.TestCase):
             report["track_names"],
         )
         self.assertEqual(["COUNT-IN", "II-V-I", "END"], report["markers"])
+
+    def test_committed_i_iv_v_material_uses_catalog_and_renders(self) -> None:
+        preset_id = "progression-major-i-iv-v"
+        expected = progression_catalog.resolve_progression(preset_id, "G")
+
+        existing_manifest_path = ROOT / "backing-tracks" / "country-i-iv-v" / "manifest.json"
+        existing_manifest = json.loads(existing_manifest_path.read_text(encoding="utf-8"))
+        self.assertEqual(expected, existing_manifest["sections"][0]["chords"])
+
+        request_path = ROOT / "examples" / "backing-tracks" / "i-iv-v-g-request.json"
+        request = json.loads(request_path.read_text(encoding="utf-8"))
+        self.assertEqual(preset_id, request["form"]["progression_preset"])
+        self.assertNotIn("progression", request["form"])
+
+        spec = resolve_backing_track_request.resolve_request(request)
+        self.assertEqual(expected, spec["sections"][0]["chords"])
+        self.assertEqual(preset_id, spec["provenance"]["progression_preset"])
+        self.assertEqual("kick-root-fifth", spec["tracks"][1]["bass"]["style"])
+        self.assertEqual(
+            ["drums", "bass", "keys"],
+            [track["role"] for track in spec["tracks"]],
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest = root / "manifest.json"
+            output = root / "i-iv-v.mid"
+            manifest.write_text(json.dumps(spec, indent=2), encoding="utf-8")
+            backing_track_engine.generate(manifest, output)
+            report = midi_workflow.validate_output(manifest, output)
+
+        self.assertEqual(1, report["format"])
+        self.assertEqual(
+            ["Conductor", "Drums", "Bass", "Keys"],
+            report["track_names"],
+        )
+        self.assertEqual(["COUNT-IN", "I-IV-V", "END"], report["markers"])
 
     def test_invariant_mismatch_fails_catalog_validation(self) -> None:
         catalog = progression_catalog.load_catalog()
