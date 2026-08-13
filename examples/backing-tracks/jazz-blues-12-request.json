@@ -11,20 +11,7 @@
   "count_in_bars": 1,
   "form": {
     "bars": 12,
-    "progression": [
-      "C7",
-      "C7",
-      "F7",
-      "F7",
-      "C7",
-      "C7",
-      "G7",
-      "C7",
-      "A7",
-      "D7",
-      "G7",
-      "C7"
-    ],
+    "progression_preset": "jazz-blues-12",
     "section_name": "JAZZ-BLUES-12"
   },
   "instrumentation": ["drums", "bass", "keys"]
