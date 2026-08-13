@@ -37,7 +37,12 @@
       "channel": 0,
       "program": 34,
       "velocity": 80,
-      "instrument_intent": "simple roots and fifths that stop with the drums during response-space bars"
+      "bass": {
+        "style": "kick-root-fifth",
+        "gate_percent": 72,
+        "follow_kick_velocity": true
+      },
+      "instrument_intent": "roots and fifths locked to the kick pattern, with whole-band response-space gaps"
     }
   ],
   "variants": {
