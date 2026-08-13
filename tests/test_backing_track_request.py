@@ -34,6 +34,7 @@ class BackingTrackRequestTests(unittest.TestCase):
         )
         self.assertEqual(["drums", "bass"], [track["role"] for track in spec["tracks"]])
         self.assertEqual("funk-wah-16", spec["tracks"][0]["groove_preset"])
+        self.assertEqual("kick-root-octave", spec["tracks"][1]["bass"]["style"])
         self.assertEqual(
             "generated/backing-tracks/funk-wah-pocket-em-96.mid",
             spec["outputs"]["midi"],
@@ -45,6 +46,21 @@ class BackingTrackRequestTests(unittest.TestCase):
         reordered["instrumentation"] = ["bass", "drums"]
         second = resolve_backing_track_request.resolve_request(reordered)
         self.assertEqual(first, second)
+
+    def test_auto_bass_style_is_preset_specific(self) -> None:
+        request = json.loads(json.dumps(self.request))
+        request["groove_preset"] = "jazz-swing"
+        request["tempo_bpm"] = 120
+        request["bass_style"] = "auto"
+        spec = resolve_backing_track_request.resolve_request(request)
+        self.assertEqual("walking", spec["tracks"][1]["bass"]["style"])
+
+    def test_explicit_bass_style_requires_bass_instrumentation(self) -> None:
+        request = json.loads(json.dumps(self.request))
+        request["instrumentation"] = ["drums"]
+        request["bass_style"] = "walking"
+        with self.assertRaisesRegex(midi_workflow.ManifestError, "requires bass"):
+            resolve_backing_track_request.resolve_request(request)
 
     def test_trims_bounded_metadata_and_rejects_oversize_text(self) -> None:
         request = json.loads(json.dumps(self.request))
