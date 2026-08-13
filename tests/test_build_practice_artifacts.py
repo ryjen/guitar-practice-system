@@ -39,6 +39,15 @@ class PracticeBundleTests(unittest.TestCase):
             self.assertIn("scripts/backing_track_engine.py", provenance["generatorInputs"])
             self.assertIn("scripts/bass_engine.py", provenance["generatorInputs"])
             self.assertIn("scripts/generate_backing_tracks.py", provenance["generatorInputs"])
+            self.assertIn("scripts/progression_catalog.py", provenance["generatorInputs"])
+            self.assertIn(
+                "catalogs/progressions/catalog.json",
+                provenance["artifacts"],
+            )
+            self.assertIn(
+                "contracts/progressions/progression-catalog.schema.json",
+                provenance["artifacts"],
+            )
             self.assertIn(
                 "generated/backing-tracks/slide-slow-blues-a-60.mid",
                 provenance["artifacts"],
