@@ -10,6 +10,7 @@ on:
       - "docs/backing-track-form.md"
       - "docs/backing-track-request.md"
       - "docs/bass-engine.md"
+      - "docs/practice-progression-variants.md"
       - "docs/groove-engine.md"
       - "docs/groove-catalog.md"
       - "examples/backing-tracks/**"
@@ -20,6 +21,7 @@ on:
       - "scripts/groove_engine.py"
       - "scripts/groove_catalog.py"
       - "scripts/generate_backing_tracks.py"
+      - "scripts/generate_practice_progression.py"
       - "scripts/midi_workflow.py"
       - "scripts/resolve_backing_track_request.py"
       - "scripts/check_public_boundary.py"
@@ -31,6 +33,7 @@ on:
       - "tests/test_groove_catalog.py"
       - "tests/test_generate_backing_tracks.py"
       - "tests/test_midi_workflow.py"
+      - "tests/test_practice_progression.py"
       - ".github/workflows/validate-midi.yml"
   push:
     branches:
@@ -43,6 +46,7 @@ on:
       - "docs/backing-track-form.md"
       - "docs/backing-track-request.md"
       - "docs/bass-engine.md"
+      - "docs/practice-progression-variants.md"
       - "docs/groove-engine.md"
       - "docs/groove-catalog.md"
       - "examples/backing-tracks/**"
@@ -53,6 +57,7 @@ on:
       - "scripts/groove_engine.py"
       - "scripts/groove_catalog.py"
       - "scripts/generate_backing_tracks.py"
+      - "scripts/generate_practice_progression.py"
       - "scripts/midi_workflow.py"
       - "scripts/resolve_backing_track_request.py"
       - "scripts/check_public_boundary.py"
@@ -64,6 +69,7 @@ on:
       - "tests/test_groove_catalog.py"
       - "tests/test_generate_backing_tracks.py"
       - "tests/test_midi_workflow.py"
+      - "tests/test_practice_progression.py"
       - ".github/workflows/validate-midi.yml"
 
 permissions:
@@ -102,6 +108,21 @@ jobs:
           assert [track["role"] for track in spec["tracks"]] == ["drums", "bass"]
           assert spec["tracks"][1]["bass"]["style"] == "kick-root-octave"
           assert spec["sections"][0]["bars"] == 8
+          PY
+      - name: Generate practice progression example
+        run: |
+          python scripts/generate_practice_progression.py \
+            examples/backing-tracks/funk-wah-request.json \
+            --output-dir /tmp/funk-wah-progression \
+            --render-midi
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          progression = json.loads(Path("/tmp/funk-wah-progression/progression.json").read_text())
+          assert progression["profile"] == "tempo-space-v1"
+          assert [stage["tempo_bpm"] for stage in progression["stages"]] == [75, 82, 96]
+          assert all((Path("/tmp/funk-wah-progression") / stage["spec"]["outputs"]["midi"]).exists() for stage in progression["stages"])
           PY
       - name: Generate and validate backing-track catalog
         run: python scripts/generate_backing_tracks.py
