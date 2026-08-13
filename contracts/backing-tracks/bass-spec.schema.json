@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ryjen.github.io/guitar-practice-system/contracts/backing-tracks/bass-spec.schema.json",
+  "title": "BassSpec",
+  "description": "Deterministic bass accompaniment pattern for a backing-track bass role.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["style"],
+  "properties": {
+    "style": {
+      "type": "string",
+      "enum": [
+        "kick-root",
+        "kick-root-fifth",
+        "kick-root-octave",
+        "walking"
+      ]
+    },
+    "gate_percent": {
+      "type": "integer",
+      "minimum": 20,
+      "maximum": 95,
+      "default": 72
+    },
+    "follow_kick_velocity": {
+      "type": "boolean"
+    }
+  }
+}
