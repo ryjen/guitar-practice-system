@@ -35,18 +35,65 @@ A version 1 request contains:
 | `title` | Human-readable practice title |
 | `purpose` | Practice intent expressed as descriptive metadata |
 | `key_signature` | MIDI key signature understood by the existing renderer |
-| `tempo_bpm` | Requested tempo; must also fit the selected preset range |
-| `meter` | Requested meter; must exactly match the selected groove preset |
+| `tempo_bpm` | Requested tempo; must also fit the selected groove range |
+| `meter` | Requested meter; must match selected groove and progression presets |
 | `groove_preset` | Stable ID from the public groove catalog |
 | `bass_style` | Optional bounded bass style; defaults to `auto` when bass is present |
 | `count_in_bars` | Zero to four count-in bars; defaults to one |
 | `form.bars` | Total musical bars, from 1 to 128 |
-| `form.progression` | Chord progression repeated deterministically across the form |
+| `form.progression` | Inline chord progression repeated deterministically across the form |
+| `form.progression_preset` | Stable ID from the public progression catalog |
 | `form.section_name` | Optional marker name; defaults to `PRACTICE` |
 | `instrumentation` | Bounded roles: `drums`, `bass`, `keys`, `pad` |
 | `arrangement` | Optional whole-accompaniment bar cycle |
 
-Example:
+A form must provide **exactly one** of `progression` or `progression_preset`.
+
+### Inline progression
+
+Inline progressions remain useful for arbitrary, modal, non-functional, or otherwise
+uncatalogued harmony. A shorter list repeats to fill `form.bars`.
+
+```json
+{
+  "form": {
+    "bars": 8,
+    "progression": ["Em7", "A7"],
+    "section_name": "POCKET"
+  }
+}
+```
+
+### Progression preset
+
+A progression preset references a reusable form owned by the progression catalog.
+The resolver transposes it using `key_signature`; callers do not copy the resolved
+chord list into the request.
+
+```json
+{
+  "key_signature": "C",
+  "meter": [4, 4],
+  "form": {
+    "bars": 12,
+    "progression_preset": "jazz-blues-12",
+    "section_name": "JAZZ-BLUES-12"
+  }
+}
+```
+
+Preset-backed forms are intentionally stricter than inline progressions:
+
+- the preset must exist;
+- `form.bars` must exactly match the preset length;
+- request meter must exactly match the preset meter;
+- the key must be supported by the preset resolver;
+- the resolved chords are validated before a `BackingTrackSpec` is returned.
+
+This prevents a stable 12-bar identity from being silently stretched or rewritten by
+a request.
+
+## Complete example
 
 ```json
 {
@@ -75,7 +122,10 @@ Example:
 }
 ```
 
-The committed example is at `examples/backing-tracks/funk-wah-request.json`.
+Committed examples:
+
+- `examples/backing-tracks/funk-wah-request.json` uses an inline progression.
+- `examples/backing-tracks/jazz-blues-12-request.json` uses the `jazz-blues-12` preset.
 
 ## Deterministic resolution
 
@@ -87,7 +137,7 @@ not caller-controlled:
 - track names and default velocities;
 - track ordering;
 - automatic bass style for the selected groove preset;
-- progression expansion to exactly one chord per bar;
+- progression expansion or preset transposition to exactly one chord per bar;
 - output path under `generated/backing-tracks/`;
 - backing-track provenance metadata.
 
@@ -100,9 +150,12 @@ preset; the mapping is documented in `docs/bass-engine.md`. Supplying a bass sty
 without bass instrumentation fails closed.
 
 A groove preset reference is checked against both meter and its catalog tempo range.
-Unknown presets, unsupported chord qualities, unsafe IDs, duplicate roles, unknown
-request fields, and malformed arrangement cycles fail closed before a manifest is
-returned.
+A progression preset is checked against key, meter, and exact form length. Unknown
+presets, unsupported chord qualities, unsafe IDs, duplicate roles, unknown request
+fields, and malformed arrangement cycles fail closed before a manifest is returned.
+
+When a progression preset is used, its stable ID is retained in request provenance;
+the rendered `BackingTrackSpec` still contains ordinary concrete chord symbols.
 
 ## Why not accept a complete track list
 
@@ -129,14 +182,14 @@ From the repository root:
 
 ```bash
 python3 scripts/resolve_backing_track_request.py \
-  examples/backing-tracks/funk-wah-request.json
+  examples/backing-tracks/jazz-blues-12-request.json
 ```
 
 To write the resolved manifest:
 
 ```bash
 python3 scripts/resolve_backing_track_request.py \
-  examples/backing-tracks/funk-wah-request.json \
+  examples/backing-tracks/jazz-blues-12-request.json \
   --output /tmp/backing-track.json
 ```
 
@@ -153,10 +206,10 @@ music.backing-track.request
     response: BackingTrackSpec
 ```
 
-The public repository does not need to know how the upstream caller chose the
-preset, progression, tempo, bass style, or practice purpose. It only needs a valid
+The public repository does not need to know how the upstream caller chose the groove,
+progression preset, tempo, bass style, or practice purpose. It only needs a valid
 versioned request and returns deterministic domain data.
 
 This keeps the integration replaceable: a different caller can produce the same
-request without changing the groove engine, backing-track engine, bass engine, or
-MIDI renderer.
+request without changing the groove engine, progression catalog, backing-track
+engine, bass engine, or MIDI renderer.
