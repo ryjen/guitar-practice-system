@@ -9,10 +9,12 @@ on:
       - "contracts/backing-tracks/**"
       - "docs/backing-track-form.md"
       - "docs/backing-track-request.md"
+      - "docs/bass-engine.md"
       - "docs/groove-engine.md"
       - "docs/groove-catalog.md"
       - "examples/backing-tracks/**"
       - "scripts/backing_track_engine.py"
+      - "scripts/bass_engine.py"
       - "scripts/build_practice_artifacts.py"
       - "scripts/export_practice_data.py"
       - "scripts/groove_engine.py"
@@ -23,6 +25,7 @@ on:
       - "scripts/check_public_boundary.py"
       - "tests/test_backing_track_engine.py"
       - "tests/test_backing_track_request.py"
+      - "tests/test_bass_engine.py"
       - "tests/test_build_practice_artifacts.py"
       - "tests/test_groove_engine.py"
       - "tests/test_groove_catalog.py"
@@ -39,10 +42,12 @@ on:
       - "contracts/backing-tracks/**"
       - "docs/backing-track-form.md"
       - "docs/backing-track-request.md"
+      - "docs/bass-engine.md"
       - "docs/groove-engine.md"
       - "docs/groove-catalog.md"
       - "examples/backing-tracks/**"
       - "scripts/backing_track_engine.py"
+      - "scripts/bass_engine.py"
       - "scripts/build_practice_artifacts.py"
       - "scripts/export_practice_data.py"
       - "scripts/groove_engine.py"
@@ -53,6 +58,7 @@ on:
       - "scripts/check_public_boundary.py"
       - "tests/test_backing_track_engine.py"
       - "tests/test_backing_track_request.py"
+      - "tests/test_bass_engine.py"
       - "tests/test_build_practice_artifacts.py"
       - "tests/test_groove_engine.py"
       - "tests/test_groove_catalog.py"
@@ -94,6 +100,7 @@ jobs:
           spec = json.loads(Path("/tmp/funk-wah-spec.json").read_text())
           assert spec["id"] == "funk-wah-pocket-em-96"
           assert [track["role"] for track in spec["tracks"]] == ["drums", "bass"]
+          assert spec["tracks"][1]["bass"]["style"] == "kick-root-octave"
           assert spec["sections"][0]["bars"] == 8
           PY
       - name: Generate and validate backing-track catalog
