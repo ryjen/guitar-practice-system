@@ -47,6 +47,34 @@ This keeps the catalog authoritative for reusable progression identity while the
 | `blues-12-quick-change` | dominant blues with IV in bar 2 |
 | `jazz-blues-12` | jazz-blues practice form with fixed opening and VI-II-V-I ending |
 | `progression-jazz-major-ii-v-i` | four-bar major ii-V-I with repeated tonic resolution |
+| `progression-major-i-iv-v` | eight-bar major I-IV-V practice realization |
+
+## Major I-IV-V identity
+
+`progression-major-i-iv-v` promotes the first eight-bar section of the existing country I-IV-V backing track into reusable catalog data:
+
+```text
+| I | I | IV | IV |
+| I | V | I  | V  |
+```
+
+In G:
+
+```text
+G | G | C | C | G | D | G | D
+```
+
+In A:
+
+```text
+A | A | D | D | A | E | A | E
+```
+
+The progression identity is intentionally genre-neutral. Country, rock, blues-rock, and other realizations can reuse the same harmony while choosing different groove, bass, instrumentation, articulation, tempo, and arrangement.
+
+The existing `backing-tracks/country-i-iv-v/manifest.json` remains a richer country-specific arrangement. Its first section is checked against the progression catalog so the promoted identity cannot drift from its source material.
+
+The committed request `examples/backing-tracks/i-iv-v-g-request.json` demonstrates the same harmonic identity with the deterministic `country-train` groove, root/fifth bass, and light keys.
 
 ## Major ii-V-I identity
 
@@ -125,6 +153,15 @@ In A it produces:
 A7 | A7 | D7 | D7 | A7 | A7 | E7 | A7 | F#7 | B7 | E7 | A7
 ```
 
+## Modal tonal centres
+
+Dorian and Mixolydian vamps are intentionally not represented by pretending the MIDI key signature is the modal tonic. A modal form needs two distinct facts:
+
+- **tonal centre** — the pitch heard as home;
+- **key signature** — the accidental set encoded in MIDI metadata.
+
+For example, D Dorian has D as tonal centre but uses the C-major key signature. Future modal progression support should model that distinction explicitly before adding reusable modal presets to the request path.
+
 ## Optional enrichment versus form identity
 
 Guide-tone practice, ii-V language, diminished colour, altered-dominant vocabulary, and turnaround anticipation are useful jazz-blues layers. They should not change the canonical `jazz-blues-12` opening or ending unless a future preset is deliberately given a different identity.
@@ -143,6 +180,12 @@ List presets:
 
 ```bash
 python3 scripts/progression_catalog.py list
+```
+
+Resolve I-IV-V in G:
+
+```bash
+python3 scripts/progression_catalog.py resolve progression-major-i-iv-v G
 ```
 
 Resolve ii-V-I in C:

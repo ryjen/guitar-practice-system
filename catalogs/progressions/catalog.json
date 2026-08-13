@@ -44,6 +44,16 @@
       "meter": [4, 4],
       "changes": ["IIm7", "V7", "Imaj7", "Imaj7"],
       "tags": ["jazz", "major", "ii-v-i", "cadence"]
+    },
+    {
+      "id": "progression-major-i-iv-v",
+      "title": "Major I-IV-V",
+      "family": "major-functional",
+      "description": "Eight-bar I-IV-V practice realization promoted from the existing country backing-track form.",
+      "bars": 8,
+      "meter": [4, 4],
+      "changes": ["I", "I", "IV", "IV", "I", "V", "I", "V"],
+      "tags": ["major", "i-iv-v", "functional", "country", "rock"]
     }
   ]
 }
