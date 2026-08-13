@@ -56,6 +56,10 @@ class PracticeBundleTests(unittest.TestCase):
                 "generated/backing-tracks/call-response-gap-em-92.mid",
                 provenance["artifacts"],
             )
+            self.assertIn(
+                "generated/backing-tracks/jazz-blues-12-c-110.mid",
+                provenance["artifacts"],
+            )
             self.assertTrue((first / "exports/practice-data.json").exists())
             self.assertTrue((first / "SHA256SUMS").exists())
 
