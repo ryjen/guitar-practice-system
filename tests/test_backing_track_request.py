@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import backing_track_engine  # noqa: E402
 import groove_catalog  # noqa: E402
 import midi_workflow  # noqa: E402
+import progression_catalog  # noqa: E402
 import resolve_backing_track_request  # noqa: E402
 
 
@@ -36,10 +37,56 @@ class BackingTrackRequestTests(unittest.TestCase):
         self.assertEqual(["drums", "bass"], [track["role"] for track in spec["tracks"]])
         self.assertEqual("funk-wah-16", spec["tracks"][0]["groove_preset"])
         self.assertEqual("kick-root-octave", spec["tracks"][1]["bass"]["style"])
+        self.assertNotIn("progression_preset", spec["provenance"])
         self.assertEqual(
             "generated/backing-tracks/funk-wah-pocket-em-96.mid",
             spec["outputs"]["midi"],
         )
+
+    def test_progression_preset_resolves_catalog_form_and_provenance(self) -> None:
+        path = ROOT / "examples" / "backing-tracks" / "jazz-blues-12-request.json"
+        request = json.loads(path.read_text(encoding="utf-8"))
+        spec = resolve_backing_track_request.resolve_request(request)
+        expected = progression_catalog.resolve_progression("jazz-blues-12", "C")
+
+        self.assertEqual("jazz-blues-12", request["form"]["progression_preset"])
+        self.assertNotIn("progression", request["form"])
+        self.assertEqual(expected, spec["sections"][0]["chords"])
+        self.assertEqual("jazz-blues-12", spec["provenance"]["progression_preset"])
+        self.assertEqual(["C7", "C7", "F7", "F7"], spec["sections"][0]["chords"][:4])
+        self.assertEqual(["A7", "D7", "G7", "C7"], spec["sections"][0]["chords"][-4:])
+
+    def test_progression_form_requires_exactly_one_source(self) -> None:
+        request = json.loads(json.dumps(self.request))
+        request["form"]["progression_preset"] = "jazz-blues-12"
+        with self.assertRaisesRegex(midi_workflow.ManifestError, "exactly one"):
+            resolve_backing_track_request.resolve_request(request)
+
+        request = json.loads(json.dumps(self.request))
+        del request["form"]["progression"]
+        with self.assertRaisesRegex(midi_workflow.ManifestError, "exactly one"):
+            resolve_backing_track_request.resolve_request(request)
+
+    def test_progression_preset_rejects_unknown_id_and_bar_mismatch(self) -> None:
+        path = ROOT / "examples" / "backing-tracks" / "jazz-blues-12-request.json"
+        request = json.loads(path.read_text(encoding="utf-8"))
+        request["form"]["progression_preset"] = "does-not-exist"
+        with self.assertRaisesRegex(midi_workflow.ManifestError, "unknown progression preset"):
+            resolve_backing_track_request.resolve_request(request)
+
+        request = json.loads(path.read_text(encoding="utf-8"))
+        request["form"]["bars"] = 16
+        with self.assertRaisesRegex(midi_workflow.ManifestError, "does not match progression preset"):
+            resolve_backing_track_request.resolve_request(request)
+
+    def test_progression_preset_meter_must_match_request(self) -> None:
+        path = ROOT / "examples" / "backing-tracks" / "jazz-blues-12-request.json"
+        request = json.loads(path.read_text(encoding="utf-8"))
+        request["meter"] = [7, 8]
+        request["groove_preset"] = "odd-7-8"
+        request["tempo_bpm"] = 92
+        with self.assertRaisesRegex(midi_workflow.ManifestError, "progression preset.*uses meter"):
+            resolve_backing_track_request.resolve_request(request)
 
     def test_resolution_is_deterministic_and_canonicalizes_instrument_order(self) -> None:
         first = resolve_backing_track_request.resolve_request(self.request)
