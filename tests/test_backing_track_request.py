@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import backing_track_engine  # noqa: E402
+import groove_catalog  # noqa: E402
 import midi_workflow  # noqa: E402
 import resolve_backing_track_request  # noqa: E402
 
@@ -54,6 +55,15 @@ class BackingTrackRequestTests(unittest.TestCase):
         request["bass_style"] = "auto"
         spec = resolve_backing_track_request.resolve_request(request)
         self.assertEqual("walking", spec["tracks"][1]["bass"]["style"])
+
+    def test_every_groove_preset_has_an_auto_bass_style(self) -> None:
+        catalog_ids = {
+            preset["id"] for preset in groove_catalog.load_catalog()["presets"]
+        }
+        self.assertEqual(
+            catalog_ids,
+            set(resolve_backing_track_request.AUTO_BASS_STYLE_BY_PRESET),
+        )
 
     def test_explicit_bass_style_requires_bass_instrumentation(self) -> None:
         request = json.loads(json.dumps(self.request))
