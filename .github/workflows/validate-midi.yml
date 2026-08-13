@@ -17,7 +17,7 @@ on:
       - "docs/groove-engine.md"
       - "docs/groove-catalog.md"
       - "examples/backing-tracks/**"
-      - "examples/musical-dimensions/twelve-bar-blues-variants.md"
+      - "examples/musical-dimensions/**"
       - "scripts/backing_track_engine.py"
       - "scripts/bass_engine.py"
       - "scripts/build_practice_artifacts.py"
@@ -59,7 +59,7 @@ on:
       - "docs/groove-engine.md"
       - "docs/groove-catalog.md"
       - "examples/backing-tracks/**"
-      - "examples/musical-dimensions/twelve-bar-blues-variants.md"
+      - "examples/musical-dimensions/**"
       - "scripts/backing_track_engine.py"
       - "scripts/bass_engine.py"
       - "scripts/build_practice_artifacts.py"
@@ -110,13 +110,29 @@ jobs:
         run: |
           python scripts/progression_catalog.py validate
           python scripts/progression_catalog.py resolve jazz-blues-12 C > /tmp/jazz-blues-c.json
+          python scripts/progression_catalog.py resolve progression-jazz-major-ii-v-i C > /tmp/ii-v-i-c.json
+          python scripts/progression_catalog.py fourths \
+            progression-jazz-major-ii-v-i \
+            --start-key C \
+            --count 4 > /tmp/ii-v-i-fourths.json
           python - <<'PY'
           import json
           from pathlib import Path
 
-          payload = json.loads(Path("/tmp/jazz-blues-c.json").read_text())
-          assert payload["chords"][:4] == ["C7", "C7", "F7", "F7"]
-          assert payload["chords"][-4:] == ["A7", "D7", "G7", "C7"]
+          jazz_blues = json.loads(Path("/tmp/jazz-blues-c.json").read_text())
+          assert jazz_blues["chords"][:4] == ["C7", "C7", "F7", "F7"]
+          assert jazz_blues["chords"][-4:] == ["A7", "D7", "G7", "C7"]
+
+          ii_v_i = json.loads(Path("/tmp/ii-v-i-c.json").read_text())
+          assert ii_v_i["chords"] == ["Dm7", "G7", "Cmaj7", "Cmaj7"]
+
+          fourths = json.loads(Path("/tmp/ii-v-i-fourths.json").read_text())
+          assert [position["key_signature"] for position in fourths["positions"]] == [
+              "C", "F", "Bb", "Eb"
+          ]
+          assert fourths["positions"][1]["chords"] == [
+              "Gm7", "C7", "Fmaj7", "Fmaj7"
+          ]
           PY
       - name: Resolve backing-track request example
         run: |
@@ -133,21 +149,32 @@ jobs:
           assert spec["tracks"][1]["bass"]["style"] == "kick-root-octave"
           assert spec["sections"][0]["bars"] == 8
           PY
-      - name: Resolve jazz blues request example
+      - name: Resolve catalog-backed jazz request examples
         run: |
           python scripts/resolve_backing_track_request.py \
             examples/backing-tracks/jazz-blues-12-request.json \
             --output /tmp/jazz-blues-spec.json
+          python scripts/resolve_backing_track_request.py \
+            examples/backing-tracks/ii-v-i-c-request.json \
+            --output /tmp/ii-v-i-spec.json
           python - <<'PY'
           import json
           from pathlib import Path
 
-          spec = json.loads(Path("/tmp/jazz-blues-spec.json").read_text())
-          assert spec["id"] == "jazz-blues-12-c-110"
-          assert spec["sections"][0]["bars"] == 12
-          assert spec["sections"][0]["chords"][:4] == ["C7", "C7", "F7", "F7"]
-          assert spec["sections"][0]["chords"][-4:] == ["A7", "D7", "G7", "C7"]
-          assert spec["tracks"][1]["bass"]["style"] == "walking"
+          jazz_blues = json.loads(Path("/tmp/jazz-blues-spec.json").read_text())
+          assert jazz_blues["id"] == "jazz-blues-12-c-110"
+          assert jazz_blues["sections"][0]["bars"] == 12
+          assert jazz_blues["sections"][0]["chords"][:4] == ["C7", "C7", "F7", "F7"]
+          assert jazz_blues["sections"][0]["chords"][-4:] == ["A7", "D7", "G7", "C7"]
+          assert jazz_blues["tracks"][1]["bass"]["style"] == "walking"
+
+          ii_v_i = json.loads(Path("/tmp/ii-v-i-spec.json").read_text())
+          assert ii_v_i["id"] == "ii-v-i-c-80"
+          assert ii_v_i["sections"][0]["chords"] == [
+              "Dm7", "G7", "Cmaj7", "Cmaj7"
+          ]
+          assert ii_v_i["provenance"]["progression_preset"] == "progression-jazz-major-ii-v-i"
+          assert ii_v_i["tracks"][1]["bass"]["style"] == "walking"
           PY
       - name: Generate practice progression example
         run: |
