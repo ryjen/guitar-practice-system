@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "i-iv-v-country-g-100",
+  "title": "Major I-IV-V in G",
+  "purpose": "Practice chord-tone targeting, country picking, fills, and clean transitions over a stable major I-IV-V form.",
+  "key_signature": "G",
+  "tempo_bpm": 100,
+  "meter": [4, 4],
+  "groove_preset": "country-train",
+  "bass_style": "auto",
+  "count_in_bars": 1,
+  "form": {
+    "bars": 8,
+    "progression_preset": "progression-major-i-iv-v",
+    "section_name": "I-IV-V"
+  },
+  "instrumentation": ["drums", "bass", "keys"]
+}
