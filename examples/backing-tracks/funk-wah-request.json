@@ -7,6 +7,7 @@
   "tempo_bpm": 96,
   "meter": [4, 4],
   "groove_preset": "funk-wah-16",
+  "bass_style": "auto",
   "count_in_bars": 1,
   "form": {
     "bars": 8,

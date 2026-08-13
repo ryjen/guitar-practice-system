@@ -44,6 +44,17 @@
       "maxLength": 64,
       "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
     },
+    "bass_style": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "kick-root",
+        "kick-root-fifth",
+        "kick-root-octave",
+        "walking"
+      ],
+      "default": "auto"
+    },
     "count_in_bars": {
       "type": "integer",
       "minimum": 0,

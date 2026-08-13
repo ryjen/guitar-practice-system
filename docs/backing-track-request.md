@@ -38,6 +38,7 @@ A version 1 request contains:
 | `tempo_bpm` | Requested tempo; must also fit the selected preset range |
 | `meter` | Requested meter; must exactly match the selected groove preset |
 | `groove_preset` | Stable ID from the public groove catalog |
+| `bass_style` | Optional bounded bass style; defaults to `auto` when bass is present |
 | `count_in_bars` | Zero to four count-in bars; defaults to one |
 | `form.bars` | Total musical bars, from 1 to 128 |
 | `form.progression` | Chord progression repeated deterministically across the form |
@@ -57,6 +58,7 @@ Example:
   "tempo_bpm": 96,
   "meter": [4, 4],
   "groove_preset": "funk-wah-16",
+  "bass_style": "auto",
   "count_in_bars": 1,
   "form": {
     "bars": 8,
@@ -84,12 +86,18 @@ not caller-controlled:
 - General MIDI programs;
 - track names and default velocities;
 - track ordering;
+- automatic bass style for the selected groove preset;
 - progression expansion to exactly one chord per bar;
 - output path under `generated/backing-tracks/`;
 - backing-track provenance metadata.
 
 Instrumentation is canonicalized in the order `drums`, `bass`, `keys`, `pad`,
 regardless of the order supplied by the caller.
+
+When bass is present, `bass_style` may be `auto`, `kick-root`, `kick-root-fifth`,
+`kick-root-octave`, or `walking`. `auto` maps deterministically from the groove
+preset; the mapping is documented in `docs/bass-engine.md`. Supplying a bass style
+without bass instrumentation fails closed.
 
 A groove preset reference is checked against both meter and its catalog tempo range.
 Unknown presets, unsupported chord qualities, unsafe IDs, duplicate roles, unknown
@@ -146,8 +154,9 @@ music.backing-track.request
 ```
 
 The public repository does not need to know how the upstream caller chose the
-preset, progression, tempo, or practice purpose. It only needs a valid versioned
-request and returns deterministic domain data.
+preset, progression, tempo, bass style, or practice purpose. It only needs a valid
+versioned request and returns deterministic domain data.
 
 This keeps the integration replaceable: a different caller can produce the same
-request without changing the groove engine, backing-track engine, or MIDI renderer.
+request without changing the groove engine, backing-track engine, bass engine, or
+MIDI renderer.
