@@ -19,6 +19,26 @@ concrete chord symbols
 
 The catalog is stored at `catalogs/progressions/catalog.json` and validated by `scripts/progression_catalog.py`.
 
+## Backing-track request integration
+
+A `BackingTrackRequest` may reference a progression by stable ID instead of copying its concrete chord list:
+
+```json
+{
+  "key_signature": "C",
+  "meter": [4, 4],
+  "form": {
+    "bars": 12,
+    "progression_preset": "jazz-blues-12",
+    "section_name": "JAZZ-BLUES-12"
+  }
+}
+```
+
+The request resolver checks the preset meter and exact form length, then transposes the Roman-numeral changes using the request key. Inline `form.progression` remains available for arbitrary or uncatalogued harmony. A form must choose exactly one source.
+
+This keeps the catalog authoritative for reusable progression identity while the resolved `BackingTrackSpec` still contains ordinary concrete chord symbols.
+
 ## Current twelve-bar presets
 
 | ID | Identity |
