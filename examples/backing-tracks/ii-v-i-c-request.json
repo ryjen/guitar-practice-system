@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "ii-v-i-c-80",
+  "title": "Major ii-V-I in C",
+  "purpose": "Practice guide-tone resolution, compact voicing movement, and short jazz phrases over a stable major ii-V-I cadence.",
+  "key_signature": "C",
+  "tempo_bpm": 80,
+  "meter": [4, 4],
+  "groove_preset": "jazz-swing",
+  "bass_style": "auto",
+  "count_in_bars": 1,
+  "form": {
+    "bars": 4,
+    "progression_preset": "progression-jazz-major-ii-v-i",
+    "section_name": "II-V-I"
+  },
+  "instrumentation": ["drums", "bass", "keys"]
+}
