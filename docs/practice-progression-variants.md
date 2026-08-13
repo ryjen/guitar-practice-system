@@ -8,7 +8,7 @@ BackingTrackRequest
       v
 PracticeProgression: tempo-space-v1
       |
-      +-- slow   70% target tempo, full drum reference
+      +-- slow   70% target tempo, no progression-added drum gap
       +-- medium 85% target tempo, one drum-gap bar per four
       +-- fast  100% target tempo, two drum-gap bars per four
 ```
@@ -19,11 +19,13 @@ The selected groove preset's minimum supported tempo is a hard floor. For exampl
 
 The progression reduces **rhythmic reference**, not harmony. Medium and fast stages add a drum-only `GrooveSpec.bar_cycle` while bass, keys, and pads continue. This makes the player carry more internal time without removing harmonic context.
 
-Whole-band gaps remain independent. If the source request already contains `arrangement.bar_cycle`, it is preserved in every stage.
+The slow stage adds no new drum gap. Any drum cycle already defined by the selected groove preset still applies.
+
+Whole-band gaps remain independent. If the source request already contains `arrangement.bar_cycle`, it is preserved in every stage, including slow.
 
 ```text
-GrooveSpec.bar_cycle                  drum reference only
-Practice progression added gap       drum reference only
+GrooveSpec.bar_cycle                    drum reference only
+Practice progression added gap         drum reference only
 BackingTrackSpec.arrangement.bar_cycle all accompaniment
 ```
 
@@ -53,7 +55,7 @@ The output directory contains `progression.json`, individual manifests under `ma
 
 The `tempo-space-v1` profile is fixed:
 
-| Stage | Tempo | Added drum gap |
+| Stage | Tempo | Progression-added drum gap |
 |---|---:|---|
 | slow | 70% of target, clamped to preset minimum | none |
 | medium | 85% of target, clamped to preset minimum | bar 4 of each 4-bar cycle |
