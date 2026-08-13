@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ryjen.github.io/guitar-practice-system/contracts/backing-tracks/backing-track-spec.schema.json",
   "title": "BackingTrackSpec",
-  "description": "Deterministic backing-track manifest with optional named groove preset and arrangement-wide bar cycle.",
+  "description": "Deterministic backing-track manifest with optional named groove preset, bass accompaniment, and arrangement-wide bar cycle.",
   "type": "object",
   "required": ["id", "title", "key_signature", "tempo_bpm", "meter", "count_in_bars", "sections", "tracks", "outputs"],
   "properties": {
@@ -82,7 +82,8 @@
         "role": {"type": "string", "minLength": 1},
         "channel": {"type": "integer", "minimum": 0, "maximum": 15},
         "groove": {"$ref": "groove-spec.schema.json"},
-        "groove_preset": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"}
+        "groove_preset": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "bass": {"$ref": "bass-spec.schema.json"}
       },
       "not": {"required": ["groove", "groove_preset"]},
       "additionalProperties": true
