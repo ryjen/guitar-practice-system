@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ryjen.github.io/guitar-practice-system/contracts/backing-tracks/practice-progression.schema.json",
+  "title": "PracticeProgression",
+  "description": "Deterministic slow/medium/fast backing-track variants derived from one BackingTrackRequest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "profile", "source_request_id", "stages"],
+  "properties": {
+    "version": {"const": 1},
+    "profile": {"const": "tempo-space-v1"},
+    "source_request_id": {"type": "string", "minLength": 1},
+    "stages": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        {"$ref": "#/$defs/slowStage"},
+        {"$ref": "#/$defs/mediumStage"},
+        {"$ref": "#/$defs/fastStage"}
+      ]
+    }
+  },
+  "$defs": {
+    "barCycle": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["length", "mute_bars"],
+      "properties": {
+        "length": {"type": "integer", "minimum": 1, "maximum": 64},
+        "mute_bars": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "integer", "minimum": 0, "maximum": 63}
+        }
+      }
+    },
+    "stageBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "tempo_percent", "tempo_bpm", "added_drum_gap_cycle", "spec"],
+      "properties": {
+        "name": {"type": "string"},
+        "tempo_percent": {"type": "integer", "minimum": 1, "maximum": 100},
+        "tempo_bpm": {"type": "integer", "minimum": 20, "maximum": 300},
+        "added_drum_gap_cycle": {"$ref": "#/$defs/barCycle"},
+        "spec": {"$ref": "backing-track-spec.schema.json"}
+      }
+    },
+    "slowStage": {
+      "allOf": [
+        {"$ref": "#/$defs/stageBase"},
+        {
+          "properties": {
+            "name": {"const": "slow"},
+            "tempo_percent": {"const": 70},
+            "added_drum_gap_cycle": {"type": "null"}
+          }
+        }
+      ]
+    },
+    "mediumStage": {
+      "allOf": [
+        {"$ref": "#/$defs/stageBase"},
+        {
+          "properties": {
+            "name": {"const": "medium"},
+            "tempo_percent": {"const": 85}
+          }
+        }
+      ]
+    },
+    "fastStage": {
+      "allOf": [
+        {"$ref": "#/$defs/stageBase"},
+        {
+          "properties": {
+            "name": {"const": "fast"},
+            "tempo_percent": {"const": 100}
+          }
+        }
+      ]
+    }
+  }
+}
