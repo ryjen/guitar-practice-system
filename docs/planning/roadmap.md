@@ -6,7 +6,7 @@ Public reference core with active deterministic practice, evidence, timing, cata
 
 The software-contract baseline is substantially implemented. The current project risk is no longer missing architecture; it is whether the model, handoffs, and generated practice material remain useful in real playing sessions.
 
-The roadmap covers only independently useful public capabilities. Private product direction and all prompt/model/provider-specific work remain out of scope.
+The roadmap covers only independently useful public capabilities. Private product direction and implementation details remain out of scope.
 
 ## Current milestone
 
@@ -180,12 +180,10 @@ The public core should support:
 - deterministic catalog filtering;
 - source-first MIDI, notation, and backing-track transformations;
 - import/export and conformance fixtures;
-- deterministic AI-neutral contracts that remain independently useful to public consumers.
+- deterministic domain contracts that remain independently useful to public consumers.
 
 ## Out of scope
 
-- prompts or prompt templates;
-- model/provider/agent orchestration;
 - opaque recommendation or ranking logic;
 - inferred weaknesses or intent;
 - opaque external recommendation services;
