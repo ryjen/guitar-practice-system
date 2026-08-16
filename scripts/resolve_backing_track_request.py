@@ -37,6 +37,7 @@ TOP_LEVEL_FIELDS = {
     "title",
     "purpose",
     "key_signature",
+    "tonal_center",
     "tempo_bpm",
     "meter",
     "groove_preset",
@@ -130,6 +131,17 @@ def _validate_meter(value: Any) -> list[int]:
     return [numerator, denominator]
 
 
+def _validate_tonal_center(value: Any) -> str | None:
+    if value is None:
+        return None
+    tonal_center = _non_empty_string(value, "tonal_center", maximum=8).upper()
+    if tonal_center not in progression_catalog.NATURAL_TONAL_CENTERS:
+        raise midi_workflow.ManifestError(
+            "tonal_center must be one of C, D, E, F, G, A, B in BackingTrackRequest v1"
+        )
+    return tonal_center
+
+
 def _validate_progression(value: Any, *, bars: int) -> list[str]:
     progression = _require(value, list, "form.progression")
     if not progression:
@@ -157,6 +169,7 @@ def _resolve_form_chords(
     *,
     bars: int,
     key_signature: str,
+    tonal_center: str | None,
     meter: list[int],
 ) -> tuple[list[str], str | None]:
     has_progression = "progression" in form
@@ -167,6 +180,10 @@ def _resolve_form_chords(
         )
 
     if has_progression:
+        if tonal_center is not None:
+            raise midi_workflow.ManifestError(
+                "tonal_center requires a modal progression preset"
+            )
         progression = _validate_progression(form["progression"], bars=bars)
         chords = [progression[index % len(progression)] for index in range(bars)]
         return chords, None
@@ -191,7 +208,12 @@ def _resolve_form_chords(
             f"form.bars {bars} does not match progression preset "
             f"{preset_id!r} length {preset['bars']}"
         )
-    return progression_catalog.resolve_progression(preset_id, key_signature), preset_id
+    chords = progression_catalog.resolve_progression(
+        preset_id,
+        key_signature,
+        tonal_center=tonal_center,
+    )
+    return chords, preset_id
 
 
 def _validate_instrumentation(value: Any) -> tuple[str, ...]:
@@ -264,6 +286,7 @@ def validate_request(request: dict[str, Any]) -> None:
         maximum=16,
     )
     midi_workflow.key_signature_payload(key_signature)
+    tonal_center = _validate_tonal_center(request.get("tonal_center"))
 
     meter = _validate_meter(request.get("meter"))
     tempo = _int_field(
@@ -304,6 +327,7 @@ def validate_request(request: dict[str, Any]) -> None:
         form,
         bars=bars,
         key_signature=key_signature,
+        tonal_center=tonal_center,
         meter=meter,
     )
     if "section_name" in form:
@@ -335,6 +359,7 @@ def resolve_request(request: dict[str, Any]) -> dict[str, Any]:
         "key_signature",
         maximum=16,
     )
+    tonal_center = _validate_tonal_center(request.get("tonal_center"))
     meter = _validate_meter(request["meter"])
     tempo_bpm = request["tempo_bpm"]
     count_in_bars = request.get("count_in_bars", 1)
@@ -350,6 +375,7 @@ def resolve_request(request: dict[str, Any]) -> dict[str, Any]:
         form,
         bars=bars,
         key_signature=key_signature,
+        tonal_center=tonal_center,
         meter=meter,
     )
     section_name = _non_empty_string(
@@ -379,6 +405,12 @@ def resolve_request(request: dict[str, Any]) -> dict[str, Any]:
     }
     if progression_preset is not None:
         provenance["progression_preset"] = progression_preset
+        progression = progression_catalog.get_preset(progression_preset)
+        modal_context = progression.get("modal_context")
+        if modal_context is not None:
+            provenance["mode"] = modal_context["mode"]
+            provenance["tonal_center"] = tonal_center
+            provenance["key_signature"] = key_signature
 
     spec: dict[str, Any] = {
         "id": request_id,
