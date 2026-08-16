@@ -28,6 +28,11 @@
     "title": {"type": "string", "minLength": 1, "maxLength": 120},
     "purpose": {"type": "string", "minLength": 1, "maxLength": 500},
     "key_signature": {"type": "string", "minLength": 1, "maxLength": 16},
+    "tonal_center": {
+      "type": "string",
+      "enum": ["C", "D", "E", "F", "G", "A", "B"],
+      "description": "Optional modal tonic. BackingTrackRequest v1 intentionally accepts natural-note spellings only; modal presets require it and non-modal forms reject it."
+    },
     "tempo_bpm": {"type": "integer", "minimum": 20, "maximum": 300},
     "meter": {
       "type": "array",
