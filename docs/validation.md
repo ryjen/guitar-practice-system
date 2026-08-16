@@ -14,8 +14,8 @@ python -m pip install -r requirements-dev.txt
 
 The canonical command runs, in order:
 
-1. Python bytecode compilation for `scripts/` and `tests/`;
-2. correctness-focused Ruff static analysis;
+1. Python bytecode compilation for `scripts/`, `tests/`, and `tools/`;
+2. correctness-focused Ruff static analysis across those Python source directories;
 3. the public repository boundary check;
 4. the full unit-test suite.
 
