@@ -17,6 +17,10 @@ They are intentionally small, playable, and reusable. Each example separates:
 4. [`seven-eight-space-session.md`](seven-eight-space-session.md) — a 7/8 phrasing session using 2+2+3 grouping and explicit silence
 5. [`caged-interval-ear-session.md`](caged-interval-ear-session.md) — CAGED used as an optional orientation frame for interval and contextual ear training
 6. [`country-over-eighties-rock-session.md`](country-over-eighties-rock-session.md) — country articulation layered selectively over an eighties-rock progression and groove
+7. [`d-dorian-modal-session.md`](d-dorian-modal-session.md) — D Dorian heard from a D tonal centre with natural-sixth ear targeting and the deterministic i–IV vamp
+8. [`g-mixolydian-modal-session.md`](g-mixolydian-modal-session.md) — G Mixolydian heard from a G tonal centre with flat-seventh contrast and the deterministic I–bVII vamp
+
+The modal examples are intentionally the first reusable pattern for #85. They are practice hypotheses until played and reviewed in real sessions; do not clone them across all seven modes before that validation step.
 
 ## Usage
 
