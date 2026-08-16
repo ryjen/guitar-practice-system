@@ -54,6 +54,28 @@
       "meter": [4, 4],
       "changes": ["I", "I", "IV", "IV", "I", "V", "I", "V"],
       "tags": ["major", "i-iv-v", "functional", "country", "rock"]
+    },
+    {
+      "id": "progression-modal-dorian-i-iv",
+      "title": "Dorian i-IV Vamp",
+      "family": "modal-vamp",
+      "description": "Sparse four-bar Dorian i-IV vamp that exposes the natural sixth without tonicizing the relative major.",
+      "bars": 4,
+      "meter": [4, 4],
+      "changes": ["Im", "Im", "IV", "IV"],
+      "tags": ["modal", "dorian", "vamp", "minor"],
+      "modal_context": {"mode": "dorian"}
+    },
+    {
+      "id": "progression-modal-mixolydian-i-bvii",
+      "title": "Mixolydian I-bVII Vamp",
+      "family": "modal-vamp",
+      "description": "Sparse four-bar Mixolydian I-bVII vamp that keeps the dominant-colour flat seventh audible.",
+      "bars": 4,
+      "meter": [4, 4],
+      "changes": ["I", "I", "bVII", "bVII"],
+      "tags": ["modal", "mixolydian", "vamp", "major"],
+      "modal_context": {"mode": "mixolydian"}
     }
   ]
 }

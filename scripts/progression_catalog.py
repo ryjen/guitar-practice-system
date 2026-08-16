@@ -34,6 +34,33 @@ FLAT_NAMES = ("C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B")
 FLAT_KEYS = {"F", "BB", "EB", "AB", "DB", "GB", "CB"}
 KEY_ROOTS = dict(midi_workflow.NOTE_NAMES)
 KEY_ROOTS["CB"] = 11
+NATURAL_TONAL_CENTERS = {
+    "C": 0,
+    "D": 2,
+    "E": 4,
+    "F": 5,
+    "G": 7,
+    "A": 9,
+    "B": 11,
+}
+MODAL_PARENT_OFFSETS = {
+    "dorian": -2,
+    "mixolydian": -7,
+}
+CANONICAL_MAJOR_KEYS_BY_ROOT = {
+    0: "C",
+    1: "Db",
+    2: "D",
+    3: "Eb",
+    4: "E",
+    5: "F",
+    6: "F#",
+    7: "G",
+    8: "Ab",
+    9: "A",
+    10: "Bb",
+    11: "B",
+}
 CIRCLE_OF_FOURTHS_MAJOR = (
     "C",
     "F",
@@ -121,6 +148,19 @@ def _validate_invariants(preset: dict[str, Any]) -> None:
             )
 
 
+def _validate_modal_context(preset: dict[str, Any]) -> None:
+    context = preset.get("modal_context")
+    if context is None:
+        return
+    if not isinstance(context, dict) or set(context) != {"mode"}:
+        raise ProgressionError("modal_context must contain only mode")
+    mode = _string(context.get("mode"), "modal_context.mode", 32)
+    if mode not in MODAL_PARENT_OFFSETS:
+        raise ProgressionError(
+            f"modal_context.mode must be one of {sorted(MODAL_PARENT_OFFSETS)}"
+        )
+
+
 def validate_catalog(catalog: dict[str, Any]) -> None:
     if not isinstance(catalog, dict):
         raise ProgressionError("catalog must be an object")
@@ -145,6 +185,7 @@ def validate_catalog(catalog: dict[str, Any]) -> None:
             "meter",
             "changes",
             "tags",
+            "modal_context",
             "invariants",
         }
         unknown = set(preset) - allowed
@@ -182,6 +223,7 @@ def validate_catalog(catalog: dict[str, Any]) -> None:
             or len(set(tags)) != len(tags)
         ):
             raise ProgressionError(f"preset {preset_id!r} tags must be unique strings")
+        _validate_modal_context(preset)
         _validate_invariants(preset)
 
 
@@ -194,7 +236,7 @@ def get_preset(preset_id: str, path: Path = DEFAULT_CATALOG) -> dict[str, Any]:
     raise ProgressionError(f"unknown progression preset: {preset_id!r}")
 
 
-def _major_key_root(key_signature: str) -> tuple[int, bool]:
+def _normalized_major_key(key_signature: str) -> str:
     midi_workflow.key_signature_payload(key_signature)
     normalized = key_signature.strip().upper().replace("♭", "B").replace("♯", "#")
     normalized = normalized.replace("MIN", "M")
@@ -204,14 +246,37 @@ def _major_key_root(key_signature: str) -> tuple[int, bool]:
         )
     if normalized not in KEY_ROOTS:
         raise ProgressionError(f"unsupported progression key: {key_signature!r}")
+    return normalized
+
+
+def _major_key_root(key_signature: str) -> tuple[int, bool]:
+    normalized = _normalized_major_key(key_signature)
     return KEY_ROOTS[normalized], normalized in FLAT_KEYS
 
 
-def _resolve_preset_in_key(
+def _natural_tonal_center(tonal_center: str) -> tuple[str, int]:
+    normalized = _string(tonal_center, "tonal_center", 8).upper()
+    if normalized not in NATURAL_TONAL_CENTERS:
+        raise ProgressionError(
+            "tonal_center must be one of C, D, E, F, G, A, B in BackingTrackRequest v1"
+        )
+    return normalized, NATURAL_TONAL_CENTERS[normalized]
+
+
+def expected_parent_major_key(mode: str, tonal_center: str) -> str:
+    if mode not in MODAL_PARENT_OFFSETS:
+        raise ProgressionError(f"unsupported modal context: {mode!r}")
+    _, tonic = _natural_tonal_center(tonal_center)
+    parent_root = (tonic + MODAL_PARENT_OFFSETS[mode]) % 12
+    return CANONICAL_MAJOR_KEYS_BY_ROOT[parent_root]
+
+
+def _resolve_changes(
     preset: dict[str, Any],
-    key_signature: str,
+    *,
+    tonic: int,
+    prefer_flats: bool,
 ) -> list[str]:
-    tonic, prefer_flats = _major_key_root(key_signature)
     names = FLAT_NAMES if prefer_flats else SHARP_NAMES
     chords: list[str] = []
     for change in preset["changes"]:
@@ -222,12 +287,56 @@ def _resolve_preset_in_key(
     return chords
 
 
+def _resolve_preset_in_key(
+    preset: dict[str, Any],
+    key_signature: str,
+) -> list[str]:
+    tonic, prefer_flats = _major_key_root(key_signature)
+    return _resolve_changes(preset, tonic=tonic, prefer_flats=prefer_flats)
+
+
+def _resolve_modal_preset(
+    preset: dict[str, Any],
+    *,
+    tonal_center: str,
+    key_signature: str,
+) -> list[str]:
+    context = preset["modal_context"]
+    mode = context["mode"]
+    normalized_tonal_center, tonic = _natural_tonal_center(tonal_center)
+    expected_key = expected_parent_major_key(mode, normalized_tonal_center)
+    requested_key = _normalized_major_key(key_signature)
+    if requested_key != expected_key.upper():
+        raise ProgressionError(
+            f"{normalized_tonal_center} {mode} requires parent-major key signature "
+            f"{expected_key}, not {key_signature.strip()}"
+        )
+    prefer_flats = requested_key in FLAT_KEYS
+    return _resolve_changes(preset, tonic=tonic, prefer_flats=prefer_flats)
+
+
 def resolve_progression(
     preset_id: str,
     key_signature: str,
     path: Path = DEFAULT_CATALOG,
+    *,
+    tonal_center: str | None = None,
 ) -> list[str]:
     preset = get_preset(preset_id, path)
+    if "modal_context" in preset:
+        if tonal_center is None:
+            raise ProgressionError(
+                f"modal progression preset {preset_id!r} requires tonal_center"
+            )
+        return _resolve_modal_preset(
+            preset,
+            tonal_center=tonal_center,
+            key_signature=key_signature,
+        )
+    if tonal_center is not None:
+        raise ProgressionError(
+            f"tonal_center is only supported for modal progression presets, not {preset_id!r}"
+        )
     return _resolve_preset_in_key(preset, key_signature)
 
 
@@ -258,6 +367,8 @@ def resolve_circle_of_fourths(
         raise ProgressionError("count must be an integer between 1 and 12")
 
     preset = get_preset(preset_id, path)
+    if "modal_context" in preset:
+        raise ProgressionError("circle-of-fourths traversal does not accept modal presets")
     canonical_start = _canonical_circle_key(start_key)
     start_index = CIRCLE_OF_FOURTHS_MAJOR.index(canonical_start)
     positions: list[dict[str, Any]] = []
@@ -284,6 +395,7 @@ def main(argv: list[str] | None = None) -> int:
     resolve = subparsers.add_parser("resolve")
     resolve.add_argument("preset_id")
     resolve.add_argument("key_signature")
+    resolve.add_argument("--tonal-center")
     fourths = subparsers.add_parser("fourths")
     fourths.add_argument("preset_id")
     fourths.add_argument("--start-key", default="C")
@@ -304,8 +416,14 @@ def main(argv: list[str] | None = None) -> int:
             payload = {
                 "preset": args.preset_id,
                 "key_signature": args.key_signature,
-                "chords": resolve_progression(args.preset_id, args.key_signature),
+                "chords": resolve_progression(
+                    args.preset_id,
+                    args.key_signature,
+                    tonal_center=args.tonal_center,
+                ),
             }
+            if args.tonal_center is not None:
+                payload["tonal_center"] = args.tonal_center
             print(json.dumps(payload, indent=2, sort_keys=True))
         else:
             positions = resolve_circle_of_fourths(

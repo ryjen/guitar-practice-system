@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "id": "d-dorian-vamp-96",
+  "title": "D Dorian i-IV Vamp",
+  "purpose": "Practice hearing and targeting the Dorian natural sixth over a sparse D-minor tonal centre.",
+  "key_signature": "C",
+  "tonal_center": "D",
+  "tempo_bpm": 96,
+  "meter": [4, 4],
+  "groove_preset": "funk-wah-16",
+  "bass_style": "auto",
+  "count_in_bars": 1,
+  "form": {
+    "bars": 4,
+    "progression_preset": "progression-modal-dorian-i-iv",
+    "section_name": "D-DORIAN"
+  },
+  "instrumentation": ["drums", "bass", "keys"]
+}
