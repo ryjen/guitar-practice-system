@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "id": "g-mixolydian-vamp-108",
+  "title": "G Mixolydian I-bVII Vamp",
+  "purpose": "Practice hearing and targeting the Mixolydian flat seventh over a stable G-major tonal centre.",
+  "key_signature": "C",
+  "tonal_center": "G",
+  "tempo_bpm": 108,
+  "meter": [4, 4],
+  "groove_preset": "80s-rock",
+  "bass_style": "auto",
+  "count_in_bars": 1,
+  "form": {
+    "bars": 4,
+    "progression_preset": "progression-modal-mixolydian-i-bvii",
+    "section_name": "G-MIXOLYDIAN"
+  },
+  "instrumentation": ["drums", "bass", "keys"]
+}
