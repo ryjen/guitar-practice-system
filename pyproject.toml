@@ -1,0 +1,9 @@
+[tool.ruff]
+target-version = "py312"
+extend-exclude = ["generated"]
+
+[tool.ruff.lint]
+# Keep the first static-analysis gate intentionally narrow: Pyflakes catches
+# undefined/unused names and import defects; E9 covers parser/runtime syntax
+# failures without introducing style-only churn.
+select = ["F", "E9"]
