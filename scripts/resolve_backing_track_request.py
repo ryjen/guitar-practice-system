@@ -208,11 +208,14 @@ def _resolve_form_chords(
             f"form.bars {bars} does not match progression preset "
             f"{preset_id!r} length {preset['bars']}"
         )
-    chords = progression_catalog.resolve_progression(
-        preset_id,
-        key_signature,
-        tonal_center=tonal_center,
-    )
+    try:
+        chords = progression_catalog.resolve_progression(
+            preset_id,
+            key_signature,
+            tonal_center=tonal_center,
+        )
+    except progression_catalog.ProgressionError as exc:
+        raise midi_workflow.ManifestError(str(exc)) from exc
     return chords, preset_id
 
 
