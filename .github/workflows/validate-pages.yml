@@ -9,6 +9,7 @@ on:
       - "docs/data/**"
       - "docs/.nojekyll"
       - "scripts/export_practice_data.py"
+      - "scripts/check_public_boundary.py"
       - "tests/test_pages_frontend.py"
       - "tests/test_practice_data_export.py"
       - ".github/workflows/validate-pages.yml"
@@ -22,6 +23,7 @@ on:
       - "docs/data/**"
       - "docs/.nojekyll"
       - "scripts/export_practice_data.py"
+      - "scripts/check_public_boundary.py"
       - "tests/test_pages_frontend.py"
       - "tests/test_practice_data_export.py"
       - ".github/workflows/validate-pages.yml"
@@ -45,6 +47,8 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22"
+      - name: Enforce public boundary
+        run: python scripts/check_public_boundary.py
       - name: Validate practice data export is current
         run: python scripts/export_practice_data.py --check
       - name: Run frontend contract tests
