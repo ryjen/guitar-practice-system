@@ -63,7 +63,7 @@ timing:
   final_check: 108 BPM over g-mixolydian-vamp-108 with one recorded musical-context take
 ```
 
-Use the ladder only while the phrase remains relaxed and centred. If the 4-BPM ladder does not land exactly on 108 from a chosen restart point, make 108 the explicit final musical-context realization rather than silently changing the backing-track target.
+Use the 4-BPM ladder only while the phrase remains relaxed and centred. The final 108-BPM pass is a musical-context check over the canonical backing-track realization, not a speed benchmark by itself.
 
 ## Phrase constraints
 
