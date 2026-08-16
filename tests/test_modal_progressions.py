@@ -145,23 +145,24 @@ class ModalProgressionTests(unittest.TestCase):
     def test_request_rejects_modal_context_mismatches(self) -> None:
         path = ROOT / "examples" / "backing-tracks" / "d-dorian-request.json"
         request = json.loads(path.read_text(encoding="utf-8"))
+        request_error = resolve_backing_track_request.midi_workflow.ManifestError
 
         missing = json.loads(json.dumps(request))
         del missing["tonal_center"]
-        with self.assertRaisesRegex(midi_workflow.ManifestError, "requires tonal_center"):
+        with self.assertRaisesRegex(request_error, "requires tonal_center"):
             resolve_backing_track_request.resolve_request(missing)
 
         wrong_key = json.loads(json.dumps(request))
         wrong_key["key_signature"] = "D"
         with self.assertRaisesRegex(
-            midi_workflow.ManifestError,
+            request_error,
             "requires parent-major key signature C",
         ):
             resolve_backing_track_request.resolve_request(wrong_key)
 
         accidental = json.loads(json.dumps(request))
         accidental["tonal_center"] = "D#"
-        with self.assertRaisesRegex(midi_workflow.ManifestError, "tonal_center must be one of"):
+        with self.assertRaisesRegex(request_error, "tonal_center must be one of"):
             resolve_backing_track_request.resolve_request(accidental)
 
         non_modal = json.loads(json.dumps(request))
@@ -172,7 +173,7 @@ class ModalProgressionTests(unittest.TestCase):
         }
         non_modal["key_signature"] = "G"
         with self.assertRaisesRegex(
-            midi_workflow.ManifestError,
+            request_error,
             "only supported for modal progression presets",
         ):
             resolve_backing_track_request.resolve_request(non_modal)
