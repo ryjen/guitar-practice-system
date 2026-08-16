@@ -24,14 +24,15 @@ def main() -> int:
         )
         return 2
 
+    source_dirs = ["scripts", "tests", "tools"]
     checks = (
         (
             "Compile Python sources",
-            [sys.executable, "-m", "compileall", "-q", "scripts", "tests"],
+            [sys.executable, "-m", "compileall", "-q", *source_dirs],
         ),
         (
             "Run Ruff static analysis",
-            [sys.executable, "-m", "ruff", "check", "scripts", "tests"],
+            [sys.executable, "-m", "ruff", "check", *source_dirs],
         ),
         (
             "Enforce public repository boundary",
