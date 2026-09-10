@@ -24,7 +24,7 @@ def main() -> int:
         )
         return 2
 
-    source_dirs = ["scripts", "tests", "tools"]
+    source_dirs = ["guitar_practice", "scripts", "tests", "tools"]
     checks = (
         (
             "Compile Python sources",
