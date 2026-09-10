@@ -46,6 +46,7 @@ Architecture and workflow references:
 - [`docs/discovery/README.md`](docs/discovery/README.md)
 - [`docs/assessment/README.md`](docs/assessment/README.md)
 - [`docs/scheduling/README.md`](docs/scheduling/README.md)
+- [`docs/cli.md`](docs/cli.md)
 
 ## Public boundary
 
@@ -97,7 +98,7 @@ The core principle is: **plan → observe → isolate → reintegrate → verify
 Search the repository catalog without changing songs, progress, schedules, or gear state:
 
 ```bash
-python scripts/discovery_catalog.py search \
+guitarctl discover search \
   examples/discovery/slide-backing-track-request.json \
   catalogs/discovery/repository.json
 ```
@@ -109,7 +110,7 @@ The same request, catalog version, and ranking rules should produce the same can
 Generate an approval-gated practice schedule from an explicit normalized snapshot:
 
 ```bash
-python scripts/scheduling_v2.py propose \
+guitarctl schedule propose \
   examples/scheduling/v2-example-snapshot.json
 ```
 
@@ -117,12 +118,14 @@ The same snapshot, state revision, ruleset version, clock value, and timezone pr
 
 ## Quick start
 
-No runtime is required for the documentation workflow. Optional standard-library Python helpers validate and generate repository assets.
+No runtime is required for the documentation workflow. Optional standard-library Python helpers validate and generate repository assets. The packaged `guitarctl` command is the preferred machine-facing interface.
 
 ```bash
 git clone https://github.com/ryjen/guitar-practice-system.git
 cd guitar-practice-system
+python -m pip install -e .
 
+guitarctl --help
 find docs templates examples -type f | sort
 python -m unittest discover -s tests -v
 mkdir -p generated
