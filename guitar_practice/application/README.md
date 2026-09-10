@@ -1,5 +1,5 @@
 # Application layer
 
-Application code coordinates use cases against inward-facing domain rules and outward-facing ports. It may depend on `domain` and protocol definitions in this package; it must not depend on concrete CLI, filesystem, network, or AI provider implementations.
+Application code coordinates deterministic use cases against inward-facing domain rules and outward-facing ports. It may depend on `domain` and protocol definitions in this package; it must not depend on concrete CLI, filesystem, network, or external orchestration implementations.
 
-Non-deterministic systems enter through proposal-oriented ports and cannot directly mutate canonical state.
+Inputs are explicit, validated, and versionable. Canonical state changes remain separate from read-only proposals or generated artifacts and require the same deterministic validation rules regardless of caller.
