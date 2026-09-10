@@ -1,5 +1,5 @@
 # Adapter layer
 
-Adapters implement application ports for concrete side effects and integrations. Filesystems, artifact encoders, model/supervisor gateways, and legacy migration bridges live here.
+Adapters implement application ports for concrete deterministic side effects and integrations such as filesystems, artifact encoders, and temporary legacy migration bridges.
 
-Adapters should expose bounded capabilities rather than ambient process authority. AI adapters in particular receive explicit context and return proposals; they do not receive canonical mutation capabilities.
+Adapters should expose bounded capabilities rather than ambient process authority. External callers interact through the same validated application contracts as local callers.
