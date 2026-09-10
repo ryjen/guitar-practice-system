@@ -1,36 +1,240 @@
-"""Command registry for the stable `guitarctl` interface.
+"""Stable command registry for `guitarctl`.
 
-The first migration step delegates to legacy modules through one explicit adapter.
-That keeps command semantics stable while application/domain logic is extracted
-incrementally. New commands should target application use cases directly.
+The registry is the anti-corruption boundary between stable command identities and
+legacy implementation files. New behavior should use native handlers; legacy
+targets exist only during strangler migration.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import Sequence
 
 
+class MigrationState(StrEnum):
+    NATIVE = "native"
+    LEGACY = "legacy"
+    DEPRECATED = "deprecated"
+
+
 @dataclass(frozen=True)
-class LegacyCommand:
-    path: tuple[str, ...]
+class LegacyTarget:
     script: str
+    prefix: tuple[str, ...] = ()
+    global_options: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class CommandSpec:
+    path: tuple[str, ...]
     help: str
+    migration: MigrationState
+    native_handler: str | None = None
+    legacy: LegacyTarget | None = None
+
+    def __post_init__(self) -> None:
+        if bool(self.native_handler) == bool(self.legacy):
+            raise ValueError("command must define exactly one implementation")
 
 
-LEGACY_COMMANDS: tuple[LegacyCommand, ...] = (
-    LegacyCommand(("discover",), "scripts/discovery_catalog.py", "Search deterministic repository catalogs"),
-    LegacyCommand(("schedule",), "scripts/scheduling_v2.py", "Propose deterministic practice schedules"),
-    LegacyCommand(("assess",), "scripts/assessment_core.py", "Run deterministic assessment workflows"),
-    LegacyCommand(("session", "adapt"), "scripts/adaptive_session.py", "Adapt a practice session from explicit evidence"),
-    LegacyCommand(("backing", "generate"), "scripts/generate_backing_tracks.py", "Generate backing-track artifacts"),
-    LegacyCommand(("midi", "workflow"), "scripts/midi_workflow.py", "Run the MIDI workflow"),
-    LegacyCommand(("midi", "generate"), "tools/generate_midi.py", "Generate MIDI from explicit source data"),
-    LegacyCommand(("progression", "generate"), "scripts/generate_practice_progression.py", "Generate a practice progression"),
-    LegacyCommand(("export",), "scripts/export_practice_data.py", "Export portable practice data"),
-    LegacyCommand(("validate", "public-boundary"), "scripts/check_public_boundary.py", "Validate the public/private boundary"),
+COMMANDS: tuple[CommandSpec, ...] = (
+    CommandSpec(
+        ("discover", "search"),
+        "Search deterministic repository catalogs",
+        MigrationState.NATIVE,
+        native_handler="discover-search",
+    ),
+    CommandSpec(
+        ("schedule", "propose"),
+        "Propose a deterministic v2 practice schedule",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/scheduling_v2.py", ("propose",)),
+    ),
+    CommandSpec(
+        ("schedule", "check-approval"),
+        "Check whether a v2 schedule proposal can still be approved",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/scheduling_v2.py", ("check-approval",)),
+    ),
+    CommandSpec(
+        ("schedule", "legacy", "propose"),
+        "Compatibility access to the v1 scheduling proposal",
+        MigrationState.DEPRECATED,
+        legacy=LegacyTarget("scripts/scheduling.py", ("propose",)),
+    ),
+    CommandSpec(
+        ("schedule", "legacy", "check-approval"),
+        "Compatibility access to v1 schedule approval checks",
+        MigrationState.DEPRECATED,
+        legacy=LegacyTarget("scripts/scheduling.py", ("check-approval",)),
+    ),
+    CommandSpec(
+        ("assess", "evaluate"),
+        "Evaluate evidence against deterministic assessment gates",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/assessment_core.py"),
+    ),
+    CommandSpec(
+        ("session", "adapt"),
+        "Build a deterministic adaptive-session recommendation",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/adaptive_session.py"),
+    ),
+    CommandSpec(
+        ("evidence", "feedback"),
+        "Derive deterministic feedback from evidence records",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/evidence_feedback.py"),
+    ),
+    CommandSpec(
+        ("groove", "validate"),
+        "Validate the groove catalog",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget(
+            "scripts/groove_catalog.py", ("validate",), ("--catalog",)
+        ),
+    ),
+    CommandSpec(
+        ("groove", "list"),
+        "List groove presets",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/groove_catalog.py", ("list",), ("--catalog",)),
+    ),
+    CommandSpec(
+        ("groove", "show"),
+        "Show one groove preset",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/groove_catalog.py", ("show",), ("--catalog",)),
+    ),
+    CommandSpec(
+        ("progression", "validate"),
+        "Validate the progression catalog",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/progression_catalog.py", ("validate",)),
+    ),
+    CommandSpec(
+        ("progression", "list"),
+        "List progression presets",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/progression_catalog.py", ("list",)),
+    ),
+    CommandSpec(
+        ("progression", "show"),
+        "Show one progression preset",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/progression_catalog.py", ("show",)),
+    ),
+    CommandSpec(
+        ("progression", "resolve"),
+        "Resolve a progression preset in a key",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/progression_catalog.py", ("resolve",)),
+    ),
+    CommandSpec(
+        ("progression", "fourths"),
+        "Resolve a progression through the circle of fourths",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/progression_catalog.py", ("fourths",)),
+    ),
+    CommandSpec(
+        ("progression", "generate"),
+        "Generate a practice progression from an explicit request",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/generate_practice_progression.py"),
+    ),
+    CommandSpec(
+        ("backing", "resolve"),
+        "Resolve a backing-track request into a deterministic spec",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/resolve_backing_track_request.py"),
+    ),
+    CommandSpec(
+        ("backing", "generate"),
+        "Generate and validate committed backing-track manifests",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/generate_backing_tracks.py"),
+    ),
+    CommandSpec(
+        ("midi", "generate"),
+        "Generate MIDI from a manifest",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/midi_workflow.py", ("generate",)),
+    ),
+    CommandSpec(
+        ("midi", "validate"),
+        "Validate generated MIDI against a manifest",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/midi_workflow.py", ("validate",)),
+    ),
+    CommandSpec(
+        ("midi", "generate-exercises"),
+        "Generate starter MIDI practice exercises",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("tools/generate_midi.py"),
+    ),
+    CommandSpec(
+        ("artifact", "build"),
+        "Build deterministic practice artifacts",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/build_practice_artifacts.py"),
+    ),
+    CommandSpec(
+        ("export", "practice-data"),
+        "Export portable practice data",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/export_practice_data.py"),
+    ),
+    CommandSpec(
+        ("validate", "repo"),
+        "Run repository validation",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/validate_repo.py"),
+    ),
+    CommandSpec(
+        ("validate", "public-boundary"),
+        "Validate the public/private repository boundary",
+        MigrationState.LEGACY,
+        legacy=LegacyTarget("scripts/check_public_boundary.py"),
+    ),
 )
+
+# These files are implementation libraries, not process entrypoints.
+INTERNAL_LIBRARY_SCRIPTS = frozenset(
+    {
+        "scripts/backing_track_engine.py",
+        "scripts/bass_engine.py",
+        "scripts/groove_engine.py",
+        "scripts/timing.py",
+    }
+)
+
+# The old discovery entrypoint remains callable only for backwards compatibility;
+# the stable command is package-native.
+COMPATIBILITY_SHIMS = frozenset({"scripts/discovery_catalog.py"})
 
 
 def command_paths() -> Sequence[tuple[str, ...]]:
-    return tuple(command.path for command in LEGACY_COMMANDS)
+    return tuple(command.path for command in COMMANDS)
+
+
+def registered_legacy_scripts() -> frozenset[str]:
+    return frozenset(command.legacy.script for command in COMMANDS if command.legacy)
+
+
+def find_command(tokens: Sequence[str]) -> tuple[CommandSpec | None, int]:
+    """Resolve the longest registered command prefix."""
+
+    best: CommandSpec | None = None
+    best_length = 0
+    for command in COMMANDS:
+        length = len(command.path)
+        if length <= len(tokens) and tuple(tokens[:length]) == command.path and length > best_length:
+            best = command
+            best_length = length
+    return best, best_length
+
+
+def commands_below(prefix: Sequence[str]) -> tuple[CommandSpec, ...]:
+    normalized = tuple(prefix)
+    return tuple(command for command in COMMANDS if command.path[: len(normalized)] == normalized)
