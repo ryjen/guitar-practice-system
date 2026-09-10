@@ -9,7 +9,12 @@ import sys
 from pathlib import Path
 from typing import Any, Iterable
 
-from guitar_practice.domain.discovery import (
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    # Compatibility only: direct script execution predates the installable package.
+    sys.path.insert(0, str(ROOT))
+
+from guitar_practice.domain.discovery import (  # noqa: E402
     CANONICAL_GENRES,
     LIST_FIELDS,
     SCALAR_FIELDS,
