@@ -64,10 +64,10 @@ jobs:
         run: python scripts/check_public_boundary.py
       - name: Run progression and timing tests
         run: |
-          python -m unittest tests.test_progression_catalog -v
-          python -m unittest tests.test_modal_progressions -v
-          python -m unittest tests.test_timing -v
-          python -m unittest tests.test_native_progression_cli -v
+          python -m unittest discover -s tests -p 'test_progression_catalog.py' -v
+          python -m unittest discover -s tests -p 'test_modal_progressions.py' -v
+          python -m unittest discover -s tests -p 'test_timing.py' -v
+          python -m unittest discover -s tests -p 'test_native_progression_cli.py' -v
       - name: Compare progression shim and native CLI
         run: |
           python scripts/progression_catalog.py resolve jazz-blues-12 C > /tmp/progression-shim.json
