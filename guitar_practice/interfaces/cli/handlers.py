@@ -7,13 +7,16 @@ import json
 from collections.abc import Callable, Sequence
 from typing import Any
 
+from guitar_practice.adapters.binary_files import BinaryFileStore
 from guitar_practice.adapters.json_files import JsonDocumentError, JsonFileStore
 from guitar_practice.application.assessment import EvaluateAssessment
 from guitar_practice.application.discovery import SearchCatalog
+from guitar_practice.application.midi import GenerateMidi, ValidateMidi
 from guitar_practice.application.progression import ProgressionCatalog
 from guitar_practice.application.scheduling import CheckScheduleApproval, ProposeSchedule
 from guitar_practice.domain.assessment import AssessmentError
 from guitar_practice.domain.discovery import DiscoveryError
+from guitar_practice.domain.midi import ManifestError as MidiManifestError
 from guitar_practice.domain.progression import ProgressionError
 from guitar_practice.domain.scheduling import SchedulingError
 from guitar_practice.interfaces.cli import exit_codes
@@ -186,6 +189,42 @@ def progression_fourths(argv: Sequence[str], context: CliContext) -> int:
     return exit_codes.OK
 
 
+def midi_generate(argv: Sequence[str], context: CliContext) -> int:
+    parser = argparse.ArgumentParser(prog="guitarctl midi generate")
+    parser.add_argument("manifest")
+    parser.add_argument("output")
+    try:
+        args = parser.parse_args(list(argv))
+        service = GenerateMidi(
+            JsonFileStore(context.workspace),
+            BinaryFileStore(context.workspace),
+        )
+        result = service.execute(args.manifest, args.output)
+    except (MidiManifestError, JsonDocumentError, OSError, ValueError) as exc:
+        print(f"guitarctl: {exc}", file=context.stderr)
+        return exit_codes.DATA_ERROR
+    _write_json(result, context)
+    return exit_codes.OK
+
+
+def midi_validate(argv: Sequence[str], context: CliContext) -> int:
+    parser = argparse.ArgumentParser(prog="guitarctl midi validate")
+    parser.add_argument("manifest")
+    parser.add_argument("midi")
+    try:
+        args = parser.parse_args(list(argv))
+        service = ValidateMidi(
+            JsonFileStore(context.workspace),
+            BinaryFileStore(context.workspace),
+        )
+        result = service.execute(args.manifest, args.midi)
+    except (MidiManifestError, JsonDocumentError, OSError, ValueError) as exc:
+        print(f"guitarctl: {exc}", file=context.stderr)
+        return exit_codes.DATA_ERROR
+    _write_json(result, context)
+    return exit_codes.OK
+
+
 NATIVE_HANDLERS: dict[str, NativeHandler] = {
     "discover-search": discover_search,
     "schedule-propose": schedule_propose,
@@ -196,4 +235,6 @@ NATIVE_HANDLERS: dict[str, NativeHandler] = {
     "progression-show": progression_show,
     "progression-resolve": progression_resolve,
     "progression-fourths": progression_fourths,
+    "midi-generate": midi_generate,
+    "midi-validate": midi_validate,
 }
