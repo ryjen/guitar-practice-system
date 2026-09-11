@@ -45,12 +45,28 @@ recordings.
 ## Inspect and validate
 
 ```bash
-python3 scripts/groove_catalog.py validate
-python3 scripts/groove_catalog.py list
-python3 scripts/groove_catalog.py show blues-shuffle
+guitarctl groove validate
+guitarctl groove list
+guitarctl groove show blues-shuffle
 ```
 
+Use `--catalog PATH` after the command to inspect another deterministic catalog.
 `show` returns the full preset including the underlying `GrooveSpec`.
+
+The historical `scripts/groove_catalog.py` command remains a compatibility shim
+while callers migrate; CI requires its JSON output to remain byte-identical to the
+native `guitarctl` catalog commands.
+
+## Package boundary
+
+Groove parsing, validation, seeded variation, swing, humanization, bar cycles, and
+drum-event rendering live in `guitar_practice.domain.groove`. The domain consumes
+explicit data and MIDI primitives; it does not load catalogs or choose files.
+
+`guitar_practice.application.groove.GrooveCatalog` owns catalog loading through the
+structured-document port. Bass accompaniment is a separate domain module that may
+consume a `GrooveSpec` as a rhythmic reference. Backing-track arrangement remains a
+higher-level orchestration concern.
 
 ## Bar cycles and gap practice
 
@@ -85,7 +101,7 @@ New presets should:
 - include at least one practice intent and descriptive tag;
 - remain deterministic for a fixed seed;
 - avoid copying distinctive commercial drum performances;
-- pass `groove_catalog.py validate` and the unit tests.
+- pass `guitarctl groove validate` and the unit tests.
 
 The catalog is a vocabulary, not a closed set. More genre-specific and technique-
 specific presets can be added without changing the `GrooveSpec` renderer.
