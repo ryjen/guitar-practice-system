@@ -16,12 +16,10 @@ if str(ROOT) not in sys.path:
 from guitar_practice.adapters.json_files import JsonDocumentError, JsonFileStore  # noqa: E402
 from guitar_practice.application.assessment import EvaluateAssessment  # noqa: E402
 from guitar_practice.domain import assessment as _domain  # noqa: E402
-from guitar_practice.domain.progression_state import (  # noqa: E402
-    ACTIVE_RANK,
-    STATES,
-    TRANSITIONS,
-)
 
+ACTIVE_RANK = _domain.ACTIVE_RANK
+STATES = _domain.STATES
+TRANSITIONS = _domain.TRANSITIONS
 OUTCOMES = _domain.OUTCOMES
 AssessmentError = _domain.AssessmentError
 nonempty = _domain.nonempty
