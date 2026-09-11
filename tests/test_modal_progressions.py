@@ -6,24 +6,46 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from guitar_practice.domain import progression
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "scripts"))
+CATALOG_PATH = ROOT / "catalogs" / "progressions" / "catalog.json"
 
+# End-to-end rendering remains in the generation subsystem until #99.
+sys.path.insert(0, str(ROOT / "scripts"))
 import backing_track_engine  # noqa: E402
 import midi_workflow  # noqa: E402
-import progression_catalog  # noqa: E402
 import resolve_backing_track_request  # noqa: E402
+
+
+def load_catalog() -> dict:
+    return json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
+
+
+def get_preset(preset_id: str) -> dict:
+    return progression.get_preset(load_catalog(), preset_id)
+
+
+def resolve_progression(
+    preset_id: str,
+    key_signature: str,
+    *,
+    tonal_center: str | None = None,
+) -> list[str]:
+    return progression.resolve_progression(
+        load_catalog(),
+        preset_id,
+        key_signature,
+        tonal_center=tonal_center,
+    )
 
 
 class ModalProgressionTests(unittest.TestCase):
     def test_catalog_contains_bounded_modal_contexts(self) -> None:
-        catalog = progression_catalog.load_catalog()
-        progression_catalog.validate_catalog(catalog)
-        dorian = progression_catalog.get_preset("progression-modal-dorian-i-iv")
-        mixolydian = progression_catalog.get_preset(
-            "progression-modal-mixolydian-i-bvii"
-        )
+        catalog = load_catalog()
+        progression.validate_catalog(catalog)
+        dorian = get_preset("progression-modal-dorian-i-iv")
+        mixolydian = get_preset("progression-modal-mixolydian-i-bvii")
         self.assertEqual({"mode": "dorian"}, dorian["modal_context"])
         self.assertEqual({"mode": "mixolydian"}, mixolydian["modal_context"])
         self.assertEqual(["Im", "Im", "IV", "IV"], dorian["changes"])
@@ -32,18 +54,18 @@ class ModalProgressionTests(unittest.TestCase):
     def test_d_dorian_resolves_from_tonal_center_with_c_key_signature(self) -> None:
         self.assertEqual(
             ["Dm", "Dm", "G", "G"],
-            progression_catalog.resolve_progression(
+            resolve_progression(
                 "progression-modal-dorian-i-iv",
                 "C",
                 tonal_center="D",
             ),
         )
-        self.assertEqual("C", progression_catalog.expected_parent_major_key("dorian", "D"))
+        self.assertEqual("C", progression.expected_parent_major_key("dorian", "D"))
 
     def test_g_mixolydian_resolves_from_tonal_center_with_c_key_signature(self) -> None:
         self.assertEqual(
             ["G", "G", "F", "F"],
-            progression_catalog.resolve_progression(
+            resolve_progression(
                 "progression-modal-mixolydian-i-bvii",
                 "C",
                 tonal_center="G",
@@ -51,44 +73,38 @@ class ModalProgressionTests(unittest.TestCase):
         )
         self.assertEqual(
             "C",
-            progression_catalog.expected_parent_major_key("mixolydian", "G"),
+            progression.expected_parent_major_key("mixolydian", "G"),
         )
 
     def test_modal_resolution_fails_closed_on_missing_or_wrong_context(self) -> None:
-        with self.assertRaisesRegex(
-            progression_catalog.ProgressionError,
-            "requires tonal_center",
-        ):
-            progression_catalog.resolve_progression(
-                "progression-modal-dorian-i-iv",
-                "C",
-            )
+        with self.assertRaisesRegex(progression.ProgressionError, "requires tonal_center"):
+            resolve_progression("progression-modal-dorian-i-iv", "C")
 
         with self.assertRaisesRegex(
-            progression_catalog.ProgressionError,
+            progression.ProgressionError,
             "requires parent-major key signature C",
         ):
-            progression_catalog.resolve_progression(
+            resolve_progression(
                 "progression-modal-dorian-i-iv",
                 "D",
                 tonal_center="D",
             )
 
         with self.assertRaisesRegex(
-            progression_catalog.ProgressionError,
+            progression.ProgressionError,
             "tonal_center must be one of",
         ):
-            progression_catalog.resolve_progression(
+            resolve_progression(
                 "progression-modal-dorian-i-iv",
                 "C",
                 tonal_center="F#",
             )
 
         with self.assertRaisesRegex(
-            progression_catalog.ProgressionError,
+            progression.ProgressionError,
             "only supported for modal progression presets",
         ):
-            progression_catalog.resolve_progression(
+            resolve_progression(
                 "progression-major-i-iv-v",
                 "G",
                 tonal_center="G",
