@@ -1,0 +1,112 @@
+name: Validate Backing
+
+on:
+  pull_request:
+    paths:
+      - "catalogs/grooves/**"
+      - "catalogs/progressions/**"
+      - "docs/backing-track-request.md"
+      - "docs/modal-progressions.md"
+      - "examples/backing-tracks/**"
+      - "guitar_practice/application/backing.py"
+      - "guitar_practice/domain/backing.py"
+      - "guitar_practice/domain/backing_request.py"
+      - "guitar_practice/interfaces/cli/**"
+      - "scripts/backing_track_engine.py"
+      - "scripts/resolve_backing_track_request.py"
+      - "scripts/check_public_boundary.py"
+      - "tests/test_backing_track_engine.py"
+      - "tests/test_backing_track_request.py"
+      - "tests/test_native_backing_cli.py"
+      - "pyproject.toml"
+      - ".github/workflows/validate-backing.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "catalogs/grooves/**"
+      - "catalogs/progressions/**"
+      - "docs/backing-track-request.md"
+      - "docs/modal-progressions.md"
+      - "examples/backing-tracks/**"
+      - "guitar_practice/application/backing.py"
+      - "guitar_practice/domain/backing.py"
+      - "guitar_practice/domain/backing_request.py"
+      - "guitar_practice/interfaces/cli/**"
+      - "scripts/backing_track_engine.py"
+      - "scripts/resolve_backing_track_request.py"
+      - "scripts/check_public_boundary.py"
+      - "tests/test_backing_track_engine.py"
+      - "tests/test_backing_track_request.py"
+      - "tests/test_native_backing_cli.py"
+      - "pyproject.toml"
+      - ".github/workflows/validate-backing.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-backing-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - name: Install package
+        run: python -m pip install --disable-pip-version-check --no-deps -e .
+      - name: Enforce public boundary
+        run: python scripts/check_public_boundary.py
+      - name: Run backing domain and CLI tests
+        run: |
+          python -m unittest tests.test_backing_track_engine -v
+          python -m unittest tests.test_backing_track_request -v
+          python -m unittest tests.test_native_backing_cli -v
+      - name: Compare request shim and native CLI stdout
+        run: |
+          python scripts/resolve_backing_track_request.py \
+            examples/backing-tracks/funk-wah-request.json \
+            > /tmp/backing-shim.json
+          guitarctl backing resolve \
+            examples/backing-tracks/funk-wah-request.json \
+            > /tmp/backing-native.json
+          cmp /tmp/backing-shim.json /tmp/backing-native.json
+      - name: Compare request shim and native CLI output files
+        run: |
+          python scripts/resolve_backing_track_request.py \
+            examples/backing-tracks/jazz-blues-12-request.json \
+            --output /tmp/backing-shim-output.json
+          guitarctl backing resolve \
+            examples/backing-tracks/jazz-blues-12-request.json \
+            --output /tmp/backing-native-output.json
+          cmp /tmp/backing-shim-output.json /tmp/backing-native-output.json
+      - name: Compare backing renderer shim and package bytes
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from guitar_practice.domain import backing
+
+          manifest_path = Path("backing-tracks/call-response-gap/manifest.json")
+          manifest = json.loads(manifest_path.read_text())
+          catalog = json.loads(Path("catalogs/grooves/catalog.json").read_text())
+          Path("/tmp/backing-native.mid").write_bytes(backing.render(manifest, catalog))
+          PY
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+
+          sys.path.insert(0, "scripts")
+          import backing_track_engine
+
+          backing_track_engine.generate(
+              Path("backing-tracks/call-response-gap/manifest.json"),
+              Path("/tmp/backing-shim.mid"),
+          )
+          PY
+          cmp /tmp/backing-shim.mid /tmp/backing-native.mid
