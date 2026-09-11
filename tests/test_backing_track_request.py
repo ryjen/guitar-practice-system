@@ -1,20 +1,22 @@
 from __future__ import annotations
 
 import json
-import sys
-import tempfile
 import unittest
 from pathlib import Path
 
+from guitar_practice.domain import backing, backing_request, groove, midi, progression
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "scripts"))
+GROOVE_CATALOG = json.loads(
+    (ROOT / "catalogs" / "grooves" / "catalog.json").read_text(encoding="utf-8")
+)
+PROGRESSION_CATALOG = json.loads(
+    (ROOT / "catalogs" / "progressions" / "catalog.json").read_text(encoding="utf-8")
+)
 
-import backing_track_engine  # noqa: E402
-import groove_catalog  # noqa: E402
-import midi_workflow  # noqa: E402
-import progression_catalog  # noqa: E402
-import resolve_backing_track_request  # noqa: E402
+
+def resolve(request: dict) -> dict:
+    return backing_request.resolve_request(request, GROOVE_CATALOG, PROGRESSION_CATALOG)
 
 
 class BackingTrackRequestTests(unittest.TestCase):
@@ -23,8 +25,8 @@ class BackingTrackRequestTests(unittest.TestCase):
         self.request = json.loads(self.request_path.read_text(encoding="utf-8"))
 
     def test_example_resolves_to_valid_backing_track_spec(self) -> None:
-        spec = resolve_backing_track_request.resolve_request(self.request)
-        backing_track_engine.validate_manifest(spec)
+        spec = resolve(self.request)
+        backing.validate_manifest(spec, GROOVE_CATALOG)
 
         self.assertEqual("funk-wah-pocket-em-96", spec["id"])
         self.assertEqual([4, 4], spec["meter"])
@@ -46,8 +48,12 @@ class BackingTrackRequestTests(unittest.TestCase):
     def test_progression_preset_resolves_catalog_form_and_provenance(self) -> None:
         path = ROOT / "examples" / "backing-tracks" / "jazz-blues-12-request.json"
         request = json.loads(path.read_text(encoding="utf-8"))
-        spec = resolve_backing_track_request.resolve_request(request)
-        expected = progression_catalog.resolve_progression("jazz-blues-12", "C")
+        spec = resolve(request)
+        expected = progression.resolve_progression(
+            PROGRESSION_CATALOG,
+            "jazz-blues-12",
+            "C",
+        )
 
         self.assertEqual("jazz-blues-12", request["form"]["progression_preset"])
         self.assertNotIn("progression", request["form"])
@@ -59,25 +65,25 @@ class BackingTrackRequestTests(unittest.TestCase):
     def test_progression_form_requires_exactly_one_source(self) -> None:
         request = json.loads(json.dumps(self.request))
         request["form"]["progression_preset"] = "jazz-blues-12"
-        with self.assertRaisesRegex(midi_workflow.ManifestError, "exactly one"):
-            resolve_backing_track_request.resolve_request(request)
+        with self.assertRaisesRegex(midi.ManifestError, "exactly one"):
+            resolve(request)
 
         request = json.loads(json.dumps(self.request))
         del request["form"]["progression"]
-        with self.assertRaisesRegex(midi_workflow.ManifestError, "exactly one"):
-            resolve_backing_track_request.resolve_request(request)
+        with self.assertRaisesRegex(midi.ManifestError, "exactly one"):
+            resolve(request)
 
     def test_progression_preset_rejects_unknown_id_and_bar_mismatch(self) -> None:
         path = ROOT / "examples" / "backing-tracks" / "jazz-blues-12-request.json"
         request = json.loads(path.read_text(encoding="utf-8"))
         request["form"]["progression_preset"] = "does-not-exist"
-        with self.assertRaisesRegex(midi_workflow.ManifestError, "unknown progression preset"):
-            resolve_backing_track_request.resolve_request(request)
+        with self.assertRaisesRegex(midi.ManifestError, "unknown progression preset"):
+            resolve(request)
 
         request = json.loads(path.read_text(encoding="utf-8"))
         request["form"]["bars"] = 16
-        with self.assertRaisesRegex(midi_workflow.ManifestError, "does not match progression preset"):
-            resolve_backing_track_request.resolve_request(request)
+        with self.assertRaisesRegex(midi.ManifestError, "does not match progression preset"):
+            resolve(request)
 
     def test_progression_preset_meter_must_match_request(self) -> None:
         path = ROOT / "examples" / "backing-tracks" / "jazz-blues-12-request.json"
@@ -85,14 +91,14 @@ class BackingTrackRequestTests(unittest.TestCase):
         request["meter"] = [7, 8]
         request["groove_preset"] = "odd-7-8"
         request["tempo_bpm"] = 92
-        with self.assertRaisesRegex(midi_workflow.ManifestError, "progression preset.*uses meter"):
-            resolve_backing_track_request.resolve_request(request)
+        with self.assertRaisesRegex(midi.ManifestError, "progression preset.*uses meter"):
+            resolve(request)
 
     def test_resolution_is_deterministic_and_canonicalizes_instrument_order(self) -> None:
-        first = resolve_backing_track_request.resolve_request(self.request)
+        first = resolve(self.request)
         reordered = json.loads(json.dumps(self.request))
         reordered["instrumentation"] = ["bass", "drums"]
-        second = resolve_backing_track_request.resolve_request(reordered)
+        second = resolve(reordered)
         self.assertEqual(first, second)
 
     def test_auto_bass_style_is_preset_specific(self) -> None:
@@ -100,24 +106,20 @@ class BackingTrackRequestTests(unittest.TestCase):
         request["groove_preset"] = "jazz-swing"
         request["tempo_bpm"] = 120
         request["bass_style"] = "auto"
-        spec = resolve_backing_track_request.resolve_request(request)
+        spec = resolve(request)
         self.assertEqual("walking", spec["tracks"][1]["bass"]["style"])
 
     def test_every_groove_preset_has_an_auto_bass_style(self) -> None:
-        catalog_ids = {
-            preset["id"] for preset in groove_catalog.load_catalog()["presets"]
-        }
-        self.assertEqual(
-            catalog_ids,
-            set(resolve_backing_track_request.AUTO_BASS_STYLE_BY_PRESET),
-        )
+        groove.validate_catalog(GROOVE_CATALOG)
+        catalog_ids = {preset["id"] for preset in GROOVE_CATALOG["presets"]}
+        self.assertEqual(catalog_ids, set(backing_request.AUTO_BASS_STYLE_BY_PRESET))
 
     def test_explicit_bass_style_requires_bass_instrumentation(self) -> None:
         request = json.loads(json.dumps(self.request))
         request["instrumentation"] = ["drums"]
         request["bass_style"] = "walking"
-        with self.assertRaisesRegex(midi_workflow.ManifestError, "requires bass"):
-            resolve_backing_track_request.resolve_request(request)
+        with self.assertRaisesRegex(midi.ManifestError, "requires bass"):
+            resolve(request)
 
     def test_trims_bounded_metadata_and_rejects_oversize_text(self) -> None:
         request = json.loads(json.dumps(self.request))
@@ -126,7 +128,7 @@ class BackingTrackRequestTests(unittest.TestCase):
         request["key_signature"] = " Emin "
         request["groove_preset"] = " funk-wah-16 "
         request["form"]["section_name"] = " POCKET "
-        spec = resolve_backing_track_request.resolve_request(request)
+        spec = resolve(request)
 
         self.assertEqual("Funk/Wah Pocket Practice", spec["title"])
         self.assertEqual("Practice the pocket.", spec["purpose"])
@@ -136,58 +138,53 @@ class BackingTrackRequestTests(unittest.TestCase):
 
         request = json.loads(json.dumps(self.request))
         request["purpose"] = "x" * 501
-        with self.assertRaisesRegex(midi_workflow.ManifestError, "at most 500"):
-            resolve_backing_track_request.resolve_request(request)
+        with self.assertRaisesRegex(midi.ManifestError, "at most 500"):
+            resolve(request)
 
     def test_rejects_unknown_request_field(self) -> None:
         request = json.loads(json.dumps(self.request))
         request["free_form_instruction"] = "make it better"
-        with self.assertRaises(midi_workflow.ManifestError):
-            resolve_backing_track_request.resolve_request(request)
+        with self.assertRaises(midi.ManifestError):
+            resolve(request)
 
     def test_rejects_preset_meter_mismatch(self) -> None:
         request = json.loads(json.dumps(self.request))
         request["meter"] = [7, 8]
-        with self.assertRaisesRegex(midi_workflow.ManifestError, "uses meter"):
-            resolve_backing_track_request.resolve_request(request)
+        with self.assertRaisesRegex(midi.ManifestError, "uses meter"):
+            resolve(request)
 
     def test_rejects_tempo_outside_preset_range(self) -> None:
         request = json.loads(json.dumps(self.request))
         request["tempo_bpm"] = 150
-        with self.assertRaisesRegex(midi_workflow.ManifestError, "outside groove preset"):
-            resolve_backing_track_request.resolve_request(request)
+        with self.assertRaisesRegex(midi.ManifestError, "outside groove preset"):
+            resolve(request)
 
     def test_rejects_unsafe_id(self) -> None:
         request = json.loads(json.dumps(self.request))
         request["id"] = "../outside"
-        with self.assertRaisesRegex(midi_workflow.ManifestError, "kebab-case"):
-            resolve_backing_track_request.resolve_request(request)
+        with self.assertRaisesRegex(midi.ManifestError, "kebab-case"):
+            resolve(request)
 
     def test_rejects_unknown_instrumentation_and_requires_drums(self) -> None:
         request = json.loads(json.dumps(self.request))
         request["instrumentation"] = ["drums", "guitar"]
-        with self.assertRaisesRegex(midi_workflow.ManifestError, "unsupported instrumentation"):
-            resolve_backing_track_request.resolve_request(request)
+        with self.assertRaisesRegex(midi.ManifestError, "unsupported instrumentation"):
+            resolve(request)
 
         request["instrumentation"] = ["bass"]
-        with self.assertRaisesRegex(midi_workflow.ManifestError, "must include drums"):
-            resolve_backing_track_request.resolve_request(request)
+        with self.assertRaisesRegex(midi.ManifestError, "must include drums"):
+            resolve(request)
 
     def test_rejects_unsupported_chord_before_rendering(self) -> None:
         request = json.loads(json.dumps(self.request))
         request["form"]["progression"] = ["Em9"]
-        with self.assertRaises(midi_workflow.ManifestError):
-            resolve_backing_track_request.resolve_request(request)
+        with self.assertRaises(midi.ManifestError):
+            resolve(request)
 
     def test_resolved_spec_generates_valid_type_one_midi(self) -> None:
-        spec = resolve_backing_track_request.resolve_request(self.request)
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            manifest = root / "manifest.json"
-            output = root / "request.mid"
-            manifest.write_text(json.dumps(spec, indent=2), encoding="utf-8")
-            backing_track_engine.generate(manifest, output)
-            report = midi_workflow.validate_output(manifest, output)
+        spec = resolve(self.request)
+        data = backing.render(spec, GROOVE_CATALOG)
+        report = midi.validate_rendered(spec, data)
 
         self.assertEqual(1, report["format"])
         self.assertEqual(["Conductor", "Drums", "Bass"], report["track_names"])

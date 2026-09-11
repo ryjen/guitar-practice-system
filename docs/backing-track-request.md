@@ -129,8 +129,9 @@ Committed examples:
 
 ## Deterministic resolution
 
-`resolve_backing_track_request.py` validates the request and derives fields that are
-not caller-controlled:
+`guitarctl backing resolve` loads the request and public catalogs, then delegates to
+the package-native deterministic resolver. The resolver derives fields that are not
+caller-controlled:
 
 - MIDI channels;
 - General MIDI programs;
@@ -157,6 +158,10 @@ fields, and malformed arrangement cycles fail closed before a manifest is return
 When a progression preset is used, its stable ID is retained in request provenance;
 the rendered `BackingTrackSpec` still contains ordinary concrete chord symbols.
 
+The domain resolver receives groove and progression catalogs as explicit inputs. It
+does not read files, discover catalogs, or select output locations. Those concerns
+belong to the application and adapter layers.
+
 ## Why not accept a complete track list
 
 The request boundary is an authority boundary. A complete `BackingTrackSpec` can
@@ -181,20 +186,21 @@ mechanical translation into the public backing-track domain.
 From the repository root:
 
 ```bash
-python3 scripts/resolve_backing_track_request.py \
+guitarctl backing resolve \
   examples/backing-tracks/jazz-blues-12-request.json
 ```
 
 To write the resolved manifest:
 
 ```bash
-python3 scripts/resolve_backing_track_request.py \
+guitarctl backing resolve \
   examples/backing-tracks/jazz-blues-12-request.json \
   --output /tmp/backing-track.json
 ```
 
-The output is a normal `BackingTrackSpec` and can be passed to the existing
-`backing_track_engine.py` generation path.
+The output is a normal `BackingTrackSpec`. The historical
+`scripts/resolve_backing_track_request.py` entrypoint remains a compatibility shim;
+CI requires its output to remain identical to the package-native command.
 
 ## Supervisor gateway integration
 

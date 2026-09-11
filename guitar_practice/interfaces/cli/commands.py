@@ -144,8 +144,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec(
         ("backing", "resolve"),
         "Resolve a backing-track request into a deterministic spec",
-        MigrationState.LEGACY,
-        legacy=LegacyTarget("scripts/resolve_backing_track_request.py"),
+        MigrationState.NATIVE,
+        native_handler="backing-resolve",
     ),
     CommandSpec(
         ("backing", "generate"),
@@ -198,7 +198,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
 )
 
 # These files are implementation libraries, not process entrypoints.
-INTERNAL_LIBRARY_SCRIPTS = frozenset({"scripts/backing_track_engine.py"})
+INTERNAL_LIBRARY_SCRIPTS = frozenset()
 
 # Old entrypoints/modules retained only for backwards compatibility after extraction.
 COMPATIBILITY_SHIMS = frozenset(
@@ -212,6 +212,8 @@ COMPATIBILITY_SHIMS = frozenset(
         "scripts/groove_catalog.py",
         "scripts/groove_engine.py",
         "scripts/bass_engine.py",
+        "scripts/backing_track_engine.py",
+        "scripts/resolve_backing_track_request.py",
     }
 )
 

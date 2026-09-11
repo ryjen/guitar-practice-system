@@ -29,6 +29,9 @@ guitarctl progression fourths progression-jazz-major-ii-v-i --count 4
 guitarctl groove list
 guitarctl groove show jazz-swing
 
+guitarctl backing resolve \
+  examples/backing-tracks/jazz-blues-12-request.json
+
 guitarctl midi generate \
   backing-tracks/slide-slow-blues/manifest.json \
   /tmp/slide-slow-blues.mid
@@ -43,14 +46,14 @@ guitarctl validate public-boundary
 Use an explicit workspace when invoking the installed command outside the repository root:
 
 ```bash
-guitarctl --workspace /path/to/guitar-practice-system schedule propose \
-  examples/scheduling/v2-example-snapshot.json
+guitarctl --workspace /path/to/guitar-practice-system backing resolve \
+  examples/backing-tracks/jazz-blues-12-request.json
 ```
 
 Global options such as `--workspace` appear before the command. Package-native commands expose their own help, for example:
 
 ```bash
-guitarctl groove show --help
+guitarctl backing resolve --help
 ```
 
 ## Migration status
@@ -69,22 +72,25 @@ The following commands are package-native and do not require repository scripts 
 - `groove validate`
 - `groove list`
 - `groove show`
+- `backing resolve`
 - `midi generate`
 - `midi validate`
 
-`progression generate`, backing generation, and `midi generate-exercises` remain in the generation subsystem while their orchestration is extracted behind the same domain/application boundaries.
+`progression generate`, bulk `backing generate`, and `midi generate-exercises` remain in the generation subsystem while their application orchestration is extracted behind the same domain/application boundaries.
 
 Former Python entrypoints remain compatibility shims while existing callers migrate. Remaining commands pass through the registered compatibility-process adapter until their cohesive subsystem is extracted.
 
 Compatibility commands require a workspace containing their registered repository script. They never dispatch arbitrary shell commands. `schedule legacy ...` is explicitly deprecated and exists only for v1 compatibility.
 
-## MIDI, groove, and bass boundaries
+## Musical generation boundaries
 
 MIDI encoding and structural validation are pure package-domain operations over explicit manifests and byte strings. Filesystem persistence is handled through the binary-artifact adapter. This separation keeps deterministic rendering reusable from CLI, tests, and other trusted callers without giving the domain filesystem authority.
 
-Groove parsing/rendering and bass accompaniment are also package-domain rules. Groove owns deterministic rhythmic realization and catalog validation; bass depends on groove and MIDI primitives for kick-locked and walking patterns. Catalog loading remains application-side, while backing-track arrangement remains a separate orchestration concern until its migration slice.
+Groove parsing/rendering and bass accompaniment are package-domain rules. Groove owns deterministic rhythmic realization and catalog validation; bass depends on groove and MIDI primitives for kick-locked and walking patterns.
 
-Compatibility entrypoints are parity-tested while callers migrate. `scripts/midi_workflow.py` must emit byte-identical MIDI to `guitarctl midi generate`, and `scripts/groove_catalog.py` must emit byte-identical catalog JSON to the native groove commands.
+Backing request resolution and arrangement rendering are also package-domain operations. Request resolution consumes explicit groove and progression catalogs and returns a canonical `BackingTrackSpec`. Arrangement rendering consumes that spec plus the groove catalog and returns deterministic MIDI bytes. Catalog/file loading remains application-side.
+
+Compatibility entrypoints are parity-tested while callers migrate. MIDI output must remain byte-identical, groove catalog output must remain text-identical, and backing request resolution must produce the same JSON through the historical script and native `guitarctl` command.
 
 ## Stability
 

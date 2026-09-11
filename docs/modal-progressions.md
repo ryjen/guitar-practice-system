@@ -95,11 +95,11 @@ Two checked-in requests exercise the initial boundary:
 - `examples/backing-tracks/d-dorian-request.json`
 - `examples/backing-tracks/g-mixolydian-request.json`
 
-Resolve them with the normal request command:
+Resolve them with the package-native request command:
 
 ```bash
-python scripts/resolve_backing_track_request.py examples/backing-tracks/d-dorian-request.json
-python scripts/resolve_backing_track_request.py examples/backing-tracks/g-mixolydian-request.json
+guitarctl backing resolve examples/backing-tracks/d-dorian-request.json
+guitarctl backing resolve examples/backing-tracks/g-mixolydian-request.json
 ```
 
 The package-native progression catalog CLI can resolve a modal preset directly when a tonal centre is explicit:

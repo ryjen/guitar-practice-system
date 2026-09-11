@@ -3,26 +3,19 @@ from __future__ import annotations
 import copy
 import json
 import struct
-import sys
-import tempfile
 import unittest
 from pathlib import Path
 
+from guitar_practice.domain import backing, midi
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPTS = ROOT / "scripts"
-if str(SCRIPTS) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS))
-
-import backing_track_engine  # noqa: E402
-import midi_workflow  # noqa: E402
-
-
 MANIFEST = ROOT / "backing-tracks" / "call-response-gap" / "manifest.json"
+GROOVE_CATALOG = json.loads(
+    (ROOT / "catalogs" / "grooves" / "catalog.json").read_text(encoding="utf-8")
+)
 
 
-def _note_on_ticks(path: Path) -> dict[str, list[int]]:
-    data = path.read_bytes()
+def _note_on_ticks(data: bytes) -> dict[str, list[int]]:
     offset = 14
     result: dict[str, list[int]] = {}
     while offset < len(data):
@@ -36,7 +29,7 @@ def _note_on_ticks(path: Path) -> dict[str, list[int]]:
         name = ""
         hits: list[int] = []
         while cursor < len(track):
-            delta, cursor = midi_workflow.read_vlq(track, cursor)
+            delta, cursor = midi.read_vlq(track, cursor)
             absolute += delta
             status = track[cursor]
             if status < 0x80:
@@ -51,14 +44,14 @@ def _note_on_ticks(path: Path) -> dict[str, list[int]]:
             if status == 0xFF:
                 kind = track[cursor]
                 cursor += 1
-                size, cursor = midi_workflow.read_vlq(track, cursor)
+                size, cursor = midi.read_vlq(track, cursor)
                 payload = track[cursor : cursor + size]
                 cursor += size
                 if kind == 0x03:
                     name = payload.decode(errors="replace")
                 continue
             if status in {0xF0, 0xF7}:
-                size, cursor = midi_workflow.read_vlq(track, cursor)
+                size, cursor = midi.read_vlq(track, cursor)
                 cursor += size
                 continue
 
@@ -81,7 +74,11 @@ class BackingTrackEngineTests(unittest.TestCase):
 
     def test_resolves_named_groove_preset(self) -> None:
         drum = self.manifest["tracks"][0]
-        resolved = backing_track_engine.resolve_track(drum, self.manifest["meter"])
+        resolved = backing.resolve_track(
+            drum,
+            self.manifest["meter"],
+            GROOVE_CATALOG,
+        )
         self.assertNotIn("groove_preset", resolved)
         self.assertIn("groove", resolved)
         self.assertEqual(16, resolved["groove"]["subdivision"])
@@ -90,13 +87,13 @@ class BackingTrackEngineTests(unittest.TestCase):
     def test_rejects_unknown_or_wrong_meter_preset(self) -> None:
         unknown = copy.deepcopy(self.manifest)
         unknown["tracks"][0]["groove_preset"] = "does-not-exist"
-        with self.assertRaises(midi_workflow.ManifestError):
-            backing_track_engine.validate_manifest(unknown)
+        with self.assertRaises(midi.ManifestError):
+            backing.validate_manifest(unknown, GROOVE_CATALOG)
 
         wrong_meter = copy.deepcopy(self.manifest)
         wrong_meter["tracks"][0]["groove_preset"] = "odd-7-8"
-        with self.assertRaises(midi_workflow.ManifestError):
-            backing_track_engine.validate_manifest(wrong_meter)
+        with self.assertRaises(midi.ManifestError):
+            backing.validate_manifest(wrong_meter, GROOVE_CATALOG)
 
     def test_rejects_inline_and_preset_groove_together(self) -> None:
         manifest = copy.deepcopy(self.manifest)
@@ -104,24 +101,19 @@ class BackingTrackEngineTests(unittest.TestCase):
             "subdivision": 8,
             "instruments": {"kick": {"steps": [0]}},
         }
-        with self.assertRaises(midi_workflow.ManifestError):
-            backing_track_engine.validate_manifest(manifest)
+        with self.assertRaises(midi.ManifestError):
+            backing.validate_manifest(manifest, GROOVE_CATALOG)
 
     def test_arrangement_cycle_starts_after_count_in(self) -> None:
-        self.assertEqual(
-            {3, 4, 7, 8},
-            backing_track_engine.arrangement_muted_bars(self.manifest),
-        )
+        self.assertEqual({3, 4, 7, 8}, backing.arrangement_muted_bars(self.manifest))
 
     def test_full_band_gap_mutes_drums_and_bass(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory) / "gap.mid"
-            backing_track_engine.generate(MANIFEST, output)
-            report = midi_workflow.validate_output(MANIFEST, output)
-            note_ticks = _note_on_ticks(output)
+        data = backing.render(self.manifest, GROOVE_CATALOG)
+        report = midi.validate_rendered(self.manifest, data)
+        note_ticks = _note_on_ticks(data)
 
         self.assertEqual(["Conductor", "Drums", "Bass"], report["track_names"])
-        bar_ticks = midi_workflow.TPQN * 4
+        bar_ticks = midi.TPQN * 4
         for track_name in ("Drums", "Bass"):
             hits = note_ticks[track_name]
             for bar in (3, 4, 7, 8):
