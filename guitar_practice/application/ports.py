@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any, Mapping, Protocol
 
 
@@ -19,6 +20,13 @@ class JsonDocumentStore(Protocol):
         ...
 
     def write(self, path: str, document: Mapping[str, Any]) -> None:
+        ...
+
+
+class DocumentLocator(Protocol):
+    """Discover workspace-relative document paths from a bounded pattern."""
+
+    def glob(self, pattern: str) -> Sequence[str]:
         ...
 
 
