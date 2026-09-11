@@ -19,10 +19,10 @@ from guitar_practice.application.scheduling import (  # noqa: E402
     ProposeSchedule,
 )
 from guitar_practice.domain import scheduling as _domain  # noqa: E402
-from guitar_practice.domain.progression_state import DEVELOPMENT_STATES  # noqa: E402
 
 CONTRACT_VERSION = _domain.CONTRACT_VERSION
 PROGRESSION_STATES = _domain.PROGRESSION_STATES
+DEVELOPMENT_STATES = _domain.DEVELOPMENT_STATES
 SchedulingError = _domain.SchedulingError
 Candidate = _domain.Candidate
 require_id = _domain.require_id
