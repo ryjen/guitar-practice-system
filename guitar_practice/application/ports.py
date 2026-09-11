@@ -20,3 +20,13 @@ class JsonDocumentStore(Protocol):
 
     def write(self, path: str, document: Mapping[str, Any]) -> None:
         ...
+
+
+class BinaryArtifactStore(Protocol):
+    """Bounded binary artifact storage used by application services."""
+
+    def read_bytes(self, path: str) -> bytes:
+        ...
+
+    def write_bytes(self, path: str, data: bytes) -> None:
+        ...
