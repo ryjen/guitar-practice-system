@@ -19,6 +19,10 @@ guitarctl discover search \
 guitarctl schedule propose \
   examples/scheduling/v2-example-snapshot.json
 
+guitarctl assess evaluate \
+  examples/assessment/slide-reliable-context.json \
+  templates/assessment-gate-set.json
+
 guitarctl groove list
 guitarctl progression list
 guitarctl validate public-boundary
@@ -34,12 +38,19 @@ guitarctl --workspace /path/to/guitar-practice-system schedule propose \
 Global options such as `--workspace` appear before the command. Package-native commands expose their own help, for example:
 
 ```bash
-guitarctl discover search --help
+guitarctl schedule propose --help
 ```
 
 ## Migration status
 
-`discover search` is package-native. Other commands currently pass through one registered compatibility-process adapter so behavior remains stable while their implementation moves into package layers.
+The following commands are package-native and do not require repository scripts at runtime:
+
+- `discover search`
+- `schedule propose`
+- `schedule check-approval`
+- `assess evaluate`
+
+Their former Python entrypoints remain compatibility shims while existing callers migrate. Remaining commands pass through the registered compatibility-process adapter until their cohesive subsystem is extracted.
 
 Compatibility commands require a workspace containing their registered repository script. They never dispatch arbitrary shell commands. `schedule legacy ...` is explicitly deprecated and exists only for v1 compatibility.
 

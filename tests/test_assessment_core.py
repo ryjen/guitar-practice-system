@@ -1,18 +1,12 @@
 from __future__ import annotations
 
-import importlib.util
 import json
-import sys
 import unittest
 from pathlib import Path
 
+from guitar_practice.domain import assessment
+
 ROOT = Path(__file__).resolve().parents[1]
-MODULE_PATH = ROOT / "scripts" / "assessment_core.py"
-SPEC = importlib.util.spec_from_file_location("assessment_core", MODULE_PATH)
-assert SPEC is not None and SPEC.loader is not None
-assessment = importlib.util.module_from_spec(SPEC)
-sys.modules[SPEC.name] = assessment
-SPEC.loader.exec_module(assessment)
 
 
 class AssessmentCoreTests(unittest.TestCase):

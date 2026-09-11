@@ -48,14 +48,14 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec(
         ("schedule", "propose"),
         "Propose a deterministic v2 practice schedule",
-        MigrationState.LEGACY,
-        legacy=LegacyTarget("scripts/scheduling_v2.py", ("propose",)),
+        MigrationState.NATIVE,
+        native_handler="schedule-propose",
     ),
     CommandSpec(
         ("schedule", "check-approval"),
         "Check whether a v2 schedule proposal can still be approved",
-        MigrationState.LEGACY,
-        legacy=LegacyTarget("scripts/scheduling_v2.py", ("check-approval",)),
+        MigrationState.NATIVE,
+        native_handler="schedule-check-approval",
     ),
     CommandSpec(
         ("schedule", "legacy", "propose"),
@@ -72,8 +72,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec(
         ("assess", "evaluate"),
         "Evaluate evidence against deterministic assessment gates",
-        MigrationState.LEGACY,
-        legacy=LegacyTarget("scripts/assessment_core.py"),
+        MigrationState.NATIVE,
+        native_handler="assess-evaluate",
     ),
     CommandSpec(
         ("session", "adapt"),
@@ -209,9 +209,14 @@ INTERNAL_LIBRARY_SCRIPTS = frozenset(
     }
 )
 
-# The old discovery entrypoint remains callable only for backwards compatibility;
-# the stable command is package-native.
-COMPATIBILITY_SHIMS = frozenset({"scripts/discovery_catalog.py"})
+# Old entrypoints retained only for backwards compatibility after extraction.
+COMPATIBILITY_SHIMS = frozenset(
+    {
+        "scripts/discovery_catalog.py",
+        "scripts/scheduling_v2.py",
+        "scripts/assessment_core.py",
+    }
+)
 
 
 def command_paths() -> Sequence[tuple[str, ...]]:

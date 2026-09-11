@@ -1,26 +1,13 @@
 from __future__ import annotations
 
 import copy
-import importlib.util
 import json
-import sys
 import unittest
 from pathlib import Path
 
+from guitar_practice.domain import assessment, scheduling
+
 ROOT = Path(__file__).resolve().parents[1]
-
-
-def load_module(name: str, path: Path):
-    spec = importlib.util.spec_from_file_location(name, path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-scheduling = load_module("scheduling_v2", ROOT / "scripts" / "scheduling_v2.py")
-assessment = load_module("assessment_core_for_scheduling", ROOT / "scripts" / "assessment_core.py")
 FIXTURE_DATA = json.loads((ROOT / "examples" / "scheduling" / "v2-fixtures.json").read_text(encoding="utf-8"))
 
 
