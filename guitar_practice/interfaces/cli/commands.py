@@ -158,14 +158,14 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec(
         ("midi", "generate"),
         "Generate MIDI from a manifest",
-        MigrationState.LEGACY,
-        legacy=LegacyTarget("scripts/midi_workflow.py", ("generate",)),
+        MigrationState.NATIVE,
+        native_handler="midi-generate",
     ),
     CommandSpec(
         ("midi", "validate"),
         "Validate generated MIDI against a manifest",
-        MigrationState.LEGACY,
-        legacy=LegacyTarget("scripts/midi_workflow.py", ("validate",)),
+        MigrationState.NATIVE,
+        native_handler="midi-validate",
     ),
     CommandSpec(
         ("midi", "generate-exercises"),
@@ -216,6 +216,7 @@ COMPATIBILITY_SHIMS = frozenset(
         "scripts/assessment_core.py",
         "scripts/progression_catalog.py",
         "scripts/timing.py",
+        "scripts/midi_workflow.py",
     }
 )
 
