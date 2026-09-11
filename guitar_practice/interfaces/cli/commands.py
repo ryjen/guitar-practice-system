@@ -110,32 +110,32 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec(
         ("progression", "validate"),
         "Validate the progression catalog",
-        MigrationState.LEGACY,
-        legacy=LegacyTarget("scripts/progression_catalog.py", ("validate",)),
+        MigrationState.NATIVE,
+        native_handler="progression-validate",
     ),
     CommandSpec(
         ("progression", "list"),
         "List progression presets",
-        MigrationState.LEGACY,
-        legacy=LegacyTarget("scripts/progression_catalog.py", ("list",)),
+        MigrationState.NATIVE,
+        native_handler="progression-list",
     ),
     CommandSpec(
         ("progression", "show"),
         "Show one progression preset",
-        MigrationState.LEGACY,
-        legacy=LegacyTarget("scripts/progression_catalog.py", ("show",)),
+        MigrationState.NATIVE,
+        native_handler="progression-show",
     ),
     CommandSpec(
         ("progression", "resolve"),
         "Resolve a progression preset in a key",
-        MigrationState.LEGACY,
-        legacy=LegacyTarget("scripts/progression_catalog.py", ("resolve",)),
+        MigrationState.NATIVE,
+        native_handler="progression-resolve",
     ),
     CommandSpec(
         ("progression", "fourths"),
         "Resolve a progression through the circle of fourths",
-        MigrationState.LEGACY,
-        legacy=LegacyTarget("scripts/progression_catalog.py", ("fourths",)),
+        MigrationState.NATIVE,
+        native_handler="progression-fourths",
     ),
     CommandSpec(
         ("progression", "generate"),
@@ -205,16 +205,17 @@ INTERNAL_LIBRARY_SCRIPTS = frozenset(
         "scripts/backing_track_engine.py",
         "scripts/bass_engine.py",
         "scripts/groove_engine.py",
-        "scripts/timing.py",
     }
 )
 
-# Old entrypoints retained only for backwards compatibility after extraction.
+# Old entrypoints/modules retained only for backwards compatibility after extraction.
 COMPATIBILITY_SHIMS = frozenset(
     {
         "scripts/discovery_catalog.py",
         "scripts/scheduling_v2.py",
         "scripts/assessment_core.py",
+        "scripts/progression_catalog.py",
+        "scripts/timing.py",
     }
 )
 
