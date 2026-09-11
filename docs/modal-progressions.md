@@ -102,9 +102,9 @@ python scripts/resolve_backing_track_request.py examples/backing-tracks/d-dorian
 python scripts/resolve_backing_track_request.py examples/backing-tracks/g-mixolydian-request.json
 ```
 
-The progression catalog CLI can also resolve a modal preset directly when a tonal centre is explicit:
+The package-native progression catalog CLI can resolve a modal preset directly when a tonal centre is explicit:
 
 ```bash
-python scripts/progression_catalog.py resolve progression-modal-dorian-i-iv C --tonal-center D
-python scripts/progression_catalog.py resolve progression-modal-mixolydian-i-bvii C --tonal-center G
+guitarctl progression resolve progression-modal-dorian-i-iv C --tonal-center D
+guitarctl progression resolve progression-modal-mixolydian-i-bvii C --tonal-center G
 ```
