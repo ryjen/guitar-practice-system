@@ -90,22 +90,20 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec(
         ("groove", "validate"),
         "Validate the groove catalog",
-        MigrationState.LEGACY,
-        legacy=LegacyTarget(
-            "scripts/groove_catalog.py", ("validate",), ("--catalog",)
-        ),
+        MigrationState.NATIVE,
+        native_handler="groove-validate",
     ),
     CommandSpec(
         ("groove", "list"),
         "List groove presets",
-        MigrationState.LEGACY,
-        legacy=LegacyTarget("scripts/groove_catalog.py", ("list",), ("--catalog",)),
+        MigrationState.NATIVE,
+        native_handler="groove-list",
     ),
     CommandSpec(
         ("groove", "show"),
         "Show one groove preset",
-        MigrationState.LEGACY,
-        legacy=LegacyTarget("scripts/groove_catalog.py", ("show",), ("--catalog",)),
+        MigrationState.NATIVE,
+        native_handler="groove-show",
     ),
     CommandSpec(
         ("progression", "validate"),
@@ -200,13 +198,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
 )
 
 # These files are implementation libraries, not process entrypoints.
-INTERNAL_LIBRARY_SCRIPTS = frozenset(
-    {
-        "scripts/backing_track_engine.py",
-        "scripts/bass_engine.py",
-        "scripts/groove_engine.py",
-    }
-)
+INTERNAL_LIBRARY_SCRIPTS = frozenset({"scripts/backing_track_engine.py"})
 
 # Old entrypoints/modules retained only for backwards compatibility after extraction.
 COMPATIBILITY_SHIMS = frozenset(
@@ -217,6 +209,9 @@ COMPATIBILITY_SHIMS = frozenset(
         "scripts/progression_catalog.py",
         "scripts/timing.py",
         "scripts/midi_workflow.py",
+        "scripts/groove_catalog.py",
+        "scripts/groove_engine.py",
+        "scripts/bass_engine.py",
     }
 )
 
