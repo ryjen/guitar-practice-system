@@ -17,7 +17,7 @@ selected major key
 concrete chord symbols
 ```
 
-The catalog is stored at `catalogs/progressions/catalog.json` and validated by `scripts/progression_catalog.py`.
+The catalog is stored at `catalogs/progressions/catalog.json`. Pure validation and harmonic resolution live in `guitar_practice.domain.progression`; `guitarctl progression ...` is the stable command interface. `scripts/progression_catalog.py` remains only as a compatibility shim.
 
 ## Backing-track request integration
 
@@ -160,7 +160,7 @@ Dorian and Mixolydian vamps are intentionally not represented by pretending the 
 - **tonal centre** — the pitch heard as home;
 - **key signature** — the accidental set encoded in MIDI metadata.
 
-For example, D Dorian has D as tonal centre but uses the C-major key signature. Future modal progression support should model that distinction explicitly before adding reusable modal presets to the request path.
+For example, D Dorian has D as tonal centre but uses the C-major key signature. The progression domain models that distinction explicitly and validates that a modal preset's tonal centre agrees with its expected parent-major key signature.
 
 ## Optional enrichment versus form identity
 
@@ -173,31 +173,31 @@ This distinction lets practice sessions vary vocabulary while keeping the form s
 Validate the catalog:
 
 ```bash
-python3 scripts/progression_catalog.py validate
+guitarctl progression validate
 ```
 
 List presets:
 
 ```bash
-python3 scripts/progression_catalog.py list
+guitarctl progression list
 ```
 
 Resolve I-IV-V in G:
 
 ```bash
-python3 scripts/progression_catalog.py resolve progression-major-i-iv-v G
+guitarctl progression resolve progression-major-i-iv-v G
 ```
 
 Resolve ii-V-I in C:
 
 ```bash
-python3 scripts/progression_catalog.py resolve progression-jazz-major-ii-v-i C
+guitarctl progression resolve progression-jazz-major-ii-v-i C
 ```
 
 Resolve four adjacent positions through the circle of fourths:
 
 ```bash
-python3 scripts/progression_catalog.py fourths \
+guitarctl progression fourths \
   progression-jazz-major-ii-v-i \
   --start-key C \
   --count 4
@@ -206,7 +206,7 @@ python3 scripts/progression_catalog.py fourths \
 Resolve jazz blues in C:
 
 ```bash
-python3 scripts/progression_catalog.py resolve jazz-blues-12 C
+guitarctl progression resolve jazz-blues-12 C
 ```
 
-The resolver currently targets major-key progression presets and emits chord symbols supported by the deterministic MIDI renderer.
+The resolver targets bounded major-key and explicit modal progression presets. Progression semantics no longer depend on MIDI serialization; the downstream deterministic MIDI renderer validates and realizes generated chord material independently.
