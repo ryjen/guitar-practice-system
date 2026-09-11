@@ -23,8 +23,10 @@ guitarctl assess evaluate \
   examples/assessment/slide-reliable-context.json \
   templates/assessment-gate-set.json
 
+guitarctl progression resolve progression-jazz-major-ii-v-i C
+guitarctl progression fourths progression-jazz-major-ii-v-i --count 4
+
 guitarctl groove list
-guitarctl progression list
 guitarctl validate public-boundary
 ```
 
@@ -38,7 +40,7 @@ guitarctl --workspace /path/to/guitar-practice-system schedule propose \
 Global options such as `--workspace` appear before the command. Package-native commands expose their own help, for example:
 
 ```bash
-guitarctl schedule propose --help
+guitarctl progression resolve --help
 ```
 
 ## Migration status
@@ -49,8 +51,15 @@ The following commands are package-native and do not require repository scripts 
 - `schedule propose`
 - `schedule check-approval`
 - `assess evaluate`
+- `progression validate`
+- `progression list`
+- `progression show`
+- `progression resolve`
+- `progression fourths`
 
-Their former Python entrypoints remain compatibility shims while existing callers migrate. Remaining commands pass through the registered compatibility-process adapter until their cohesive subsystem is extracted.
+`progression generate` remains in the generation subsystem and will migrate with MIDI, groove, bass, and backing-track generation rather than coupling those concerns into the progression catalog.
+
+Former Python entrypoints remain compatibility shims while existing callers migrate. Remaining commands pass through the registered compatibility-process adapter until their cohesive subsystem is extracted.
 
 Compatibility commands require a workspace containing their registered repository script. They never dispatch arbitrary shell commands. `schedule legacy ...` is explicitly deprecated and exists only for v1 compatibility.
 
