@@ -18,6 +18,7 @@ DEFAULT_GROOVE_CATALOG = "catalogs/grooves/catalog.json"
 DEFAULT_PROGRESSION_CATALOG = "catalogs/progressions/catalog.json"
 DEFAULT_EXERCISE_MANIFEST = "midi/exercises.json"
 DEFAULT_EXERCISE_OUTPUT_DIR = "generated/midi"
+DEFAULT_BACKING_PATTERN = "backing-tracks/*/manifest.json"
 
 
 def manifest_output_path(manifest: dict[str, Any]) -> str:
@@ -43,9 +44,10 @@ class GenerateBackingCatalog:
     locator: DocumentLocator
     artifacts: BinaryArtifactStore
     groove_catalog_path: str = DEFAULT_GROOVE_CATALOG
+    manifest_pattern: str = DEFAULT_BACKING_PATTERN
 
     def execute(self) -> list[dict[str, Any]]:
-        manifest_paths = tuple(self.locator.glob("backing-tracks/*/manifest.json"))
+        manifest_paths = tuple(self.locator.glob(self.manifest_pattern))
         if not manifest_paths:
             raise midi.ManifestError("no backing-track manifests found")
         groove_catalog = dict(self.documents.read(self.groove_catalog_path))
