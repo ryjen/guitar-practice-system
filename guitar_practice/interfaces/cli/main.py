@@ -16,8 +16,11 @@ from guitar_practice.interfaces.cli.commands import (
     commands_below,
     find_command,
 )
-from guitar_practice.interfaces.cli.handlers import NATIVE_HANDLERS
+from guitar_practice.interfaces.cli.groove_handlers import GROOVE_HANDLERS
+from guitar_practice.interfaces.cli.handlers import NATIVE_HANDLERS as CORE_HANDLERS
 from guitar_practice.interfaces.cli.runtime import CliContext
+
+NATIVE_HANDLERS = {**CORE_HANDLERS, **GROOVE_HANDLERS}
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -91,7 +94,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             _print_prefix_help(tokens, sys.stderr)
         else:
             print(f"guitarctl: unknown command: {' '.join(tokens)}", file=sys.stderr)
-            # If the first token is a valid namespace, show its commands.
             _print_prefix_help(tokens[:1], sys.stderr)
         return exit_codes.USAGE
 
