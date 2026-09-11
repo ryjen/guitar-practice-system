@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
     # Compatibility only: direct script execution predates the installable package.
     sys.path.insert(0, str(ROOT))
 
+import midi_workflow  # noqa: E402
 from guitar_practice.domain import progression as _domain  # noqa: E402
 
 DEFAULT_CATALOG = ROOT / "catalogs" / "progressions" / "catalog.json"
@@ -30,7 +31,12 @@ MODAL_PARENT_OFFSETS = _domain.MODAL_PARENT_OFFSETS
 CANONICAL_MAJOR_KEYS_BY_ROOT = _domain.CANONICAL_MAJOR_KEYS_BY_ROOT
 CIRCLE_OF_FOURTHS_MAJOR = _domain.CIRCLE_OF_FOURTHS_MAJOR
 CIRCLE_KEY_LOOKUP = _domain.CIRCLE_KEY_LOOKUP
-ProgressionError = _domain.ProgressionError
+
+
+class ProgressionError(_domain.ProgressionError, midi_workflow.ManifestError):
+    """Legacy error type preserving the former MIDI-manifest compatibility."""
+
+
 _string = _domain._string
 _meter = _domain._meter
 parse_change = _domain.parse_change
@@ -39,11 +45,14 @@ _validate_modal_context = _domain._validate_modal_context
 _normalized_major_key = _domain._normalized_major_key
 _major_key_root = _domain._major_key_root
 _natural_tonal_center = _domain._natural_tonal_center
-expected_parent_major_key = _domain.expected_parent_major_key
 _resolve_changes = _domain._resolve_changes
 _resolve_preset_in_key = _domain._resolve_preset_in_key
 _resolve_modal_preset = _domain._resolve_modal_preset
 _canonical_circle_key = _domain._canonical_circle_key
+
+
+def _translate(error: _domain.ProgressionError) -> ProgressionError:
+    return ProgressionError(str(error))
 
 
 def load_catalog(path: Path = DEFAULT_CATALOG) -> dict[str, Any]:
@@ -51,11 +60,24 @@ def load_catalog(path: Path = DEFAULT_CATALOG) -> dict[str, Any]:
 
 
 def validate_catalog(catalog: dict[str, Any]) -> None:
-    _domain.validate_catalog(catalog)
+    try:
+        _domain.validate_catalog(catalog)
+    except _domain.ProgressionError as error:
+        raise _translate(error) from error
 
 
 def get_preset(preset_id: str, path: Path = DEFAULT_CATALOG) -> dict[str, Any]:
-    return _domain.get_preset(load_catalog(path), preset_id)
+    try:
+        return _domain.get_preset(load_catalog(path), preset_id)
+    except _domain.ProgressionError as error:
+        raise _translate(error) from error
+
+
+def expected_parent_major_key(mode: str, tonal_center: str) -> str:
+    try:
+        return _domain.expected_parent_major_key(mode, tonal_center)
+    except _domain.ProgressionError as error:
+        raise _translate(error) from error
 
 
 def resolve_progression(
@@ -65,12 +87,15 @@ def resolve_progression(
     *,
     tonal_center: str | None = None,
 ) -> list[str]:
-    return _domain.resolve_progression(
-        load_catalog(path),
-        preset_id,
-        key_signature,
-        tonal_center=tonal_center,
-    )
+    try:
+        return _domain.resolve_progression(
+            load_catalog(path),
+            preset_id,
+            key_signature,
+            tonal_center=tonal_center,
+        )
+    except _domain.ProgressionError as error:
+        raise _translate(error) from error
 
 
 def resolve_circle_of_fourths(
@@ -80,12 +105,15 @@ def resolve_circle_of_fourths(
     count: int = 12,
     path: Path = DEFAULT_CATALOG,
 ) -> list[dict[str, Any]]:
-    return _domain.resolve_circle_of_fourths(
-        load_catalog(path),
-        preset_id,
-        start_key=start_key,
-        count=count,
-    )
+    try:
+        return _domain.resolve_circle_of_fourths(
+            load_catalog(path),
+            preset_id,
+            start_key=start_key,
+            count=count,
+        )
+    except _domain.ProgressionError as error:
+        raise _translate(error) from error
 
 
 def main(argv: list[str] | None = None) -> int:
