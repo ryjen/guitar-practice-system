@@ -16,8 +16,7 @@ guitarctl discover search \
   examples/discovery/slide-backing-track-request.json \
   catalogs/discovery/repository.json
 
-guitarctl schedule propose \
-  examples/scheduling/v2-example-snapshot.json
+guitarctl schedule propose examples/scheduling/v2-example-snapshot.json
 
 guitarctl assess evaluate \
   examples/assessment/slide-reliable-context.json \
@@ -25,20 +24,21 @@ guitarctl assess evaluate \
 
 guitarctl progression resolve progression-jazz-major-ii-v-i C
 guitarctl progression fourths progression-jazz-major-ii-v-i --count 4
+guitarctl progression generate examples/backing-tracks/funk-wah-request.json
 
 guitarctl groove list
 guitarctl groove show jazz-swing
 
-guitarctl backing resolve \
-  examples/backing-tracks/jazz-blues-12-request.json
+guitarctl backing resolve examples/backing-tracks/jazz-blues-12-request.json
+guitarctl backing generate
 
 guitarctl midi generate \
   backing-tracks/slide-slow-blues/manifest.json \
   /tmp/slide-slow-blues.mid
-
 guitarctl midi validate \
   backing-tracks/slide-slow-blues/manifest.json \
   /tmp/slide-slow-blues.mid
+guitarctl midi generate-exercises
 
 guitarctl validate public-boundary
 ```
@@ -53,44 +53,22 @@ guitarctl --workspace /path/to/guitar-practice-system backing resolve \
 Global options such as `--workspace` appear before the command. Package-native commands expose their own help, for example:
 
 ```bash
-guitarctl backing resolve --help
+guitarctl progression generate --help
 ```
 
 ## Migration status
 
-The following commands are package-native and do not require repository scripts at runtime:
+The musical core is package-native: discovery, scheduling v2, assessment, progression catalog operations, groove catalog operations, backing request resolution, backing generation, MIDI generation/validation, starter MIDI exercises, and practice-progression generation do not require repository scripts at runtime.
 
-- `discover search`
-- `schedule propose`
-- `schedule check-approval`
-- `assess evaluate`
-- `progression validate`
-- `progression list`
-- `progression show`
-- `progression resolve`
-- `progression fourths`
-- `groove validate`
-- `groove list`
-- `groove show`
-- `backing resolve`
-- `midi generate`
-- `midi validate`
-
-`progression generate`, bulk `backing generate`, and `midi generate-exercises` remain in the generation subsystem while their application orchestration is extracted behind the same domain/application boundaries.
-
-Former Python entrypoints remain compatibility shims while existing callers migrate. Remaining commands pass through the registered compatibility-process adapter until their cohesive subsystem is extracted.
-
-Compatibility commands require a workspace containing their registered repository script. They never dispatch arbitrary shell commands. `schedule legacy ...` is explicitly deprecated and exists only for v1 compatibility.
+The remaining compatibility-process commands are outside this generation subsystem, including scheduling v1, adaptive-session/evidence workflows, repository validation/export, and artifact-bundle tooling. Historical musical `scripts/*.py` and `tools/*.py` entrypoints remain compatibility shims while callers migrate.
 
 ## Musical generation boundaries
 
-MIDI encoding and structural validation are pure package-domain operations over explicit manifests and byte strings. Filesystem persistence is handled through the binary-artifact adapter. This separation keeps deterministic rendering reusable from CLI, tests, and other trusted callers without giving the domain filesystem authority.
+MIDI encoding and structural validation are pure package-domain operations over explicit manifests and byte strings. Groove and bass rules consume MIDI primitives without filesystem access. Backing request resolution consumes explicit groove/progression catalogs and returns a canonical `BackingTrackSpec`; backing rendering consumes that spec and returns deterministic MIDI bytes.
 
-Groove parsing/rendering and bass accompaniment are package-domain rules. Groove owns deterministic rhythmic realization and catalog validation; bass depends on groove and MIDI primitives for kick-locked and walking patterns.
+Practice-progression rules derive slow/medium/fast stages as pure domain data. Starter MIDI exercises are also pure byte generators. Application services own catalog loading, bounded manifest discovery, and artifact persistence through structured-document and binary-artifact ports.
 
-Backing request resolution and arrangement rendering are also package-domain operations. Request resolution consumes explicit groove and progression catalogs and returns a canonical `BackingTrackSpec`. Arrangement rendering consumes that spec plus the groove catalog and returns deterministic MIDI bytes. Catalog/file loading remains application-side.
-
-Compatibility entrypoints are parity-tested while callers migrate. MIDI output must remain byte-identical, groove catalog output must remain text-identical, and backing request resolution must produce the same JSON through the historical script and native `guitarctl` command.
+Compatibility entrypoints are parity-tested while callers migrate. CI compares native and historical command JSON/text output as well as generated MIDI directories and byte streams.
 
 ## Stability
 
