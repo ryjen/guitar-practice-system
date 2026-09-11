@@ -26,6 +26,14 @@ guitarctl assess evaluate \
 guitarctl progression resolve progression-jazz-major-ii-v-i C
 guitarctl progression fourths progression-jazz-major-ii-v-i --count 4
 
+guitarctl midi generate \
+  backing-tracks/slide-slow-blues/manifest.json \
+  /tmp/slide-slow-blues.mid
+
+guitarctl midi validate \
+  backing-tracks/slide-slow-blues/manifest.json \
+  /tmp/slide-slow-blues.mid
+
 guitarctl groove list
 guitarctl validate public-boundary
 ```
@@ -40,7 +48,7 @@ guitarctl --workspace /path/to/guitar-practice-system schedule propose \
 Global options such as `--workspace` appear before the command. Package-native commands expose their own help, for example:
 
 ```bash
-guitarctl progression resolve --help
+guitarctl midi generate --help
 ```
 
 ## Migration status
@@ -56,12 +64,20 @@ The following commands are package-native and do not require repository scripts 
 - `progression show`
 - `progression resolve`
 - `progression fourths`
+- `midi generate`
+- `midi validate`
 
-`progression generate` remains in the generation subsystem and will migrate with MIDI, groove, bass, and backing-track generation rather than coupling those concerns into the progression catalog.
+`progression generate`, groove/backing generation, and `midi generate-exercises` remain in the generation subsystem while their musical orchestration is extracted behind the same domain/application boundaries.
 
 Former Python entrypoints remain compatibility shims while existing callers migrate. Remaining commands pass through the registered compatibility-process adapter until their cohesive subsystem is extracted.
 
 Compatibility commands require a workspace containing their registered repository script. They never dispatch arbitrary shell commands. `schedule legacy ...` is explicitly deprecated and exists only for v1 compatibility.
+
+## MIDI boundary
+
+MIDI encoding and structural validation are pure package-domain operations over explicit manifests and byte strings. Filesystem persistence is handled through the binary-artifact adapter. This separation keeps deterministic rendering reusable from CLI, tests, and other trusted callers without giving the domain filesystem authority.
+
+The compatibility `scripts/midi_workflow.py` entrypoint is parity-tested against `guitarctl midi generate`: both paths must emit identical MIDI bytes for the same manifest.
 
 ## Stability
 
