@@ -1,0 +1,281 @@
+"""Canonical imported-song model and deterministic track-role classification."""
+
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass, field
+from enum import StrEnum
+from typing import Any, Mapping, Sequence
+
+_SAFE_ID = re.compile(r"^[A-Za-z0-9._-]+$")
+
+
+class TrackRole(StrEnum):
+    GUITAR = "guitar"
+    BASS = "bass"
+    DRUMS = "drums"
+    KEYS = "keys"
+    OTHER = "other"
+    UNKNOWN = "unknown"
+
+
+class ClassificationSource(StrEnum):
+    EXPLICIT = "explicit"
+    INSTRUMENT = "instrument"
+    MIDI = "midi"
+    PERCUSSION = "percussion"
+    NAME_HEURISTIC = "name-heuristic"
+    UNKNOWN = "unknown"
+
+
+@dataclass(frozen=True)
+class TrackClassification:
+    role: TrackRole
+    source: ClassificationSource
+
+
+@dataclass(frozen=True)
+class TempoPoint:
+    position: float
+    bpm: float
+
+    def __post_init__(self) -> None:
+        if self.position < 0:
+            raise ValueError("tempo position must be non-negative")
+        if self.bpm <= 0:
+            raise ValueError("tempo BPM must be positive")
+
+
+@dataclass(frozen=True)
+class MeterPoint:
+    position: float
+    numerator: int
+    denominator: int
+
+    def __post_init__(self) -> None:
+        if self.position < 0:
+            raise ValueError("meter position must be non-negative")
+        if self.numerator <= 0:
+            raise ValueError("meter numerator must be positive")
+        if self.denominator <= 0 or self.denominator & (self.denominator - 1):
+            raise ValueError("meter denominator must be a positive power of two")
+
+
+@dataclass(frozen=True)
+class SongTrack:
+    id: str
+    name: str
+    classification: TrackClassification
+    instrument_name: str | None = None
+    midi_program: int | None = None
+    midi_channel: int | None = None
+    is_percussion: bool = False
+
+    def __post_init__(self) -> None:
+        _validate_id(self.id, "track id")
+        if not isinstance(self.name, str):
+            raise ValueError("track name must be a string")
+        if self.midi_program is not None and not 0 <= self.midi_program <= 127:
+            raise ValueError("MIDI program must be between 0 and 127")
+        if self.midi_channel is not None and not 1 <= self.midi_channel <= 16:
+            raise ValueError("MIDI channel must be between 1 and 16")
+
+
+@dataclass(frozen=True)
+class Song:
+    source_id: str
+    title: str
+    tracks: tuple[SongTrack, ...] = field(default_factory=tuple)
+    tempo_map: tuple[TempoPoint, ...] = field(default_factory=tuple)
+    meter_map: tuple[MeterPoint, ...] = field(default_factory=tuple)
+
+    def __post_init__(self) -> None:
+        _validate_id(self.source_id, "source id")
+        if not isinstance(self.title, str):
+            raise ValueError("song title must be a string")
+        track_ids = [track.id for track in self.tracks]
+        if len(track_ids) != len(set(track_ids)):
+            raise ValueError("song track ids must be unique")
+        if tuple(sorted(self.tempo_map, key=lambda item: item.position)) != self.tempo_map:
+            raise ValueError("tempo map must be ordered by position")
+        if tuple(sorted(self.meter_map, key=lambda item: item.position)) != self.meter_map:
+            raise ValueError("meter map must be ordered by position")
+
+
+def _validate_id(value: str, label: str) -> None:
+    if not isinstance(value, str) or not value or _SAFE_ID.fullmatch(value) is None:
+        raise ValueError(f"{label} must contain only letters, digits, '.', '_' or '-'")
+
+
+def _instrument_role(instrument_name: str | None) -> TrackRole | None:
+    if not instrument_name:
+        return None
+    value = instrument_name.casefold()
+    if "bass" in value:
+        return TrackRole.BASS
+    if "guitar" in value:
+        return TrackRole.GUITAR
+    if any(token in value for token in ("drum", "percussion")):
+        return TrackRole.DRUMS
+    if any(token in value for token in ("piano", "organ", "keyboard", "keys")):
+        return TrackRole.KEYS
+    return None
+
+
+def _midi_role(program: int | None) -> TrackRole | None:
+    if program is None:
+        return None
+    if 24 <= program <= 31:
+        return TrackRole.GUITAR
+    if 32 <= program <= 39:
+        return TrackRole.BASS
+    if 0 <= program <= 7 or 16 <= program <= 23:
+        return TrackRole.KEYS
+    return None
+
+
+def _name_role(name: str) -> TrackRole | None:
+    value = name.casefold()
+    if "bass" in value:
+        return TrackRole.BASS
+    if any(token in value for token in ("drum", "percussion", "kit")):
+        return TrackRole.DRUMS
+    if "guitar" in value or "gtr" in value:
+        return TrackRole.GUITAR
+    if any(token in value for token in ("piano", "organ", "keyboard", "keys")):
+        return TrackRole.KEYS
+    return None
+
+
+def classify_track(
+    *,
+    name: str,
+    instrument_name: str | None,
+    midi_program: int | None,
+    is_percussion: bool,
+    override: TrackRole | None = None,
+) -> TrackClassification:
+    """Classify a track without turning weak inference into destructive authority."""
+
+    if override is not None:
+        return TrackClassification(override, ClassificationSource.EXPLICIT)
+
+    instrument_role = _instrument_role(instrument_name)
+    if instrument_role is not None:
+        return TrackClassification(instrument_role, ClassificationSource.INSTRUMENT)
+
+    midi_role = _midi_role(midi_program)
+    if midi_role is not None:
+        return TrackClassification(midi_role, ClassificationSource.MIDI)
+
+    if is_percussion:
+        return TrackClassification(TrackRole.DRUMS, ClassificationSource.PERCUSSION)
+
+    name_role = _name_role(name)
+    if name_role is not None:
+        return TrackClassification(name_role, ClassificationSource.NAME_HEURISTIC)
+
+    return TrackClassification(TrackRole.UNKNOWN, ClassificationSource.UNKNOWN)
+
+
+def song_to_dict(song: Song) -> dict[str, Any]:
+    return {
+        "schema_version": 1,
+        "source_id": song.source_id,
+        "title": song.title,
+        "tracks": [
+            {
+                "id": track.id,
+                "name": track.name,
+                "classification": {
+                    "role": track.classification.role.value,
+                    "source": track.classification.source.value,
+                },
+                "instrument_name": track.instrument_name,
+                "midi_program": track.midi_program,
+                "midi_channel": track.midi_channel,
+                "is_percussion": track.is_percussion,
+            }
+            for track in song.tracks
+        ],
+        "tempo_map": [
+            {"position": point.position, "bpm": point.bpm} for point in song.tempo_map
+        ],
+        "meter_map": [
+            {
+                "position": point.position,
+                "numerator": point.numerator,
+                "denominator": point.denominator,
+            }
+            for point in song.meter_map
+        ],
+    }
+
+
+def song_from_dict(document: Mapping[str, Any]) -> Song:
+    if document.get("schema_version") != 1:
+        raise ValueError("unsupported song schema_version")
+
+    raw_tracks = document.get("tracks", [])
+    raw_tempos = document.get("tempo_map", [])
+    raw_meters = document.get("meter_map", [])
+    if not isinstance(raw_tracks, Sequence) or isinstance(raw_tracks, (str, bytes)):
+        raise ValueError("tracks must be a sequence")
+    if not isinstance(raw_tempos, Sequence) or isinstance(raw_tempos, (str, bytes)):
+        raise ValueError("tempo_map must be a sequence")
+    if not isinstance(raw_meters, Sequence) or isinstance(raw_meters, (str, bytes)):
+        raise ValueError("meter_map must be a sequence")
+
+    tracks: list[SongTrack] = []
+    for raw in raw_tracks:
+        if not isinstance(raw, Mapping):
+            raise ValueError("each track must be an object")
+        classification = raw.get("classification")
+        if not isinstance(classification, Mapping):
+            raise ValueError("track classification must be an object")
+        tracks.append(
+            SongTrack(
+                id=str(raw.get("id", "")),
+                name=str(raw.get("name", "")),
+                classification=TrackClassification(
+                    TrackRole(str(classification.get("role"))),
+                    ClassificationSource(str(classification.get("source"))),
+                ),
+                instrument_name=_optional_str(raw.get("instrument_name")),
+                midi_program=_optional_int(raw.get("midi_program")),
+                midi_channel=_optional_int(raw.get("midi_channel")),
+                is_percussion=bool(raw.get("is_percussion", False)),
+            )
+        )
+
+    return Song(
+        source_id=str(document.get("source_id", "")),
+        title=str(document.get("title", "")),
+        tracks=tuple(tracks),
+        tempo_map=tuple(
+            TempoPoint(position=float(raw["position"]), bpm=float(raw["bpm"]))
+            for raw in raw_tempos
+            if isinstance(raw, Mapping)
+        ),
+        meter_map=tuple(
+            MeterPoint(
+                position=float(raw["position"]),
+                numerator=int(raw["numerator"]),
+                denominator=int(raw["denominator"]),
+            )
+            for raw in raw_meters
+            if isinstance(raw, Mapping)
+        ),
+    )
+
+
+def _optional_str(value: Any) -> str | None:
+    return value if isinstance(value, str) else None
+
+
+def _optional_int(value: Any) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError("optional integer field must be an integer")
+    return value
