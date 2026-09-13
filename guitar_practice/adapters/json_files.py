@@ -21,6 +21,13 @@ class JsonFileStore:
         candidate = Path(path)
         return candidate.resolve() if candidate.is_absolute() else (self.workspace / candidate).resolve()
 
+    def glob(self, pattern: str) -> tuple[str, ...]:
+        return tuple(
+            path.relative_to(self.workspace).as_posix()
+            for path in sorted(self.workspace.glob(pattern))
+            if path.is_file()
+        )
+
     def read(self, path: str | Path) -> Mapping[str, Any]:
         resolved = self.resolve(path)
         try:

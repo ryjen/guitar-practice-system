@@ -14,13 +14,14 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class NativeProgressionCliTests(unittest.TestCase):
-    def test_catalog_commands_are_native_but_generation_remains_legacy(self) -> None:
+    def test_progression_commands_are_native(self) -> None:
         for tokens in (
             ["progression", "validate"],
             ["progression", "list"],
             ["progression", "show"],
             ["progression", "resolve"],
             ["progression", "fourths"],
+            ["progression", "generate"],
         ):
             command, consumed = find_command(tokens)
             self.assertIsNotNone(command)
@@ -29,11 +30,6 @@ class NativeProgressionCliTests(unittest.TestCase):
             self.assertEqual(MigrationState.NATIVE, command.migration)
             self.assertIsNotNone(command.native_handler)
             self.assertIsNone(command.legacy)
-
-        generation, _ = find_command(["progression", "generate"])
-        self.assertIsNotNone(generation)
-        assert generation is not None
-        self.assertEqual(MigrationState.LEGACY, generation.migration)
 
     def test_progression_cli_runs_without_repository_scripts(self) -> None:
         catalog = json.loads(

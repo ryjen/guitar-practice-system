@@ -16,8 +16,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class NativeMidiCliTests(unittest.TestCase):
-    def test_midi_render_commands_are_native_but_exercise_generator_remains_legacy(self) -> None:
-        for tokens in (["midi", "generate"], ["midi", "validate"]):
+    def test_midi_commands_are_native(self) -> None:
+        for tokens in (
+            ["midi", "generate"],
+            ["midi", "validate"],
+            ["midi", "generate-exercises"],
+        ):
             command, consumed = find_command(tokens)
             self.assertIsNotNone(command)
             assert command is not None
@@ -25,11 +29,6 @@ class NativeMidiCliTests(unittest.TestCase):
             self.assertEqual(MigrationState.NATIVE, command.migration)
             self.assertIsNotNone(command.native_handler)
             self.assertIsNone(command.legacy)
-
-        exercises, _ = find_command(["midi", "generate-exercises"])
-        self.assertIsNotNone(exercises)
-        assert exercises is not None
-        self.assertEqual(MigrationState.LEGACY, exercises.migration)
 
     def test_generate_and_validate_run_without_repository_scripts(self) -> None:
         manifest = json.loads(

@@ -2,23 +2,34 @@ from __future__ import annotations
 
 import json
 import struct
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
+from guitar_practice.adapters.binary_files import BinaryFileStore
+from guitar_practice.adapters.json_files import JsonFileStore
+from guitar_practice.application.generation import GeneratePracticeProgression
+from guitar_practice.domain import backing, midi, practice_progression
+
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "scripts"))
-
-import backing_track_engine  # noqa: E402
-import generate_practice_progression  # noqa: E402
-import midi_workflow  # noqa: E402
-
 REQUEST = ROOT / "examples" / "backing-tracks" / "funk-wah-request.json"
+GROOVE_CATALOG = json.loads(
+    (ROOT / "catalogs" / "grooves" / "catalog.json").read_text(encoding="utf-8")
+)
+PROGRESSION_CATALOG = json.loads(
+    (ROOT / "catalogs" / "progressions" / "catalog.json").read_text(encoding="utf-8")
+)
 
 
-def _note_on_ticks(path: Path) -> dict[str, list[int]]:
-    data = path.read_bytes()
+def resolve(request: dict) -> dict:
+    return practice_progression.resolve_progression(
+        request,
+        GROOVE_CATALOG,
+        PROGRESSION_CATALOG,
+    )
+
+
+def _note_on_ticks(data: bytes) -> dict[str, list[int]]:
     offset = 14
     result: dict[str, list[int]] = {}
     while offset < len(data):
@@ -30,7 +41,7 @@ def _note_on_ticks(path: Path) -> dict[str, list[int]]:
         name = ""
         hits: list[int] = []
         while cursor < len(track):
-            delta, cursor = midi_workflow.read_vlq(track, cursor)
+            delta, cursor = midi.read_vlq(track, cursor)
             absolute += delta
             status = track[cursor]
             if status < 0x80:
@@ -44,14 +55,14 @@ def _note_on_ticks(path: Path) -> dict[str, list[int]]:
             if status == 0xFF:
                 kind = track[cursor]
                 cursor += 1
-                size, cursor = midi_workflow.read_vlq(track, cursor)
+                size, cursor = midi.read_vlq(track, cursor)
                 payload = track[cursor : cursor + size]
                 cursor += size
                 if kind == 0x03:
                     name = payload.decode(errors="replace")
                 continue
             if status in {0xF0, 0xF7}:
-                size, cursor = midi_workflow.read_vlq(track, cursor)
+                size, cursor = midi.read_vlq(track, cursor)
                 cursor += size
                 continue
             message = status & 0xF0
@@ -71,7 +82,7 @@ class PracticeProgressionTests(unittest.TestCase):
         self.request = json.loads(REQUEST.read_text(encoding="utf-8"))
 
     def test_funk_progression_has_expected_tempos_ids_and_gaps(self) -> None:
-        progression = generate_practice_progression.resolve_progression(self.request)
+        progression = resolve(self.request)
         self.assertEqual("tempo-space-v1", progression["profile"])
         self.assertEqual(["slow", "medium", "fast"], [s["name"] for s in progression["stages"]])
         self.assertEqual([75, 82, 96], [s["tempo_bpm"] for s in progression["stages"]])
@@ -96,47 +107,64 @@ class PracticeProgressionTests(unittest.TestCase):
         )
         for spec in specs:
             self.assertEqual(self.request["arrangement"], spec["arrangement"])
-            backing_track_engine.validate_manifest(spec)
+            backing.validate_manifest(spec, GROOVE_CATALOG)
 
     def test_composes_existing_and_added_drum_cycles(self) -> None:
-        combined = generate_practice_progression.compose_bar_cycles(
+        combined = practice_progression.compose_bar_cycles(
             {"length": 3, "mute_bars": [1]},
             {"length": 4, "mute_bars": [3]},
         )
+        assert combined is not None
         self.assertEqual(12, combined["length"])
         self.assertEqual([1, 3, 4, 7, 10, 11], combined["mute_bars"])
 
     def test_resolution_is_deterministic(self) -> None:
-        self.assertEqual(
-            generate_practice_progression.resolve_progression(self.request),
-            generate_practice_progression.resolve_progression(self.request),
-        )
+        self.assertEqual(resolve(self.request), resolve(self.request))
 
     def test_fast_stage_reduces_drums_before_whole_band_gap(self) -> None:
-        progression = generate_practice_progression.resolve_progression(self.request)
+        progression = resolve(self.request)
         fast = progression["stages"][2]["spec"]
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            manifest = root / "fast.json"
-            midi = root / "fast.mid"
-            manifest.write_text(json.dumps(fast, indent=2), encoding="utf-8")
-            backing_track_engine.generate(manifest, midi)
-            midi_workflow.validate_output(manifest, midi)
-            ticks = _note_on_ticks(midi)
+        data = backing.render(fast, GROOVE_CATALOG)
+        midi.validate_rendered(fast, data)
+        ticks = _note_on_ticks(data)
 
-        bar_ticks = midi_workflow.TPQN * 4
-        drum_gap_bar = 3  # count-in + musical bar 2
-        whole_band_gap_bar = 4  # count-in + musical bar 3
-        self.assertFalse(any(drum_gap_bar * bar_ticks <= t < (drum_gap_bar + 1) * bar_ticks for t in ticks["Drums"]))
-        self.assertTrue(any(drum_gap_bar * bar_ticks <= t < (drum_gap_bar + 1) * bar_ticks for t in ticks["Bass"]))
+        bar_ticks = midi.TPQN * 4
+        drum_gap_bar = 3
+        whole_band_gap_bar = 4
+        self.assertFalse(
+            any(
+                drum_gap_bar * bar_ticks <= tick < (drum_gap_bar + 1) * bar_ticks
+                for tick in ticks["Drums"]
+            )
+        )
+        self.assertTrue(
+            any(
+                drum_gap_bar * bar_ticks <= tick < (drum_gap_bar + 1) * bar_ticks
+                for tick in ticks["Bass"]
+            )
+        )
         for name in ("Drums", "Bass"):
-            self.assertFalse(any(whole_band_gap_bar * bar_ticks <= t < (whole_band_gap_bar + 1) * bar_ticks for t in ticks[name]))
+            self.assertFalse(
+                any(
+                    whole_band_gap_bar * bar_ticks
+                    <= tick
+                    < (whole_band_gap_bar + 1) * bar_ticks
+                    for tick in ticks[name]
+                )
+            )
 
-    def test_write_progression_renders_all_stage_midi(self) -> None:
-        progression = generate_practice_progression.resolve_progression(self.request)
+    def test_application_writes_all_stage_artifacts(self) -> None:
+        service = GeneratePracticeProgression(
+            documents=JsonFileStore(ROOT),
+            artifacts=BinaryFileStore(ROOT),
+        )
+        progression = service.execute(
+            "examples/backing-tracks/funk-wah-request.json"
+        )
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            generate_practice_progression.write_progression(progression, root, render_midi=True)
+            output_dir = str(Path(directory) / "progression")
+            service.write(progression, output_dir, render_midi=True)
+            root = Path(output_dir)
             self.assertTrue((root / "progression.json").exists())
             for stage in progression["stages"]:
                 spec = stage["spec"]

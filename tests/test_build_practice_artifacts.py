@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
-
-import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -40,6 +39,18 @@ class PracticeBundleTests(unittest.TestCase):
             self.assertIn("scripts/bass_engine.py", provenance["generatorInputs"])
             self.assertIn("scripts/generate_backing_tracks.py", provenance["generatorInputs"])
             self.assertIn("scripts/progression_catalog.py", provenance["generatorInputs"])
+            self.assertIn(
+                "guitar_practice/application/generation.py",
+                provenance["generatorInputs"],
+            )
+            self.assertIn(
+                "guitar_practice/domain/backing.py",
+                provenance["generatorInputs"],
+            )
+            self.assertIn(
+                "guitar_practice/domain/midi.py",
+                provenance["generatorInputs"],
+            )
             self.assertIn(
                 "catalogs/progressions/catalog.json",
                 provenance["artifacts"],

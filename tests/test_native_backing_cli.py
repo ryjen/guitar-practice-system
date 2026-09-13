@@ -35,14 +35,14 @@ class NativeBackingCliTests(unittest.TestCase):
         )
         return workspace
 
-    def test_backing_resolve_is_native_but_bulk_generate_remains_legacy(self) -> None:
-        resolve, _ = find_command(["backing", "resolve", "request.json"])
-        generate, _ = find_command(["backing", "generate"])
-        self.assertIsNotNone(resolve)
-        self.assertIsNotNone(generate)
-        assert resolve is not None and generate is not None
-        self.assertEqual(MigrationState.NATIVE, resolve.migration)
-        self.assertEqual(MigrationState.LEGACY, generate.migration)
+    def test_backing_commands_are_native(self) -> None:
+        for tokens in (["backing", "resolve", "request.json"], ["backing", "generate"]):
+            command, _ = find_command(tokens)
+            self.assertIsNotNone(command)
+            assert command is not None
+            self.assertEqual(MigrationState.NATIVE, command.migration)
+            self.assertIsNotNone(command.native_handler)
+            self.assertIsNone(command.legacy)
 
     def test_backing_resolve_runs_without_repository_scripts(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

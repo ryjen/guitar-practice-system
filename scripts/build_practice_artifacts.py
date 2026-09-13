@@ -30,6 +30,13 @@ PUBLIC_SOURCE_DIRS = (
     Path("contracts/progressions"),
 )
 GENERATOR_INPUTS = (
+    Path("guitar_practice/adapters/binary_files.py"),
+    Path("guitar_practice/adapters/json_files.py"),
+    Path("guitar_practice/application/generation.py"),
+    Path("guitar_practice/domain/backing.py"),
+    Path("guitar_practice/domain/bass.py"),
+    Path("guitar_practice/domain/groove.py"),
+    Path("guitar_practice/domain/midi.py"),
     Path("scripts/backing_track_engine.py"),
     Path("scripts/bass_engine.py"),
     Path("scripts/build_practice_artifacts.py"),

@@ -1,0 +1,114 @@
+name: Validate Generation
+
+on:
+  pull_request:
+    paths:
+      - "backing-tracks/**"
+      - "catalogs/grooves/**"
+      - "catalogs/progressions/**"
+      - "midi/exercises.json"
+      - "guitar_practice/application/generation.py"
+      - "guitar_practice/application/ports.py"
+      - "guitar_practice/adapters/json_files.py"
+      - "guitar_practice/domain/midi_exercises.py"
+      - "guitar_practice/domain/practice_progression.py"
+      - "guitar_practice/interfaces/cli/**"
+      - "scripts/generate_backing_tracks.py"
+      - "scripts/generate_practice_progression.py"
+      - "tools/generate_midi.py"
+      - "tests/test_generate_backing_tracks.py"
+      - "tests/test_practice_progression.py"
+      - "tests/test_midi_exercises.py"
+      - "tests/test_native_generation_cli.py"
+      - "pyproject.toml"
+      - ".github/workflows/validate-generation.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "backing-tracks/**"
+      - "catalogs/grooves/**"
+      - "catalogs/progressions/**"
+      - "midi/exercises.json"
+      - "guitar_practice/application/generation.py"
+      - "guitar_practice/application/ports.py"
+      - "guitar_practice/adapters/json_files.py"
+      - "guitar_practice/domain/midi_exercises.py"
+      - "guitar_practice/domain/practice_progression.py"
+      - "guitar_practice/interfaces/cli/**"
+      - "scripts/generate_backing_tracks.py"
+      - "scripts/generate_practice_progression.py"
+      - "tools/generate_midi.py"
+      - "tests/test_generate_backing_tracks.py"
+      - "tests/test_practice_progression.py"
+      - "tests/test_midi_exercises.py"
+      - "tests/test_native_generation_cli.py"
+      - "pyproject.toml"
+      - ".github/workflows/validate-generation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-generation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - name: Install package
+        run: python -m pip install --disable-pip-version-check --no-deps -e .
+      - name: Enforce public boundary
+        run: python scripts/check_public_boundary.py
+      - name: Run generation tests
+        run: |
+          python -m unittest tests.test_generate_backing_tracks -v
+          python -m unittest tests.test_practice_progression -v
+          python -m unittest tests.test_midi_exercises -v
+          python -m unittest tests.test_native_generation_cli -v
+      - name: Compare bulk backing shim and native command
+        run: |
+          rm -rf generated/backing-tracks /tmp/backing-shim-dir
+          python scripts/generate_backing_tracks.py > /tmp/backing-shim.json
+          cp -a generated/backing-tracks /tmp/backing-shim-dir
+          rm -rf generated/backing-tracks
+          guitarctl backing generate > /tmp/backing-native.json
+          cmp /tmp/backing-shim.json /tmp/backing-native.json
+          diff -qr /tmp/backing-shim-dir generated/backing-tracks
+      - name: Compare practice progression shim and native command
+        run: |
+          python scripts/generate_practice_progression.py \
+            examples/backing-tracks/funk-wah-request.json \
+            > /tmp/progression-shim.json
+          guitarctl progression generate \
+            examples/backing-tracks/funk-wah-request.json \
+            > /tmp/progression-native.json
+          cmp /tmp/progression-shim.json /tmp/progression-native.json
+
+          rm -rf /tmp/progression-shim /tmp/progression-native
+          python scripts/generate_practice_progression.py \
+            examples/backing-tracks/funk-wah-request.json \
+            --output-dir /tmp/progression-shim \
+            --render-midi > /tmp/progression-shim.out
+          guitarctl progression generate \
+            examples/backing-tracks/funk-wah-request.json \
+            --output-dir /tmp/progression-native \
+            --render-midi > /tmp/progression-native.out
+          test "$(cat /tmp/progression-shim.out)" = "/tmp/progression-shim"
+          test "$(cat /tmp/progression-native.out)" = "/tmp/progression-native"
+          diff -qr /tmp/progression-shim /tmp/progression-native
+      - name: Compare starter MIDI shim and native command
+        run: |
+          rm -rf generated/midi /tmp/exercises-shim-dir
+          python tools/generate_midi.py > /tmp/exercises-shim.txt
+          cp -a generated/midi /tmp/exercises-shim-dir
+          rm -rf generated/midi
+          guitarctl midi generate-exercises > /tmp/exercises-native.txt
+          cmp /tmp/exercises-shim.txt /tmp/exercises-native.txt
+          diff -qr /tmp/exercises-shim-dir generated/midi
