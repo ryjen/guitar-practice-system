@@ -260,7 +260,7 @@ Expected: unregistered score commands.
 
 - [ ] **Step 3: Implement handlers and registration**
 
-`score import` chooses `DirectMusicXmlConverter` for `.xml/.musicxml`; Guitar Pro extensions use `MuseScoreConverter`, configurable via `--musescore` with default `MuseScore4`. `score tracks` reads canonical JSON through `JsonFileStore` and deserializes with `song_from_dict` before emitting normalized inspection output.
+`score import` chooses `DirectMusicXmlConverter` for `.xml/.musicxml`; Guitar Pro extensions use `MuseScoreConverter`, configurable via `--musescore` with default `mscore`. `score tracks` reads canonical JSON through `JsonFileStore` and deserializes with `song_from_dict` before emitting normalized inspection output.
 
 - [ ] **Step 4: Run targeted and full repository validation**
 

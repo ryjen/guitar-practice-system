@@ -39,7 +39,7 @@ def score_import(argv: Sequence[str], context: CliContext) -> int:
     parser.add_argument("--output", required=True, help="Canonical imported-score JSON output")
     parser.add_argument(
         "--musescore",
-        default="MuseScore4",
+        default="mscore",
         help="MuseScore executable used for Guitar Pro conversion",
     )
     args = parser.parse_args(list(argv))

@@ -54,7 +54,7 @@ class DirectMusicXmlConverter:
 @dataclass(frozen=True)
 class MuseScoreConverter:
     workspace: Path
-    executable: str = "MuseScore4"
+    executable: str = "mscore"
 
     def _version(self) -> str | None:
         try:

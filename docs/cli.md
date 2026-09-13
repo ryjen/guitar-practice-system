@@ -45,7 +45,7 @@ guitarctl score import scores/song.musicxml --output imported/song.json
 guitarctl score tracks imported/song.json
 
 # Guitar Pro formats: .gp, .gp3, .gp4, .gp5, .gpx
-guitarctl score import scores/song.gp5 --output imported/song.json --musescore MuseScore4
+guitarctl score import scores/song.gp5 --output imported/song.json --musescore mscore
 
 guitarctl validate public-boundary
 ```
