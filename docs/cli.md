@@ -40,6 +40,13 @@ guitarctl midi validate \
   /tmp/slide-slow-blues.mid
 guitarctl midi generate-exercises
 
+# Import MusicXML directly; Guitar Pro uses MuseScore conversion.
+guitarctl score import scores/song.musicxml --output imported/song.json
+guitarctl score tracks imported/song.json
+
+# Guitar Pro formats: .gp, .gp3, .gp4, .gp5, .gpx
+guitarctl score import scores/song.gp5 --output imported/song.json --musescore MuseScore4
+
 guitarctl validate public-boundary
 ```
 
@@ -58,9 +65,13 @@ guitarctl progression generate --help
 
 ## Migration status
 
-The musical core is package-native: discovery, scheduling v2, assessment, progression catalog operations, groove catalog operations, backing request resolution, backing generation, MIDI generation/validation, starter MIDI exercises, and practice-progression generation do not require repository scripts at runtime.
+The musical core is package-native: discovery, scheduling v2, assessment, progression catalog operations, groove catalog operations, backing request resolution, backing generation, MIDI generation/validation, starter MIDI exercises, practice-progression generation, and imported-score inspection do not require repository scripts at runtime. MusicXML import is direct; Guitar Pro import delegates only the source conversion step to a configured MuseScore executable.
 
 The remaining compatibility-process commands are outside this generation subsystem, including scheduling v1, adaptive-session/evidence workflows, repository validation/export, and artifact-bundle tooling. Historical musical `scripts/*.py` and `tools/*.py` entrypoints remain compatibility shims while callers migrate.
+
+## Score import boundary
+
+`score import` accepts `.gp`, `.gp3`, `.gp4`, `.gp5`, `.gpx`, `.musicxml`, and `.xml` sources inside the explicit workspace. MusicXML is parsed directly. Guitar Pro sources are converted to MusicXML by a bounded MuseScore adapter using argv execution without shell interpolation; canonical Song data contains no MuseScore-specific state. `score tracks` reports stable track ids, inferred roles, and classification provenance so later backing/stem commands can remain non-destructive around ambiguous tracks.
 
 ## Musical generation boundaries
 
