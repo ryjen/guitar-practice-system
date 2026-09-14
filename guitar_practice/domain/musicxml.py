@@ -5,10 +5,12 @@ from __future__ import annotations
 import re
 import xml.etree.ElementTree as ET
 from collections.abc import Iterable
+from dataclasses import replace
 from typing import TypeVar
 
 from guitar_practice.domain.song import (
     MeterPoint,
+    NoteEvent,
     Song,
     SongTrack,
     TempoPoint,
@@ -72,11 +74,65 @@ def _part_id(raw_id: str, index: int) -> str:
     return f"part-{index}"
 
 
+_STEP_TO_SEMITONE = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
+
+
+def _divisions(attributes: ET.Element | None, current: int) -> int:
+    if attributes is None:
+        return current
+    value = _int_text(_first(attributes, "divisions"), "divisions")
+    if value is None:
+        return current
+    if value <= 0:
+        raise MusicXmlError("divisions must be positive")
+    return value
+
+
+def _pitched_midi_note(note: ET.Element) -> int | None:
+    pitch = _first(note, "pitch")
+    if pitch is None:
+        return None
+    step = (_text(_first(pitch, "step")) or "").upper()
+    if step not in _STEP_TO_SEMITONE:
+        raise MusicXmlError("pitch step must be A through G")
+    octave = _int_text(_first(pitch, "octave"), "pitch octave")
+    if octave is None:
+        raise MusicXmlError("pitched note requires octave")
+    alter_value = _float_value(_text(_first(pitch, "alter")), "pitch alter") or 0.0
+    if not alter_value.is_integer():
+        raise MusicXmlError("microtonal pitch alters are not supported for MIDI import")
+    midi_note = 12 * (octave + 1) + _STEP_TO_SEMITONE[step] + int(alter_value)
+    if not 0 <= midi_note <= 127:
+        raise MusicXmlError("pitched note is outside the MIDI range")
+    return midi_note
+
+
 def _title(root: ET.Element, source_id: str) -> str:
     work = _first(root, "work")
     work_title = _text(_first(work, "work-title")) if work is not None else None
     movement_title = _text(_first(root, "movement-title"))
     return work_title or movement_title or source_id
+
+
+def _unpitched_note_map(root: ET.Element) -> dict[str, dict[str, int]]:
+    part_list = _first(root, "part-list")
+    if part_list is None:
+        return {}
+    result: dict[str, dict[str, int]] = {}
+    for score_part in _children(part_list, "score-part"):
+        raw_part_id = score_part.attrib.get("id", "").strip()
+        per_instrument: dict[str, int] = {}
+        for midi_instrument in _children(score_part, "midi-instrument"):
+            instrument_id = midi_instrument.attrib.get("id", "").strip()
+            value = _int_text(_first(midi_instrument, "midi-unpitched"), "midi-unpitched")
+            if value is None:
+                continue
+            if not 1 <= value <= 128:
+                raise MusicXmlError("MusicXML midi-unpitched must be between 1 and 128")
+            if instrument_id:
+                per_instrument[instrument_id] = value - 1
+        result[raw_part_id] = per_instrument
+    return result
 
 
 def _parse_tracks(root: ET.Element) -> tuple[SongTrack, ...]:
@@ -143,6 +199,102 @@ def _parse_tracks(root: ET.Element) -> tuple[SongTrack, ...]:
     return tuple(tracks)
 
 
+def _duration_quarters(element: ET.Element, divisions: int, label: str) -> float:
+    raw = _float_value(_text(_first(element, "duration")), label)
+    if raw is None or raw <= 0:
+        raise MusicXmlError(f"{label} must be positive")
+    return raw / divisions
+
+
+def _note_midi_note(note: ET.Element, unpitched: dict[str, int]) -> int | None:
+    if _first(note, "rest") is not None:
+        return None
+    pitched = _pitched_midi_note(note)
+    if pitched is not None:
+        return pitched
+    if _first(note, "unpitched") is None:
+        raise MusicXmlError("note must contain pitch, unpitched, or rest")
+    instrument = _first(note, "instrument")
+    instrument_id = instrument.attrib.get("id", "").strip() if instrument is not None else ""
+    if instrument_id and instrument_id in unpitched:
+        return unpitched[instrument_id]
+    if len(unpitched) == 1:
+        return next(iter(unpitched.values()))
+    raise MusicXmlError("unpitched note has no unambiguous midi-unpitched identity")
+
+
+def _parse_track_notes(root: ET.Element, tracks: tuple[SongTrack, ...]) -> tuple[SongTrack, ...]:
+    part_list = _first(root, "part-list")
+    assert part_list is not None
+    raw_ids = [part.attrib.get("id", "").strip() for part in _children(part_list, "score-part")]
+    track_by_raw_id = dict(zip(raw_ids, tracks, strict=True))
+    unpitched_by_part = _unpitched_note_map(root)
+    notes_by_track: dict[str, list[NoteEvent]] = {track.id: [] for track in tracks}
+
+    for part in _children(root, "part"):
+        raw_id = part.attrib.get("id", "").strip()
+        track = track_by_raw_id.get(raw_id)
+        if track is None:
+            raise MusicXmlError(f"part references unknown score-part id: {raw_id}")
+        divisions = 1
+        numerator = 4
+        denominator = 4
+        measure_position = 0.0
+        for measure in _children(part, "measure"):
+            cursor = 0.0
+            last_note_start: float | None = None
+            for child in measure:
+                kind = _local_name(child.tag)
+                if kind == "attributes":
+                    divisions = _divisions(child, divisions)
+                    time = _first(child, "time")
+                    if time is not None:
+                        beats = _int_text(_first(time, "beats"), "time beats")
+                        beat_type = _int_text(_first(time, "beat-type"), "time beat-type")
+                        if beats is None or beat_type is None:
+                            raise MusicXmlError("time signature requires beats and beat-type")
+                        numerator, denominator = beats, beat_type
+                    continue
+                if kind in {"backup", "forward"}:
+                    duration = _duration_quarters(child, divisions, f"{kind} duration")
+                    cursor += duration if kind == "forward" else -duration
+                    if cursor < 0:
+                        raise MusicXmlError("backup moves before the start of a measure")
+                    last_note_start = None
+                    continue
+                if kind != "note":
+                    continue
+                if _first(child, "grace") is not None:
+                    raise MusicXmlError("grace notes are not yet supported for symbolic MIDI import")
+                duration = _duration_quarters(child, divisions, "note duration")
+                is_chord = _first(child, "chord") is not None
+                if is_chord:
+                    if last_note_start is None:
+                        raise MusicXmlError("chord note has no preceding note onset")
+                    start = last_note_start
+                else:
+                    start = measure_position + cursor
+                    last_note_start = start
+                midi_note = _note_midi_note(child, unpitched_by_part.get(raw_id, {}))
+                if midi_note is not None:
+                    notes_by_track[track.id].append(
+                        NoteEvent(position=start, duration=duration, midi_note=midi_note)
+                    )
+                if not is_chord:
+                    cursor += duration
+            measure_position += numerator * (4.0 / denominator)
+
+    return tuple(
+        replace(
+            track,
+            notes=tuple(
+                sorted(notes_by_track[track.id], key=lambda note: (note.position, note.midi_note))
+            ),
+        )
+        for track in tracks
+    )
+
+
 def _parse_maps(root: ET.Element) -> tuple[tuple[TempoPoint, ...], tuple[MeterPoint, ...]]:
     first_part = _first(root, "part")
     if first_part is None:
@@ -151,12 +303,14 @@ def _parse_maps(root: ET.Element) -> tuple[tuple[TempoPoint, ...], tuple[MeterPo
     position = 0.0
     numerator = 4
     denominator = 4
+    divisions = 1
     tempo_points: list[TempoPoint] = []
     meter_points: list[MeterPoint] = []
 
     for measure in _children(first_part, "measure"):
         attributes = _first(measure, "attributes")
         if attributes is not None:
+            divisions = _divisions(attributes, divisions)
             time = _first(attributes, "time")
             if time is not None:
                 beats = _int_text(_first(time, "beats"), "time beats")
@@ -173,7 +327,7 @@ def _parse_maps(root: ET.Element) -> tuple[tuple[TempoPoint, ...], tuple[MeterPo
             offset_element = _first(direction, "offset")
             if offset_element is not None:
                 parsed_offset = _float_value(_text(offset_element), "direction offset")
-                offset = parsed_offset or 0.0
+                offset = (parsed_offset or 0.0) / divisions
             for sound in _descendants(direction, "sound"):
                 bpm = _float_value(sound.attrib.get("tempo"), "sound tempo")
                 if bpm is not None:
@@ -196,7 +350,7 @@ def parse_musicxml(data: bytes, *, source_id: str) -> Song:
         raise MusicXmlError("MusicXML root must be score-partwise")
 
     try:
-        tracks = _parse_tracks(root)
+        tracks = _parse_track_notes(root, _parse_tracks(root))
         tempo_map, meter_map = _parse_maps(root)
         return Song(
             source_id=source_id,

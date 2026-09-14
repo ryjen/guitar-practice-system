@@ -62,6 +62,24 @@ class MeterPoint:
 
 
 @dataclass(frozen=True)
+class NoteEvent:
+    position: float
+    duration: float
+    midi_note: int
+    velocity: int = 80
+
+    def __post_init__(self) -> None:
+        if self.position < 0:
+            raise ValueError("note position must be non-negative")
+        if self.duration <= 0:
+            raise ValueError("note duration must be positive")
+        if isinstance(self.midi_note, bool) or not 0 <= self.midi_note <= 127:
+            raise ValueError("MIDI note must be between 0 and 127")
+        if isinstance(self.velocity, bool) or not 1 <= self.velocity <= 127:
+            raise ValueError("note velocity must be between 1 and 127")
+
+
+@dataclass(frozen=True)
 class SongTrack:
     id: str
     name: str
@@ -70,6 +88,7 @@ class SongTrack:
     midi_program: int | None = None
     midi_channel: int | None = None
     is_percussion: bool = False
+    notes: tuple[NoteEvent, ...] = field(default_factory=tuple)
 
     def __post_init__(self) -> None:
         _validate_id(self.id, "track id")
@@ -79,6 +98,8 @@ class SongTrack:
             raise ValueError("MIDI program must be between 0 and 127")
         if self.midi_channel is not None and not 1 <= self.midi_channel <= 16:
             raise ValueError("MIDI channel must be between 1 and 16")
+        if tuple(sorted(self.notes, key=lambda note: note.position)) != self.notes:
+            raise ValueError("track notes must be ordered by position")
 
 
 @dataclass(frozen=True)
@@ -195,6 +216,15 @@ def song_to_dict(song: Song) -> dict[str, Any]:
                 "midi_program": track.midi_program,
                 "midi_channel": track.midi_channel,
                 "is_percussion": track.is_percussion,
+                "notes": [
+                    {
+                        "position": note.position,
+                        "duration": note.duration,
+                        "midi_note": note.midi_note,
+                        "velocity": note.velocity,
+                    }
+                    for note in track.notes
+                ],
             }
             for track in song.tracks
         ],
@@ -233,6 +263,9 @@ def song_from_dict(document: Mapping[str, Any]) -> Song:
         classification = raw.get("classification")
         if not isinstance(classification, Mapping):
             raise ValueError("track classification must be an object")
+        raw_notes = raw.get("notes", [])
+        if not isinstance(raw_notes, Sequence) or isinstance(raw_notes, (str, bytes)):
+            raise ValueError("track notes must be a sequence")
         tracks.append(
             SongTrack(
                 id=str(raw.get("id", "")),
@@ -245,6 +278,16 @@ def song_from_dict(document: Mapping[str, Any]) -> Song:
                 midi_program=_optional_int(raw.get("midi_program")),
                 midi_channel=_optional_int(raw.get("midi_channel")),
                 is_percussion=bool(raw.get("is_percussion", False)),
+                notes=tuple(
+                    NoteEvent(
+                        position=float(note["position"]),
+                        duration=float(note["duration"]),
+                        midi_note=int(note["midi_note"]),
+                        velocity=int(note.get("velocity", 80)),
+                    )
+                    for note in raw_notes
+                    if isinstance(note, Mapping)
+                ),
             )
         )
 

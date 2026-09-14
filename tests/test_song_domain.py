@@ -5,6 +5,7 @@ import unittest
 from guitar_practice.domain.song import (
     ClassificationSource,
     MeterPoint,
+    NoteEvent,
     Song,
     SongTrack,
     TempoPoint,
@@ -92,6 +93,20 @@ class SongDomainTests(unittest.TestCase):
         )
         self.assertEqual("../../still display data", track.name)
 
+    def test_note_events_validate_musical_position_and_midi_values(self) -> None:
+        self.assertEqual(
+            NoteEvent(position=1.5, duration=0.5, midi_note=64, velocity=90),
+            NoteEvent(position=1.5, duration=0.5, midi_note=64, velocity=90),
+        )
+        for kwargs in (
+            {"position": -1.0, "duration": 1.0, "midi_note": 60},
+            {"position": 0.0, "duration": 0.0, "midi_note": 60},
+            {"position": 0.0, "duration": 1.0, "midi_note": 128},
+            {"position": 0.0, "duration": 1.0, "midi_note": 60, "velocity": 0},
+        ):
+            with self.assertRaises(ValueError):
+                NoteEvent(**kwargs)
+
     def test_tempo_and_meter_validate_values(self) -> None:
         with self.assertRaises(ValueError):
             TempoPoint(position=0.0, bpm=0)
@@ -117,6 +132,10 @@ class SongDomainTests(unittest.TestCase):
                     instrument_name="Electric Guitar",
                     midi_program=29,
                     is_percussion=False,
+                    notes=(
+                        NoteEvent(position=0.0, duration=1.0, midi_note=64, velocity=88),
+                        NoteEvent(position=1.0, duration=0.5, midi_note=67),
+                    ),
                 ),
             ),
             tempo_map=(TempoPoint(position=0.0, bpm=120.0),),
