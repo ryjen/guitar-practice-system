@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import re
 import xml.etree.ElementTree as ET
 from collections.abc import Iterable
@@ -382,6 +383,168 @@ def _structural_duration_quarters(root: ET.Element) -> float | None:
         durations.append(position)
     return max(durations, default=0.0) or None
 
+_NAVIGATION_SOUND_ATTRIBUTES = frozenset({
+    "dacapo", "dalsegno", "tocoda", "fine", "segno", "coda"
+})
+
+
+def _repeat_play_order(measures: list[ET.Element]) -> list[int]:
+    active_start: int | None = None
+    order: list[int] = []
+    for index, measure in enumerate(measures):
+        if any(True for _ in _descendants(measure, "ending")):
+            raise MusicXmlError("MusicXML ending playback is not yet supported")
+        repeats = list(_descendants(measure, "repeat"))
+        forwards = [item for item in repeats if item.attrib.get("direction") == "forward"]
+        backwards = [item for item in repeats if item.attrib.get("direction") == "backward"]
+        if len(forwards) > 1 or len(backwards) > 1:
+            raise MusicXmlError("multiple repeat marks in one measure are not supported")
+        if forwards:
+            if active_start is not None:
+                raise MusicXmlError("nested forward repeats are not supported")
+            active_start = index
+
+        order.append(index)
+        if backwards:
+            repeat = backwards[0]
+            raw_times = repeat.attrib.get("times")
+            try:
+                plays = int(raw_times) if raw_times is not None else 2
+            except ValueError as exc:
+                raise MusicXmlError("repeat times must be an integer") from exc
+            if not 1 <= plays <= 32:
+                raise MusicXmlError("repeat times must be between 1 and 32")
+            start = active_start if active_start is not None else 0
+            section = list(range(start, index + 1))
+            for _ in range(plays - 1):
+                order.extend(section)
+            active_start = None
+        if len(order) > 10_000:
+            raise MusicXmlError("expanded repeat form is too large")
+    return order
+
+
+def _measure_start_states(
+    measures: list[ET.Element],
+) -> list[tuple[int, int, int]]:
+    divisions = 1
+    numerator = 4
+    denominator = 4
+    states: list[tuple[int, int, int]] = []
+    for measure in measures:
+        attributes = _first(measure, "attributes")
+        divisions = _divisions(attributes, divisions)
+        if attributes is not None:
+            time = _first(attributes, "time")
+            if time is not None:
+                beats = _int_text(_first(time, "beats"), "time beats")
+                beat_type = _int_text(_first(time, "beat-type"), "time beat-type")
+                if beats is None or beat_type is None:
+                    raise MusicXmlError("time signature requires beats and beat-type")
+                numerator, denominator = beats, beat_type
+        states.append((divisions, numerator, denominator))
+    return states
+
+
+def _tempo_start_states(measures: list[ET.Element]) -> list[float]:
+    tempo = 120.0
+    divisions = 1
+    states: list[float] = []
+    for measure in measures:
+        attributes = _first(measure, "attributes")
+        divisions = _divisions(attributes, divisions)
+        states.append(tempo)
+        events: list[tuple[float, float]] = []
+        for direction in _children(measure, "direction"):
+            offset_element = _first(direction, "offset")
+            parsed_offset = (
+                _float_value(_text(offset_element), "direction offset")
+                if offset_element is not None
+                else 0.0
+            )
+            offset = (parsed_offset or 0.0) / divisions
+            for sound in _descendants(direction, "sound"):
+                bpm = _float_value(sound.attrib.get("tempo"), "sound tempo")
+                if bpm is not None:
+                    events.append((offset, bpm))
+        for _, bpm in sorted(events):
+            tempo = bpm
+    return states
+
+
+def _inject_repeat_start_state(
+    measure: ET.Element,
+    *,
+    divisions: int,
+    numerator: int,
+    denominator: int,
+    tempo: float | None,
+) -> None:
+    attributes = ET.Element("attributes")
+    ET.SubElement(attributes, "divisions").text = str(divisions)
+    time = ET.SubElement(attributes, "time")
+    ET.SubElement(time, "beats").text = str(numerator)
+    ET.SubElement(time, "beat-type").text = str(denominator)
+    measure.insert(0, attributes)
+    if tempo is not None:
+        direction = ET.Element("direction")
+        direction_type = ET.SubElement(direction, "direction-type")
+        ET.SubElement(direction_type, "words").text = "repeat-state"
+        ET.SubElement(direction, "sound", {"tempo": f"{tempo:g}"})
+        measure.insert(1, direction)
+
+
+def _expand_simple_repeats(root: ET.Element) -> ET.Element:
+    for sound in _descendants(root, "sound"):
+        if _NAVIGATION_SOUND_ATTRIBUTES & set(sound.attrib):
+            raise MusicXmlError("MusicXML jump navigation is not yet supported")
+
+    if any(True for _ in _descendants(root, "ending")):
+        raise MusicXmlError("MusicXML ending playback is not yet supported")
+
+    parts = list(_children(root, "part"))
+    if not parts:
+        return root
+    measure_sets = [list(_children(part, "measure")) for part in parts]
+    repeat_flags = [
+        any(any(True for _ in _descendants(measure, "repeat")) for measure in measures)
+        for measures in measure_sets
+    ]
+    if not any(repeat_flags):
+        return root
+
+    reference_index = repeat_flags.index(True)
+    expected_count = len(measure_sets[reference_index])
+    if any(len(measures) != expected_count for measures in measure_sets):
+        raise MusicXmlError("parts must have aligned measure counts for repeat expansion")
+    order = _repeat_play_order(measure_sets[reference_index])
+    for has_repeats, measures in zip(repeat_flags, measure_sets, strict=True):
+        if has_repeats and _repeat_play_order(measures) != order:
+            raise MusicXmlError("parts must use consistent repeat marks")
+
+    state_sets = [_measure_start_states(measures) for measures in measure_sets]
+    tempo_states = _tempo_start_states(measure_sets[0])
+    expanded = copy.deepcopy(root)
+    for part_index, part in enumerate(_children(expanded, "part")):
+        measures = list(_children(part, "measure"))
+        for measure in measures:
+            part.remove(measure)
+        for occurrence, index in enumerate(order):
+            measure = copy.deepcopy(measures[index])
+            is_jump = occurrence > 0 and index != order[occurrence - 1] + 1
+            if is_jump:
+                divisions, numerator, denominator = state_sets[part_index][index]
+                _inject_repeat_start_state(
+                    measure,
+                    divisions=divisions,
+                    numerator=numerator,
+                    denominator=denominator,
+                    tempo=tempo_states[index] if part_index == 0 else None,
+                )
+            part.append(measure)
+    return expanded
+
+
 def parse_musicxml(data: bytes, *, source_id: str) -> Song:
     """Parse the import-foundation subset of MusicXML into a canonical Song."""
 
@@ -394,6 +557,7 @@ def parse_musicxml(data: bytes, *, source_id: str) -> Song:
         raise MusicXmlError("MusicXML root must be score-partwise")
 
     try:
+        root = _expand_simple_repeats(root)
         tracks = _parse_track_notes(root, _parse_tracks(root))
         tempo_map, meter_map = _parse_maps(root)
         return Song(

@@ -89,7 +89,7 @@ guitarctl drums export imported/song.json --tempo 75% --target boss-rc3
 
 Without `--output`, the RC-3 command writes `generated/rc3/<source-id>-drums-<tempo>pct.wav`, the corresponding source MIDI, and a JSON provenance sidecar. `source-id` is derived from the imported source filename. Outside the flake, provide a SoundFont with `--soundfont PATH` or `GUITAR_SOUNDFONT`. Explicit output names must end in `.wav`.
 
-The RC-3 path is full-song by default over the imported literal measure span. Loop length comes from score structure and the realized tempo map; rendered silence is never used to infer boundaries. MusicXML repeat/navigation expansion and explicit section/bar slicing remain follow-up work in #108. Direct phrase-memory synchronization is intentionally outside this command.
+The RC-3 path is full-song by default over the imported playback span. Simple MusicXML forward/backward repeats are expanded before Song IR is built, including inherited tempo/meter state at repeat jumps. First/second endings and D.C./D.S./coda navigation currently fail closed rather than being silently ignored. Loop length comes from score structure and the realized tempo map; rendered silence is never used to infer boundaries. Explicit section/bar slicing remains follow-up work in #108. Direct phrase-memory synchronization is intentionally outside this command.
 
 ## Musical generation boundaries
 

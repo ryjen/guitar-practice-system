@@ -80,6 +80,55 @@ class MusicXmlImportTests(unittest.TestCase):
         song = parse_musicxml(data, source_id="pickup")
         self.assertEqual(5.0, song.duration_quarters)
 
+    def test_expands_simple_forward_backward_repeats_using_total_play_count(self) -> None:
+        data = b"""<score-partwise><part-list>
+        <score-part id='P1'><part-name>Guitar</part-name></score-part>
+        </part-list><part id='P1'>
+        <measure number='1'><attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes>
+          <barline location='left'><repeat direction='forward'/></barline>
+          <note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration></note></measure>
+        <measure number='2'><note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration></note>
+          <barline location='right'><repeat direction='backward' times='3'/></barline></measure>
+        <measure number='3'><note><pitch><step>E</step><octave>4</octave></pitch><duration>4</duration></note></measure>
+        </part></score-partwise>"""
+        song = parse_musicxml(data, source_id="repeat")
+        self.assertEqual(28.0, song.duration_quarters)
+        self.assertEqual(
+            [(0.0, 60), (4.0, 62), (8.0, 60), (12.0, 62), (16.0, 60), (20.0, 62), (24.0, 64)],
+            [(note.position, note.midi_note) for note in song.tracks[0].notes],
+        )
+
+    def test_repeat_jump_restores_inherited_tempo_and_meter_state(self) -> None:
+        data = b"""<score-partwise><part-list>
+        <score-part id='P1'><part-name>Guitar</part-name></score-part>
+        </part-list><part id='P1'>
+        <measure number='0'><attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes>
+          <direction><direction-type><words>120</words></direction-type><sound tempo='120'/></direction>
+          <note><rest/><duration>4</duration></note></measure>
+        <measure number='1'><barline location='left'><repeat direction='forward'/></barline>
+          <note><rest/><duration>4</duration></note></measure>
+        <measure number='2'><attributes><time><beats>3</beats><beat-type>4</beat-type></time></attributes>
+          <direction><direction-type><words>60</words></direction-type><sound tempo='60'/></direction>
+          <note><rest/><duration>3</duration></note>
+          <barline location='right'><repeat direction='backward'/></barline></measure>
+        </part></score-partwise>"""
+        song = parse_musicxml(data, source_id="repeat-state")
+        self.assertEqual(18.0, song.duration_quarters)
+        self.assertEqual(
+            [(0.0, 120.0), (8.0, 60.0), (11.0, 120.0), (15.0, 60.0)],
+            [(point.position, point.bpm) for point in song.tempo_map],
+        )
+
+    def test_rejects_endings_and_jump_navigation_until_supported(self) -> None:
+        ending = b"""<score-partwise><part-list><score-part id='P1'><part-name>Guitar</part-name></score-part></part-list>
+        <part id='P1'><measure number='1'><barline><ending number='1' type='start'/></barline></measure></part></score-partwise>"""
+        jump = b"""<score-partwise><part-list><score-part id='P1'><part-name>Guitar</part-name></score-part></part-list>
+        <part id='P1'><measure number='1'><direction><direction-type><words>D.C.</words></direction-type><sound dacapo='yes'/></direction></measure></part></score-partwise>"""
+        with self.assertRaisesRegex(MusicXmlError, "ending"):
+            parse_musicxml(ending, source_id="ending")
+        with self.assertRaisesRegex(MusicXmlError, "navigation"):
+            parse_musicxml(jump, source_id="jump")
+
     def test_rejects_malformed_xml(self) -> None:
         with self.assertRaises(MusicXmlError):
             parse_musicxml(b"<score-partwise>", source_id="fixture")
