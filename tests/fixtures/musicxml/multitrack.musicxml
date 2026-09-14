@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="4.0">
+  <work><work-title>Fixture Song</work-title></work>
+  <part-list>
+    <score-part id="P1">
+      <part-name>Lead Guitar</part-name>
+      <score-instrument id="P1-I1"><instrument-name>Electric Guitar</instrument-name></score-instrument>
+      <midi-instrument id="P1-I1"><midi-channel>1</midi-channel><midi-program>30</midi-program></midi-instrument>
+    </score-part>
+    <score-part id="P2">
+      <part-name>Bass</part-name>
+      <score-instrument id="P2-I1"><instrument-name>Electric Bass</instrument-name></score-instrument>
+      <midi-instrument id="P2-I1"><midi-channel>2</midi-channel><midi-program>34</midi-program></midi-instrument>
+    </score-part>
+    <score-part id="P3">
+      <part-name>Drum Kit</part-name>
+      <score-instrument id="P3-I1"><instrument-name>Drumset</instrument-name></score-instrument>
+      <midi-instrument id="P3-I1"><midi-channel>10</midi-channel><midi-unpitched>36</midi-unpitched></midi-instrument>
+    </score-part>
+    <score-part id="P4">
+      <part-name>Keys</part-name>
+      <score-instrument id="P4-I1"><instrument-name>Hammond Organ</instrument-name></score-instrument>
+      <midi-instrument id="P4-I1"><midi-channel>3</midi-channel><midi-program>17</midi-program></midi-instrument>
+    </score-part>
+  </part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes>
+      <direction><sound tempo="120"/></direction>
+      <note><pitch><step>E</step><octave>4</octave></pitch><duration>4</duration><type>whole</type></note>
+    </measure>
+    <measure number="2">
+      <direction><sound tempo="90"/></direction>
+      <note><pitch><step>G</step><octave>4</octave></pitch><duration>4</duration><type>whole</type></note>
+    </measure>
+  </part>
+  <part id="P2"><measure number="1"><note><rest/><duration>4</duration></note></measure></part>
+  <part id="P3"><measure number="1"><note><unpitched><display-step>C</display-step><display-octave>5</display-octave></unpitched><duration>1</duration></note></measure></part>
+  <part id="P4"><measure number="1"><note><rest/><duration>4</duration></note></measure></part>
+</score-partwise>

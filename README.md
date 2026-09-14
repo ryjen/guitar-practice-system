@@ -123,13 +123,17 @@ No runtime is required for the documentation workflow. Optional standard-library
 ```bash
 git clone https://github.com/ryjen/guitar-practice-system.git
 cd guitar-practice-system
-python -m pip install -e .
+
+# Reproducible full toolchain (Python, MuseScore, FluidSynth, SoundFont, ffmpeg)
+nix develop
 
 guitarctl --help
 find docs templates examples -type f | sort
 python -m unittest discover -s tests -v
 mkdir -p generated
 ```
+
+Without Nix, install the Python package with `python -m pip install -e .`; score conversion and audio rendering additionally require compatible MuseScore/FluidSynth tools and a SoundFont.
 
 Suggested first pass:
 
