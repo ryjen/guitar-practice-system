@@ -123,6 +123,9 @@ No runtime is required for the documentation workflow. Optional standard-library
 ```bash
 git clone https://github.com/ryjen/guitar-practice-system.git
 cd guitar-practice-system
+
+# Reproducible full toolchain (Python, MuseScore, FluidSynth, SoundFont, ffmpeg)
+nix develop
 python -m pip install -e .
 
 guitarctl --help
