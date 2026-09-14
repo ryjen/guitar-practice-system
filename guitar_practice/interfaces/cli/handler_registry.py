@@ -9,6 +9,7 @@ from guitar_practice.interfaces.cli.generation_handlers import GENERATION_HANDLE
 from guitar_practice.interfaces.cli.groove_handlers import GROOVE_HANDLERS
 from guitar_practice.interfaces.cli.handlers import NATIVE_HANDLERS as CORE_HANDLERS
 from guitar_practice.interfaces.cli.score_handlers import SCORE_HANDLERS
+from guitar_practice.interfaces.cli.stem_handlers import STEM_HANDLERS
 
 
 def _merge(*registries: Mapping[str, object]) -> dict[str, object]:
@@ -27,4 +28,5 @@ NATIVE_HANDLERS = _merge(
     BACKING_HANDLERS,
     GENERATION_HANDLERS,
     SCORE_HANDLERS,
+    STEM_HANDLERS,
 )

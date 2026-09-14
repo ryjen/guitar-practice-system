@@ -32,6 +32,9 @@ guitarctl groove show jazz-swing
 guitarctl backing resolve examples/backing-tracks/jazz-blues-12-request.json
 guitarctl backing generate
 
+# Render imported Song IR to no-guitar practice MIDI at 75% tempo.
+guitarctl backing render imported/song.json --tempo 75% --output practice/song-backing-075.mid
+
 guitarctl midi generate \
   backing-tracks/slide-slow-blues/manifest.json \
   /tmp/slide-slow-blues.mid
@@ -65,19 +68,19 @@ guitarctl progression generate --help
 
 ## Migration status
 
-The musical core is package-native: discovery, scheduling v2, assessment, progression catalog operations, groove catalog operations, backing request resolution, backing generation, MIDI generation/validation, starter MIDI exercises, practice-progression generation, and imported-score inspection do not require repository scripts at runtime. MusicXML import is direct; Guitar Pro import delegates only the source conversion step to a configured MuseScore executable.
+The musical core is package-native: discovery, scheduling v2, assessment, progression catalog operations, groove catalog operations, backing request resolution, backing generation, MIDI generation/validation, starter MIDI exercises, practice-progression generation, imported-score inspection, and imported-score symbolic backing rendering do not require repository scripts at runtime. MusicXML import is direct; Guitar Pro import delegates only the source conversion step to a configured MuseScore executable.
 
 The remaining compatibility-process commands are outside this generation subsystem, including scheduling v1, adaptive-session/evidence workflows, repository validation/export, and artifact-bundle tooling. Historical musical `scripts/*.py` and `tools/*.py` entrypoints remain compatibility shims while callers migrate.
 
 ## Score import boundary
 
-`score import` accepts `.gp`, `.gp3`, `.gp4`, `.gp5`, `.gpx`, `.musicxml`, and `.xml` sources inside the explicit workspace. MusicXML is parsed directly. Guitar Pro sources are converted to MusicXML by a bounded MuseScore adapter using argv execution without shell interpolation; canonical Song data contains no MuseScore-specific state. `score tracks` reports stable track ids, inferred roles, and classification provenance so later backing/stem commands can remain non-destructive around ambiguous tracks.
+`score import` accepts `.gp`, `.gp3`, `.gp4`, `.gp5`, `.gpx`, `.musicxml`, and `.xml` sources inside the explicit workspace. MusicXML is parsed directly. Guitar Pro sources are converted to MusicXML by a bounded MuseScore adapter using argv execution without shell interpolation; canonical Song data contains no MuseScore-specific state. `score tracks` reports stable track ids, inferred roles, and classification provenance. `backing render` consumes that canonical Song document, proportionally derives practice tempo, excludes guitar-role tracks by default, preserves ambiguous tracks, and writes deterministic MIDI plus a JSON provenance sidecar. Explicit `--include-track` and `--exclude-track` flags operate on stable track ids.
 
 ## Musical generation boundaries
 
-MIDI encoding and structural validation are pure package-domain operations over explicit manifests and byte strings. Groove and bass rules consume MIDI primitives without filesystem access. Backing request resolution consumes explicit groove/progression catalogs and returns a canonical `BackingTrackSpec`; backing rendering consumes that spec and returns deterministic MIDI bytes.
+MIDI encoding and structural validation are pure package-domain operations over explicit manifests and byte strings. Groove and bass rules consume MIDI primitives without filesystem access. Backing request resolution consumes explicit groove/progression catalogs and returns a canonical `BackingTrackSpec`; generated-backing rendering consumes that spec and returns deterministic MIDI bytes. Imported-score `backing render` is a separate application use case over canonical Song IR, but it reuses the same pure MIDI primitives rather than introducing a second encoder.
 
-Practice-progression rules derive slow/medium/fast stages as pure domain data. Starter MIDI exercises are also pure byte generators. Application services own catalog loading, bounded manifest discovery, and artifact persistence through structured-document and binary-artifact ports.
+`backing render` is symbolic MIDI only in this slice. Audio rendering and `drums export --target boss-rc3` remain separate later boundaries so RC-3/WAV semantics do not leak into Song IR or the core CLI architecture. Practice-progression rules derive slow/medium/fast stages as pure domain data. Starter MIDI exercises are also pure byte generators. Application services own catalog loading, bounded manifest discovery, and artifact persistence through structured-document and binary-artifact ports.
 
 Compatibility entrypoints are parity-tested while callers migrate. CI compares native and historical command JSON/text output as well as generated MIDI directories and byte streams.
 
