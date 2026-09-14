@@ -8,6 +8,7 @@ from guitar_practice.interfaces.cli.backing_handlers import BACKING_HANDLERS
 from guitar_practice.interfaces.cli.generation_handlers import GENERATION_HANDLERS
 from guitar_practice.interfaces.cli.groove_handlers import GROOVE_HANDLERS
 from guitar_practice.interfaces.cli.handlers import NATIVE_HANDLERS as CORE_HANDLERS
+from guitar_practice.interfaces.cli.rc3_handlers import RC3_HANDLERS
 from guitar_practice.interfaces.cli.score_handlers import SCORE_HANDLERS
 from guitar_practice.interfaces.cli.stem_handlers import STEM_HANDLERS
 
@@ -29,4 +30,5 @@ NATIVE_HANDLERS = _merge(
     GENERATION_HANDLERS,
     SCORE_HANDLERS,
     STEM_HANDLERS,
+    RC3_HANDLERS,
 )

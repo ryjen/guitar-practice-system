@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import re
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -109,6 +110,7 @@ class Song:
     tracks: tuple[SongTrack, ...] = field(default_factory=tuple)
     tempo_map: tuple[TempoPoint, ...] = field(default_factory=tuple)
     meter_map: tuple[MeterPoint, ...] = field(default_factory=tuple)
+    duration_quarters: float | None = None
 
     def __post_init__(self) -> None:
         _validate_id(self.source_id, "source id")
@@ -121,6 +123,15 @@ class Song:
             raise ValueError("tempo map must be ordered by position")
         if tuple(sorted(self.meter_map, key=lambda item: item.position)) != self.meter_map:
             raise ValueError("meter map must be ordered by position")
+        if self.duration_quarters is not None:
+            duration = self.duration_quarters
+            if (
+                isinstance(duration, bool)
+                or not isinstance(duration, (int, float))
+                or not math.isfinite(float(duration))
+                or duration <= 0
+            ):
+                raise ValueError("song duration must be a positive finite number")
 
 
 def _validate_id(value: str, label: str) -> None:
@@ -231,6 +242,7 @@ def song_to_dict(song: Song) -> dict[str, Any]:
         "tempo_map": [
             {"position": point.position, "bpm": point.bpm} for point in song.tempo_map
         ],
+        "duration_quarters": song.duration_quarters,
         "meter_map": [
             {
                 "position": point.position,
@@ -299,6 +311,11 @@ def song_from_dict(document: Mapping[str, Any]) -> Song:
             TempoPoint(position=float(raw["position"]), bpm=float(raw["bpm"]))
             for raw in raw_tempos
             if isinstance(raw, Mapping)
+        ),
+        duration_quarters=(
+            float(document["duration_quarters"])
+            if document.get("duration_quarters") is not None
+            else None
         ),
         meter_map=tuple(
             MeterPoint(

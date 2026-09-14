@@ -20,6 +20,7 @@ class MusicXmlImportTests(unittest.TestCase):
         )
         self.assertEqual([120.0, 90.0], [point.bpm for point in song.tempo_map])
         self.assertEqual([(4, 4)], [(point.numerator, point.denominator) for point in song.meter_map])
+        self.assertEqual(8.0, song.duration_quarters)
 
     def test_preserves_part_identity_and_midi_metadata(self) -> None:
         song = parse_musicxml(FIXTURE.read_bytes(), source_id="fixture")
@@ -65,6 +66,19 @@ class MusicXmlImportTests(unittest.TestCase):
             [(0.0, 1.0, 60), (0.0, 1.0, 64), (2.0, 1.0, 67)],
             [(note.position, note.duration, note.midi_note) for note in song.tracks[0].notes],
         )
+
+    def test_structural_duration_uses_actual_span_for_implicit_pickup_measure(self) -> None:
+        data = b"""<score-partwise><part-list>
+        <score-part id='P1'><part-name>Guitar</part-name></score-part>
+        </part-list><part id='P1'>
+        <measure number='0' implicit='yes'>
+          <attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes>
+          <note><rest/><duration>1</duration></note>
+        </measure>
+        <measure number='1'><note><rest/><duration>4</duration></note></measure>
+        </part></score-partwise>"""
+        song = parse_musicxml(data, source_id="pickup")
+        self.assertEqual(5.0, song.duration_quarters)
 
     def test_rejects_malformed_xml(self) -> None:
         with self.assertRaises(MusicXmlError):

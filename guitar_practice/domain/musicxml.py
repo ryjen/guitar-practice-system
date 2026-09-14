@@ -338,6 +338,50 @@ def _parse_maps(root: ET.Element) -> tuple[tuple[TempoPoint, ...], tuple[MeterPo
     return tuple(tempo_points), tuple(meter_points)
 
 
+
+def _structural_duration_quarters(root: ET.Element) -> float | None:
+    durations: list[float] = []
+    for part in _children(root, "part"):
+        numerator = 4
+        denominator = 4
+        divisions = 1
+        position = 0.0
+        for measure in _children(part, "measure"):
+            attributes = _first(measure, "attributes")
+            divisions = _divisions(attributes, divisions)
+            if attributes is not None:
+                time = _first(attributes, "time")
+                if time is not None:
+                    beats = _int_text(_first(time, "beats"), "time beats")
+                    beat_type = _int_text(_first(time, "beat-type"), "time beat-type")
+                    if beats is None or beat_type is None:
+                        raise MusicXmlError("time signature requires beats and beat-type")
+                    numerator, denominator = beats, beat_type
+
+            nominal = numerator * (4.0 / denominator)
+            if measure.attrib.get("implicit", "no").casefold() != "yes":
+                position += nominal
+                continue
+
+            cursor = 0.0
+            maximum = 0.0
+            for child in measure:
+                kind = _local_name(child.tag)
+                if kind in {"backup", "forward"}:
+                    duration = _duration_quarters(child, divisions, f"{kind} duration")
+                    cursor += duration if kind == "forward" else -duration
+                    if cursor < 0:
+                        raise MusicXmlError("backup moves before the start of a measure")
+                    maximum = max(maximum, cursor)
+                elif kind == "note" and _first(child, "grace") is None:
+                    duration = _duration_quarters(child, divisions, "note duration")
+                    if _first(child, "chord") is None:
+                        cursor += duration
+                        maximum = max(maximum, cursor)
+            position += maximum or nominal
+        durations.append(position)
+    return max(durations, default=0.0) or None
+
 def parse_musicxml(data: bytes, *, source_id: str) -> Song:
     """Parse the import-foundation subset of MusicXML into a canonical Song."""
 
@@ -358,6 +402,7 @@ def parse_musicxml(data: bytes, *, source_id: str) -> Song:
             tracks=tracks,
             tempo_map=tempo_map,
             meter_map=meter_map,
+            duration_quarters=_structural_duration_quarters(root),
         )
     except MusicXmlError:
         raise

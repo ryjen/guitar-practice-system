@@ -31,6 +31,12 @@ class FlakePythonEnvironmentTests(unittest.TestCase):
         text = Path("flake.nix").read_text()
         self.assertIn("ps.ruff", text)
 
+    def test_dev_shell_exposes_package_native_guitarctl(self) -> None:
+        text = Path("flake.nix").read_text()
+        self.assertIn("writeShellApplication", text)
+        self.assertIn('name = "guitarctl"', text)
+        self.assertIn("python -m guitar_practice.interfaces.cli.main", text)
+
 
 if __name__ == "__main__":
     unittest.main()

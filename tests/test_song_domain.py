@@ -117,6 +117,12 @@ class SongDomainTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             MeterPoint(position=0.0, numerator=4, denominator=3)
 
+    def test_song_duration_must_be_positive_finite_number(self) -> None:
+        for duration in (0.0, -1.0, float("inf"), float("nan"), True):
+            with self.subTest(duration=duration):
+                with self.assertRaises(ValueError):
+                    Song(source_id="fixture", title="Fixture", duration_quarters=duration)
+
     def test_song_dict_round_trip_is_deterministic(self) -> None:
         song = Song(
             source_id="fixture-1",
@@ -140,6 +146,7 @@ class SongDomainTests(unittest.TestCase):
             ),
             tempo_map=(TempoPoint(position=0.0, bpm=120.0),),
             meter_map=(MeterPoint(position=0.0, numerator=4, denominator=4),),
+            duration_quarters=8.0,
         )
         document = song_to_dict(song)
         self.assertEqual(song, song_from_dict(document))

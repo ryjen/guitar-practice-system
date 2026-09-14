@@ -61,6 +61,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec(("backing", "resolve"), "Resolve a backing-track request into a deterministic spec", MigrationState.NATIVE, native_handler="backing-resolve"),
     CommandSpec(("backing", "generate"), "Generate and validate committed backing-track manifests", MigrationState.NATIVE, native_handler="backing-generate"),
     CommandSpec(("backing", "render"), "Render an imported score as symbolic no-guitar backing MIDI", MigrationState.NATIVE, native_handler="backing-render"),
+    CommandSpec(("drums", "export"), "Export full-song drums for a supported hardware target", MigrationState.NATIVE, native_handler="drums-export"),
     CommandSpec(("midi", "generate"), "Generate MIDI from a manifest", MigrationState.NATIVE, native_handler="midi-generate"),
     CommandSpec(("midi", "validate"), "Validate generated MIDI against a manifest", MigrationState.NATIVE, native_handler="midi-validate"),
     CommandSpec(("midi", "generate-exercises"), "Generate starter MIDI practice exercises", MigrationState.NATIVE, native_handler="midi-generate-exercises"),

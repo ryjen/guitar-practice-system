@@ -13,8 +13,16 @@
         ps.ruff
       ]);
       soundfont = "${pkgs.soundfont-fluid}/share/soundfonts/FluidR3_GM2-2.sf2";
+      guitarctl = pkgs.writeShellApplication {
+        name = "guitarctl";
+        runtimeInputs = [ python ];
+        text = ''
+          exec python -m guitar_practice.interfaces.cli.main "$@"
+        '';
+      };
       toolchain = with pkgs; [
         python
+        guitarctl
         musescore
         fluidsynth
         ffmpeg
@@ -34,6 +42,7 @@
         nativeBuildInputs = toolchain;
       } ''
         command -v python >/dev/null
+        command -v guitarctl >/dev/null
         command -v ruff >/dev/null
         command -v mscore >/dev/null
         command -v fluidsynth >/dev/null
