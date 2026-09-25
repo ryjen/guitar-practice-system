@@ -7,6 +7,7 @@ from guitar_practice.domain.song import (
     MeterPoint,
     NoteEvent,
     Song,
+    SongSection,
     SongTrack,
     TempoPoint,
     TrackClassification,
@@ -16,6 +17,7 @@ from guitar_practice.domain.song_stems import (
     scale_tempo,
     select_backing_tracks,
     slice_bars,
+    slice_section,
     select_drum_tracks,
 )
 
@@ -87,6 +89,37 @@ class SongStemTests(unittest.TestCase):
             [(0.0, 0.5, 36), (1.0, 2.0, 38), (6.0, 1.0, 42)],
             [(n.position, n.duration, n.midi_note) for n in sliced.tracks[0].notes],
         )
+
+    def test_slice_section_uses_unique_case_insensitive_rehearsal_name(self) -> None:
+        song = Song(
+            source_id="sections",
+            title="Sections",
+            duration_quarters=16.0,
+            bar_boundaries=(0.0, 4.0, 8.0, 12.0, 16.0),
+            sections=(
+                SongSection(name="Verse", start_bar=1, end_bar=2),
+                SongSection(name="Chorus", start_bar=3, end_bar=4),
+            ),
+        )
+        sliced = slice_section(song, "chorus")
+        self.assertEqual(8.0, sliced.duration_quarters)
+        self.assertEqual((0.0, 4.0, 8.0), sliced.bar_boundaries)
+
+    def test_slice_section_rejects_unknown_or_ambiguous_name(self) -> None:
+        song = Song(
+            source_id="sections",
+            title="Sections",
+            duration_quarters=8.0,
+            bar_boundaries=(0.0, 4.0, 8.0),
+            sections=(
+                SongSection(name="Chorus", start_bar=1, end_bar=1),
+                SongSection(name="CHORUS", start_bar=2, end_bar=2),
+            ),
+        )
+        with self.assertRaisesRegex(ValueError, "ambiguous"):
+            slice_section(song, "chorus")
+        with self.assertRaisesRegex(ValueError, "unknown"):
+            slice_section(song, "bridge")
 
     def test_slice_bars_rejects_missing_boundaries_and_invalid_ranges(self) -> None:
         with self.assertRaises(ValueError):

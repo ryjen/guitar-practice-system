@@ -11,6 +11,7 @@ from guitar_practice.interfaces.cli.commands import MigrationState, find_command
 from guitar_practice.interfaces.cli.main import main
 
 FIXTURE = Path(__file__).parent / "fixtures" / "musicxml" / "multitrack.musicxml"
+SECTION_FIXTURE = Path(__file__).parent / "fixtures" / "musicxml" / "sections.musicxml"
 
 
 class NativeStemCliTests(unittest.TestCase):
@@ -75,6 +76,43 @@ class NativeStemCliTests(unittest.TestCase):
                 (workspace / "practice" / "focused.mid.json").read_text(encoding="utf-8")
             )
             self.assertEqual([2, 2], metadata["bar_range"])
+
+    def test_renders_named_section_from_rehearsal_mark(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            (workspace / "sections.musicxml").write_bytes(SECTION_FIXTURE.read_bytes())
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(0, main([
+                    "--workspace", str(workspace), "score", "import", "sections.musicxml",
+                    "--output", "songs/sections.json",
+                ]))
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main([
+                    "--workspace", str(workspace), "backing", "render",
+                    "songs/sections.json", "--tempo", "75%", "--section", "chorus a/b",
+                    "--output", "practice/chorus.mid",
+                ])
+            self.assertEqual(0, result)
+            self.assertEqual("", stdout.getvalue())
+            self.assertEqual("", stderr.getvalue())
+            metadata = json.loads((workspace / "practice/chorus.mid.json").read_text())
+            self.assertEqual("Chorus A/B", metadata["section"])
+            self.assertEqual([2, 2], metadata["bar_range"])
+
+    def test_rejects_bars_and_section_together(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            self._import_fixture(workspace)
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(stderr):
+                result = main([
+                    "--workspace", str(workspace), "backing", "render",
+                    "songs/fixture.json", "--tempo", "75%", "--bars", "1:1",
+                    "--section", "Verse", "--output", "practice/focused.mid",
+                ])
+            self.assertEqual(65, result)
+            self.assertIn("either", stderr.getvalue().lower())
 
     def test_include_and_exclude_track_flags_are_forwarded(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

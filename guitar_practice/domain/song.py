@@ -81,6 +81,17 @@ class NoteEvent:
 
 
 @dataclass(frozen=True)
+class SongSection:
+    name: str
+    start_bar: int
+    end_bar: int
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.name, str) or not self.name.strip():
+            raise ValueError("section name must be non-empty")
+
+
+@dataclass(frozen=True)
 class SongTrack:
     id: str
     name: str
@@ -112,6 +123,7 @@ class Song:
     meter_map: tuple[MeterPoint, ...] = field(default_factory=tuple)
     duration_quarters: float | None = None
     bar_boundaries: tuple[float, ...] = field(default_factory=tuple)
+    sections: tuple[SongSection, ...] = field(default_factory=tuple)
 
     def __post_init__(self) -> None:
         _validate_id(self.source_id, "source id")
@@ -150,6 +162,19 @@ class Song:
                 raise ValueError("bar boundaries must increase strictly")
             if not math.isclose(float(boundaries[-1]), float(self.duration_quarters)):
                 raise ValueError("bar boundaries must end at structural duration")
+        if self.sections:
+            if len(self.bar_boundaries) < 2:
+                raise ValueError("sections require structural bar boundaries")
+            bar_count = len(self.bar_boundaries) - 1
+            previous_end = 0
+            for section in self.sections:
+                if section.start_bar < 1 or section.end_bar < section.start_bar:
+                    raise ValueError("section bar range must be positive and ordered")
+                if section.end_bar > bar_count:
+                    raise ValueError("section exceeds structural bar count")
+                if section.start_bar <= previous_end:
+                    raise ValueError("sections must be ordered and non-overlapping")
+                previous_end = section.end_bar
 
 
 def _validate_id(value: str, label: str) -> None:
@@ -262,6 +287,14 @@ def song_to_dict(song: Song) -> dict[str, Any]:
         ],
         "duration_quarters": song.duration_quarters,
         "bar_boundaries": list(song.bar_boundaries),
+        "sections": [
+            {
+                "name": section.name,
+                "start_bar": section.start_bar,
+                "end_bar": section.end_bar,
+            }
+            for section in song.sections
+        ],
         "meter_map": [
             {
                 "position": point.position,
@@ -281,6 +314,7 @@ def song_from_dict(document: Mapping[str, Any]) -> Song:
     raw_tempos = document.get("tempo_map", [])
     raw_meters = document.get("meter_map", [])
     raw_boundaries = document.get("bar_boundaries", [])
+    raw_sections = document.get("sections", [])
     if not isinstance(raw_tracks, Sequence) or isinstance(raw_tracks, (str, bytes)):
         raise ValueError("tracks must be a sequence")
     if not isinstance(raw_tempos, Sequence) or isinstance(raw_tempos, (str, bytes)):
@@ -289,6 +323,8 @@ def song_from_dict(document: Mapping[str, Any]) -> Song:
         raise ValueError("meter_map must be a sequence")
     if not isinstance(raw_boundaries, Sequence) or isinstance(raw_boundaries, (str, bytes)):
         raise ValueError("bar_boundaries must be a sequence")
+    if not isinstance(raw_sections, Sequence) or isinstance(raw_sections, (str, bytes)):
+        raise ValueError("sections must be a sequence")
 
     tracks: list[SongTrack] = []
     for raw in raw_tracks:
@@ -340,6 +376,15 @@ def song_from_dict(document: Mapping[str, Any]) -> Song:
             else None
         ),
         bar_boundaries=tuple(float(value) for value in raw_boundaries),
+        sections=tuple(
+            SongSection(
+                name=str(raw["name"]),
+                start_bar=int(raw["start_bar"]),
+                end_bar=int(raw["end_bar"]),
+            )
+            for raw in raw_sections
+            if isinstance(raw, Mapping)
+        ),
         meter_map=tuple(
             MeterPoint(
                 position=float(raw["position"]),

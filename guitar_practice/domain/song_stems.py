@@ -10,6 +10,7 @@ from guitar_practice.domain.song import (
     ClassificationSource,
     MeterPoint,
     Song,
+    SongSection,
     SongTrack,
     TempoPoint,
     TrackRole,
@@ -183,6 +184,15 @@ def slice_bars(song: Song, start_bar: int, end_bar: int) -> Song:
         point - left
         for point in song.bar_boundaries[start_bar - 1 : end_bar + 1]
     )
+    sections = tuple(
+        SongSection(
+            name=section.name,
+            start_bar=max(section.start_bar, start_bar) - start_bar + 1,
+            end_bar=min(section.end_bar, end_bar) - start_bar + 1,
+        )
+        for section in song.sections
+        if section.start_bar <= end_bar and section.end_bar >= start_bar
+    )
     return replace(
         song,
         tracks=tuple(sliced_tracks),
@@ -190,4 +200,26 @@ def slice_bars(song: Song, start_bar: int, end_bar: int) -> Song:
         meter_map=tuple(meter_map),
         duration_quarters=duration,
         bar_boundaries=boundaries,
+        sections=sections,
     )
+
+
+def resolve_section(song: Song, name: str) -> SongSection:
+    """Resolve one uniquely named rehearsal section without guessing."""
+
+    normalized = name.strip().casefold()
+    if not normalized:
+        raise ValueError("section name must be non-empty")
+    matches = [section for section in song.sections if section.name.casefold() == normalized]
+    if not matches:
+        raise ValueError(f"unknown section: {name}")
+    if len(matches) > 1:
+        raise ValueError(f"ambiguous section name: {name}; use --bars")
+    return matches[0]
+
+
+def slice_section(song: Song, name: str) -> Song:
+    """Return one uniquely named structural rehearsal section."""
+
+    section = resolve_section(song, name)
+    return slice_bars(song, section.start_bar, section.end_bar)

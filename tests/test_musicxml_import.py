@@ -132,6 +132,22 @@ class MusicXmlImportTests(unittest.TestCase):
         with self.assertRaisesRegex(MusicXmlError, "navigation"):
             parse_musicxml(jump, source_id="jump")
 
+    def test_imports_rehearsal_marks_as_structural_sections(self) -> None:
+        data = b"""<score-partwise><part-list>
+        <score-part id='P1'><part-name>Guitar</part-name></score-part>
+        </part-list><part id='P1'>
+        <measure number='1'><attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes>
+          <direction><direction-type><rehearsal>Intro</rehearsal></direction-type></direction><note><rest/><duration>4</duration></note></measure>
+        <measure number='2'><note><rest/><duration>4</duration></note></measure>
+        <measure number='3'><direction><direction-type><rehearsal>Chorus</rehearsal></direction-type></direction><note><rest/><duration>4</duration></note></measure>
+        <measure number='4'><note><rest/><duration>4</duration></note></measure>
+        </part></score-partwise>"""
+        song = parse_musicxml(data, source_id="sections")
+        self.assertEqual(
+            [("Intro", 1, 2), ("Chorus", 3, 4)],
+            [(section.name, section.start_bar, section.end_bar) for section in song.sections],
+        )
+
     def test_rejects_malformed_xml(self) -> None:
         with self.assertRaises(MusicXmlError):
             parse_musicxml(b"<score-partwise>", source_id="fixture")

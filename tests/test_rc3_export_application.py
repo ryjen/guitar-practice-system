@@ -12,6 +12,7 @@ from guitar_practice.domain.song import (
     ClassificationSource,
     NoteEvent,
     Song,
+    SongSection,
     SongTrack,
     TempoPoint,
     TrackClassification,
@@ -71,6 +72,10 @@ def _song_document() -> Mapping[str, Any]:
         title="Fixture",
         duration_quarters=4.0,
         bar_boundaries=(0.0, 2.0, 4.0),
+        sections=(
+            SongSection(name="Intro", start_bar=1, end_bar=1),
+            SongSection(name="Chorus A/B", start_bar=2, end_bar=2),
+        ),
         tempo_map=(TempoPoint(position=0.0, bpm=120.0),),
         tracks=(
             SongTrack(
@@ -145,6 +150,22 @@ class Rc3ExportApplicationTests(unittest.TestCase):
         self.assertEqual(1.0, metadata["duration_seconds"])
         with wave.open(BytesIO(artifacts.writes[metadata["artifact"]]), "rb") as audio:
             self.assertEqual(44_100, audio.getnframes())
+
+    def test_exports_named_section_with_safe_default_filename(self) -> None:
+        documents = MemoryDocuments({"songs/fixture.json": _song_document()})
+        artifacts = MemoryArtifacts()
+        metadata = ExportBossRc3Drums(documents, artifacts, FakeRenderer()).execute(
+            "songs/fixture.json",
+            None,
+            tempo_factor=1.0,
+            section_name="chorus a/b",
+        )
+        self.assertEqual(
+            "generated/rc3/fixture-drums-100pct-section-Chorus-A-B.wav",
+            metadata["artifact"],
+        )
+        self.assertEqual("Chorus A/B", metadata["section"])
+        self.assertEqual([2, 2], metadata["bar_range"])
 
     def test_rejects_non_wav_output_before_rendering(self) -> None:
         documents = MemoryDocuments({"songs/fixture.json": _song_document()})

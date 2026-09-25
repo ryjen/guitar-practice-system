@@ -40,6 +40,7 @@ def drums_export(argv: Sequence[str], context: CliContext) -> int:
     parser.add_argument("--output", help="Optional workspace-relative WAV output path")
     parser.add_argument("--soundfont", help="SoundFont path; defaults to GUITAR_SOUNDFONT")
     parser.add_argument("--bars", help="1-based inclusive structural bar range, for example 42:58")
+    parser.add_argument("--section", help="Named MusicXML rehearsal section")
     parser.add_argument("--include-track", action="append", default=[])
     parser.add_argument("--exclude-track", action="append", default=[])
     args = parser.parse_args(list(argv))
@@ -52,6 +53,8 @@ def drums_export(argv: Sequence[str], context: CliContext) -> int:
             else None
         )
         factor = tempo_factor(args.tempo)
+        if args.bars is not None and args.section is not None:
+            raise ValueError("choose either --bars or --section, not both")
         selected_bars = bar_range(args.bars) if args.bars is not None else None
         renderer = FluidSynthAudioRenderer(
             context.workspace,
@@ -68,6 +71,7 @@ def drums_export(argv: Sequence[str], context: CliContext) -> int:
             include_track_ids=tuple(args.include_track),
             exclude_track_ids=tuple(args.exclude_track),
             bar_range=selected_bars,
+            section_name=args.section,
         )
     except AudioRenderError as exc:
         print(f"guitarctl: {exc}", file=context.stderr)

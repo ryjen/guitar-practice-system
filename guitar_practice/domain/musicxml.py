@@ -13,6 +13,7 @@ from guitar_practice.domain.song import (
     MeterPoint,
     NoteEvent,
     Song,
+    SongSection,
     SongTrack,
     TempoPoint,
     classify_track,
@@ -398,6 +399,28 @@ def _bar_boundaries(root: ET.Element) -> tuple[float, ...]:
     return tuple(boundaries)
 
 
+def _sections(root: ET.Element) -> tuple[SongSection, ...]:
+    first_part = _first(root, "part")
+    if first_part is None:
+        return ()
+    measures = list(_children(first_part, "measure"))
+    markers: list[tuple[int, str]] = []
+    for bar, measure in enumerate(measures, start=1):
+        names = [name for item in _descendants(measure, "rehearsal") if (name := _text(item))]
+        if len(names) > 1:
+            raise MusicXmlError("multiple rehearsal marks in one measure are not supported")
+        if names:
+            markers.append((bar, names[0]))
+    return tuple(
+        SongSection(
+            name=name,
+            start_bar=start,
+            end_bar=(markers[index + 1][0] - 1 if index + 1 < len(markers) else len(measures)),
+        )
+        for index, (start, name) in enumerate(markers)
+    )
+
+
 _NAVIGATION_SOUND_ATTRIBUTES = frozenset({
     "dacapo", "dalsegno", "tocoda", "fine", "segno", "coda"
 })
@@ -583,6 +606,7 @@ def parse_musicxml(data: bytes, *, source_id: str) -> Song:
             meter_map=meter_map,
             duration_quarters=_structural_duration_quarters(root),
             bar_boundaries=_bar_boundaries(root),
+            sections=_sections(root),
         )
     except MusicXmlError:
         raise

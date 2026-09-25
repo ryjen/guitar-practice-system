@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 from typing import Any, Mapping
@@ -19,7 +20,20 @@ from guitar_practice.domain.audio_profiles import (
 )
 from guitar_practice.domain.song import song_from_dict
 from guitar_practice.domain.song_midi import render_song_midi
-from guitar_practice.domain.song_stems import scale_tempo, select_drum_tracks, slice_bars
+from guitar_practice.domain.song_stems import (
+    resolve_section,
+    scale_tempo,
+    select_drum_tracks,
+    slice_bars,
+)
+
+
+_SAFE_FILENAME_TOKEN = re.compile(r"[^A-Za-z0-9._-]+")
+
+
+def _filename_token(value: str) -> str:
+    token = _SAFE_FILENAME_TOKEN.sub("-", value.strip()).strip("._-")
+    return token[:64] or "section"
 
 
 @dataclass(frozen=True)
@@ -37,6 +51,7 @@ class ExportBossRc3Drums:
         include_track_ids: tuple[str, ...] = (),
         exclude_track_ids: tuple[str, ...] = (),
         bar_range: tuple[int, int] | None = None,
+        section_name: str | None = None,
     ) -> Mapping[str, Any]:
         document = self.documents.read(score_path)
         raw_song = document.get("song")
@@ -44,7 +59,11 @@ class ExportBossRc3Drums:
             raise ValueError("score document must contain a song object")
 
         song = song_from_dict(raw_song)
-        focused = slice_bars(song, *bar_range) if bar_range is not None else song
+        if bar_range is not None and section_name is not None:
+            raise ValueError("choose either a bar range or a section, not both")
+        section = resolve_section(song, section_name) if section_name is not None else None
+        selected_range = (section.start_bar, section.end_bar) if section is not None else bar_range
+        focused = slice_bars(song, *selected_range) if selected_range is not None else song
         realized = scale_tempo(focused, tempo_factor)
         selected = select_drum_tracks(
             realized,
@@ -58,7 +77,11 @@ class ExportBossRc3Drums:
             filename = PurePosixPath(
                 boss_rc3_filename(song.source_id, tempo_factor=tempo_factor)
             )
-            if bar_range is not None:
+            if section is not None:
+                filename = filename.with_name(
+                    f"{filename.stem}-section-{_filename_token(section.name)}{filename.suffix}"
+                )
+            elif bar_range is not None:
                 start_bar, end_bar = bar_range
                 filename = filename.with_name(
                     f"{filename.stem}-bars{start_bar}-{end_bar}{filename.suffix}"
@@ -89,7 +112,8 @@ class ExportBossRc3Drums:
             "source_midi": midi_output,
             "tempo_factor": float(tempo_factor),
             "duration_seconds": duration_seconds,
-            "bar_range": list(bar_range) if bar_range is not None else None,
+            "bar_range": list(selected_range) if selected_range is not None else None,
+            "section": section.name if section is not None else None,
             "selected_track_ids": [track.id for track in selected],
             "explicit_include_track_ids": list(include_track_ids),
             "explicit_exclude_track_ids": list(exclude_track_ids),

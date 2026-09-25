@@ -14,6 +14,7 @@ from guitar_practice.interfaces.cli.commands import MigrationState, find_command
 from guitar_practice.interfaces.cli.main import main
 
 FIXTURE = Path(__file__).parent / "fixtures" / "musicxml" / "multitrack.musicxml"
+SECTION_FIXTURE = Path(__file__).parent / "fixtures" / "musicxml" / "sections.musicxml"
 
 
 class NativeRc3CliTests(unittest.TestCase):
@@ -133,6 +134,35 @@ class NativeRc3CliTests(unittest.TestCase):
                         ])
                     self.assertEqual(65, result)
                     self.assertIn("bar", stderr.getvalue().lower())
+
+    def test_exports_named_section_from_rehearsal_mark(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as directory:
+            workspace = Path(directory)
+            (workspace / "sections.musicxml").write_bytes(SECTION_FIXTURE.read_bytes())
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(0, main([
+                    "--workspace", str(workspace), "score", "import", "sections.musicxml",
+                    "--output", "songs/sections.json",
+                ]))
+            executable, soundfont = self._fake_fluidsynth(workspace)
+            env = {
+                "PATH": f"{executable.parent}:{os.environ.get('PATH', '')}",
+                "GUITAR_SOUNDFONT": str(soundfont),
+            }
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with mock.patch.dict(os.environ, env, clear=False), contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main([
+                    "--workspace", str(workspace), "drums", "export",
+                    "songs/sections.json", "--tempo", "75%", "--target", "boss-rc3",
+                    "--section", "chorus a/b",
+                ])
+            self.assertEqual(0, result)
+            self.assertEqual("", stdout.getvalue())
+            self.assertEqual("", stderr.getvalue())
+            wav_path = workspace / "generated/rc3/sections-drums-75pct-section-Chorus-A-B.wav"
+            metadata = json.loads(Path(f"{wav_path}.json").read_text())
+            self.assertEqual("Chorus A/B", metadata["section"])
+            self.assertEqual([2, 2], metadata["bar_range"])
 
     def test_explicit_output_and_path_boundary(self) -> None:
         with tempfile.TemporaryDirectory(dir=Path.cwd()) as directory:

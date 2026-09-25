@@ -10,6 +10,7 @@ from guitar_practice.domain.song import (
     ClassificationSource,
     NoteEvent,
     Song,
+    SongSection,
     SongTrack,
     TempoPoint,
     TrackClassification,
@@ -70,6 +71,10 @@ class SongStemApplicationTests(unittest.TestCase):
             ),
             duration_quarters=8.0,
             bar_boundaries=(0.0, 4.0, 8.0),
+            sections=(
+                SongSection(name="Intro", start_bar=1, end_bar=1),
+                SongSection(name="Chorus", start_bar=2, end_bar=2),
+            ),
         )
         self.wrapper = {
             "schema_version": 1,
@@ -112,6 +117,18 @@ class SongStemApplicationTests(unittest.TestCase):
         )
         self.assertEqual([2, 2], metadata["bar_range"])
         self.assertIn("practice/focused.mid", artifacts.writes)
+
+    def test_named_section_is_applied_and_canonicalized(self) -> None:
+        documents = MemoryDocuments({"songs/fixture.json": self.wrapper})
+        artifacts = MemoryArtifacts()
+        metadata = RenderBackingStem(documents=documents, artifacts=artifacts).execute(
+            "songs/fixture.json",
+            "practice/chorus.mid",
+            tempo_factor=0.75,
+            section_name="chorus",
+        )
+        self.assertEqual("Chorus", metadata["section"])
+        self.assertEqual([2, 2], metadata["bar_range"])
 
     def test_explicit_track_overrides_are_recorded(self) -> None:
         documents = MemoryDocuments({"song.json": self.wrapper})

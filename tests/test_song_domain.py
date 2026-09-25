@@ -7,6 +7,7 @@ from guitar_practice.domain.song import (
     MeterPoint,
     NoteEvent,
     Song,
+    SongSection,
     SongTrack,
     TempoPoint,
     TrackClassification,
@@ -139,6 +140,23 @@ class SongDomainTests(unittest.TestCase):
                         bar_boundaries=boundaries,
                     )
 
+    def test_sections_validate_against_structural_bars(self) -> None:
+        with self.assertRaises(ValueError):
+            SongSection(name="", start_bar=1, end_bar=1)
+        for section in (
+            SongSection(name="Bad start", start_bar=0, end_bar=1),
+            SongSection(name="Bad order", start_bar=2, end_bar=1),
+        ):
+            with self.subTest(section=section):
+                with self.assertRaises(ValueError):
+                    Song(
+                        source_id="fixture",
+                        title="Fixture",
+                        duration_quarters=8.0,
+                        bar_boundaries=(0.0, 4.0, 8.0),
+                        sections=(section,),
+                    )
+
     def test_song_dict_round_trip_is_deterministic(self) -> None:
         song = Song(
             source_id="fixture-1",
@@ -164,6 +182,7 @@ class SongDomainTests(unittest.TestCase):
             meter_map=(MeterPoint(position=0.0, numerator=4, denominator=4),),
             duration_quarters=8.0,
             bar_boundaries=(0.0, 4.0, 8.0),
+            sections=(SongSection(name="Verse", start_bar=1, end_bar=2),),
         )
         document = song_to_dict(song)
         self.assertEqual(song, song_from_dict(document))
