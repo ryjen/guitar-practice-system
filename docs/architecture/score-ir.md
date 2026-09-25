@@ -242,5 +242,3 @@ Version 1 validation includes:
 - bounded provenance confidence semantics
 
 More advanced notation invariants such as complete voice filling, beaming, enharmonic policy, and cross-part engraving are intentionally exporter/editor concerns unless they become necessary canonical invariants later.
-
-[executed on device: 2f3498544c93 (a7fd9f41-8002-4c03-ac43-498109dd9775)]

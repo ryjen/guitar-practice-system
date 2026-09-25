@@ -179,5 +179,3 @@ Considerations:
 - How should local recordings be referenced without bloating the repository?
 - What should be versioned in Git versus kept as local private state?
 - Which metrics improve practice without creating false precision?
-
-[executed on device: 2f3498544c93 (a7fd9f41-8002-4c03-ac43-498109dd9775)]

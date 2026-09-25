@@ -412,5 +412,3 @@ class ScoreIrStructureTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-[executed on device: 2f3498544c93 (a7fd9f41-8002-4c03-ac43-498109dd9775)]

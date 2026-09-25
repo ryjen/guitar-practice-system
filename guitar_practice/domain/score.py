@@ -689,5 +689,3 @@ def loads(text: str) -> dict[str, Any]:
         raise ScoreError("score JSON root must be an object")
     validate(document)
     return document
-
-[executed on device: 2f3498544c93 (a7fd9f41-8002-4c03-ac43-498109dd9775)]
