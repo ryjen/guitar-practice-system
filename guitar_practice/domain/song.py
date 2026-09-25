@@ -111,6 +111,7 @@ class Song:
     tempo_map: tuple[TempoPoint, ...] = field(default_factory=tuple)
     meter_map: tuple[MeterPoint, ...] = field(default_factory=tuple)
     duration_quarters: float | None = None
+    bar_boundaries: tuple[float, ...] = field(default_factory=tuple)
 
     def __post_init__(self) -> None:
         _validate_id(self.source_id, "source id")
@@ -132,6 +133,23 @@ class Song:
                 or duration <= 0
             ):
                 raise ValueError("song duration must be a positive finite number")
+        if self.bar_boundaries:
+            boundaries = self.bar_boundaries
+            if self.duration_quarters is None:
+                raise ValueError("bar boundaries require structural duration")
+            if boundaries[0] != 0.0:
+                raise ValueError("bar boundaries must start at zero")
+            if any(
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not math.isfinite(float(value))
+                for value in boundaries
+            ):
+                raise ValueError("bar boundaries must be finite numbers")
+            if any(right <= left for left, right in zip(boundaries, boundaries[1:])):
+                raise ValueError("bar boundaries must increase strictly")
+            if not math.isclose(float(boundaries[-1]), float(self.duration_quarters)):
+                raise ValueError("bar boundaries must end at structural duration")
 
 
 def _validate_id(value: str, label: str) -> None:
@@ -243,6 +261,7 @@ def song_to_dict(song: Song) -> dict[str, Any]:
             {"position": point.position, "bpm": point.bpm} for point in song.tempo_map
         ],
         "duration_quarters": song.duration_quarters,
+        "bar_boundaries": list(song.bar_boundaries),
         "meter_map": [
             {
                 "position": point.position,
@@ -261,12 +280,15 @@ def song_from_dict(document: Mapping[str, Any]) -> Song:
     raw_tracks = document.get("tracks", [])
     raw_tempos = document.get("tempo_map", [])
     raw_meters = document.get("meter_map", [])
+    raw_boundaries = document.get("bar_boundaries", [])
     if not isinstance(raw_tracks, Sequence) or isinstance(raw_tracks, (str, bytes)):
         raise ValueError("tracks must be a sequence")
     if not isinstance(raw_tempos, Sequence) or isinstance(raw_tempos, (str, bytes)):
         raise ValueError("tempo_map must be a sequence")
     if not isinstance(raw_meters, Sequence) or isinstance(raw_meters, (str, bytes)):
         raise ValueError("meter_map must be a sequence")
+    if not isinstance(raw_boundaries, Sequence) or isinstance(raw_boundaries, (str, bytes)):
+        raise ValueError("bar_boundaries must be a sequence")
 
     tracks: list[SongTrack] = []
     for raw in raw_tracks:
@@ -317,6 +339,7 @@ def song_from_dict(document: Mapping[str, Any]) -> Song:
             if document.get("duration_quarters") is not None
             else None
         ),
+        bar_boundaries=tuple(float(value) for value in raw_boundaries),
         meter_map=tuple(
             MeterPoint(
                 position=float(raw["position"]),

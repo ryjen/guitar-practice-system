@@ -8,7 +8,7 @@ from typing import Any, Mapping
 from guitar_practice.application.ports import BinaryArtifactStore, JsonDocumentStore
 from guitar_practice.domain.song import song_from_dict
 from guitar_practice.domain.song_midi import render_song_midi
-from guitar_practice.domain.song_stems import scale_tempo, select_backing_tracks
+from guitar_practice.domain.song_stems import scale_tempo, select_backing_tracks, slice_bars
 
 
 @dataclass(frozen=True)
@@ -24,6 +24,7 @@ class RenderBackingStem:
         tempo_factor: float,
         include_track_ids: tuple[str, ...] = (),
         exclude_track_ids: tuple[str, ...] = (),
+        bar_range: tuple[int, int] | None = None,
     ) -> Mapping[str, Any]:
         document = self.documents.read(score_path)
         raw_song = document.get("song")
@@ -31,7 +32,8 @@ class RenderBackingStem:
             raise ValueError("score document must contain a song object")
 
         song = song_from_dict(raw_song)
-        realized = scale_tempo(song, tempo_factor)
+        focused = slice_bars(song, *bar_range) if bar_range is not None else song
+        realized = scale_tempo(focused, tempo_factor)
         selected = select_backing_tracks(
             realized,
             include_track_ids=include_track_ids,
@@ -48,6 +50,7 @@ class RenderBackingStem:
             "score": score_path,
             "artifact": output_path,
             "tempo_factor": float(tempo_factor),
+            "bar_range": list(bar_range) if bar_range is not None else None,
             "selected_track_ids": selected_ids,
             "excluded_track_ids": excluded_ids,
             "explicit_include_track_ids": list(include_track_ids),

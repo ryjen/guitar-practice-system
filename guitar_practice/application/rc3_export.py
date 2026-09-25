@@ -19,7 +19,7 @@ from guitar_practice.domain.audio_profiles import (
 )
 from guitar_practice.domain.song import song_from_dict
 from guitar_practice.domain.song_midi import render_song_midi
-from guitar_practice.domain.song_stems import scale_tempo, select_drum_tracks
+from guitar_practice.domain.song_stems import scale_tempo, select_drum_tracks, slice_bars
 
 
 @dataclass(frozen=True)
@@ -36,6 +36,7 @@ class ExportBossRc3Drums:
         tempo_factor: float,
         include_track_ids: tuple[str, ...] = (),
         exclude_track_ids: tuple[str, ...] = (),
+        bar_range: tuple[int, int] | None = None,
     ) -> Mapping[str, Any]:
         document = self.documents.read(score_path)
         raw_song = document.get("song")
@@ -43,7 +44,8 @@ class ExportBossRc3Drums:
             raise ValueError("score document must contain a song object")
 
         song = song_from_dict(raw_song)
-        realized = scale_tempo(song, tempo_factor)
+        focused = slice_bars(song, *bar_range) if bar_range is not None else song
+        realized = scale_tempo(focused, tempo_factor)
         selected = select_drum_tracks(
             realized,
             include_track_ids=include_track_ids,
@@ -52,10 +54,18 @@ class ExportBossRc3Drums:
         if not selected:
             raise ValueError("no drum tracks selected for RC-3 export")
 
-        resolved_output = output_path or str(
-            PurePosixPath("generated/rc3")
-            / boss_rc3_filename(song.source_id, tempo_factor=tempo_factor)
-        )
+        if output_path is None:
+            filename = PurePosixPath(
+                boss_rc3_filename(song.source_id, tempo_factor=tempo_factor)
+            )
+            if bar_range is not None:
+                start_bar, end_bar = bar_range
+                filename = filename.with_name(
+                    f"{filename.stem}-bars{start_bar}-{end_bar}{filename.suffix}"
+                )
+            resolved_output = str(PurePosixPath("generated/rc3") / filename)
+        else:
+            resolved_output = output_path
         if PurePosixPath(resolved_output).suffix.casefold() != ".wav":
             raise ValueError("RC-3 output must use a .wav filename")
         midi_output = str(PurePosixPath(resolved_output).with_suffix(".mid"))
@@ -79,6 +89,7 @@ class ExportBossRc3Drums:
             "source_midi": midi_output,
             "tempo_factor": float(tempo_factor),
             "duration_seconds": duration_seconds,
+            "bar_range": list(bar_range) if bar_range is not None else None,
             "selected_track_ids": [track.id for track in selected],
             "explicit_include_track_ids": list(include_track_ids),
             "explicit_exclude_track_ids": list(exclude_track_ids),

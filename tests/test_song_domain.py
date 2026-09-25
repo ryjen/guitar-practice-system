@@ -123,6 +123,22 @@ class SongDomainTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     Song(source_id="fixture", title="Fixture", duration_quarters=duration)
 
+    def test_bar_boundaries_must_match_structural_duration(self) -> None:
+        for boundaries in (
+            (1.0, 4.0),
+            (0.0, 4.0, 4.0),
+            (0.0, 5.0),
+            (0.0, float("inf"), 8.0),
+        ):
+            with self.subTest(boundaries=boundaries):
+                with self.assertRaises(ValueError):
+                    Song(
+                        source_id="fixture",
+                        title="Fixture",
+                        duration_quarters=8.0,
+                        bar_boundaries=boundaries,
+                    )
+
     def test_song_dict_round_trip_is_deterministic(self) -> None:
         song = Song(
             source_id="fixture-1",
@@ -147,6 +163,7 @@ class SongDomainTests(unittest.TestCase):
             tempo_map=(TempoPoint(position=0.0, bpm=120.0),),
             meter_map=(MeterPoint(position=0.0, numerator=4, denominator=4),),
             duration_quarters=8.0,
+            bar_boundaries=(0.0, 4.0, 8.0),
         )
         document = song_to_dict(song)
         self.assertEqual(song, song_from_dict(document))

@@ -28,3 +28,20 @@ def tempo_factor(value: str) -> float:
     if factor <= 0:
         raise ValueError("tempo percentage must be positive")
     return factor
+
+
+def bar_range(value: str) -> tuple[int, int]:
+    """Parse a 1-based inclusive bar range such as 42:58."""
+
+    parts = value.strip().split(":")
+    if len(parts) != 2:
+        raise ValueError("bar range must use START:END")
+    try:
+        start, end = (int(part) for part in parts)
+    except ValueError as exc:
+        raise ValueError("bar range values must be integers") from exc
+    if start < 1 or end < 1:
+        raise ValueError("bar range values must be positive")
+    if end < start:
+        raise ValueError("bar range end must not precede start")
+    return start, end

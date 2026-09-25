@@ -6,7 +6,23 @@ import math
 from dataclasses import replace
 from collections.abc import Callable, Iterable
 
-from guitar_practice.domain.song import Song, SongTrack, TempoPoint, TrackRole
+from guitar_practice.domain.song import (
+    ClassificationSource,
+    MeterPoint,
+    Song,
+    SongTrack,
+    TempoPoint,
+    TrackRole,
+)
+
+_STRONG_CLASSIFICATION_SOURCES = frozenset(
+    {
+        ClassificationSource.EXPLICIT,
+        ClassificationSource.INSTRUMENT,
+        ClassificationSource.MIDI,
+        ClassificationSource.PERCUSSION,
+    }
+)
 
 
 def scale_tempo(song: Song, factor: float) -> Song:
@@ -68,7 +84,10 @@ def select_backing_tracks(
 
     return _select(
         song,
-        default_selected=lambda track: track.classification.role is not TrackRole.GUITAR,
+        default_selected=lambda track: not (
+            track.classification.role is TrackRole.GUITAR
+            and track.classification.source in _STRONG_CLASSIFICATION_SOURCES
+        ),
         include_track_ids=include_track_ids,
         exclude_track_ids=exclude_track_ids,
     )
@@ -87,4 +106,88 @@ def select_drum_tracks(
         default_selected=lambda track: track.classification.role is TrackRole.DRUMS,
         include_track_ids=include_track_ids,
         exclude_track_ids=exclude_track_ids,
+    )
+
+
+def slice_bars(song: Song, start_bar: int, end_bar: int) -> Song:
+    """Return a 1-based inclusive structural bar slice remapped to position zero."""
+
+    for value, label in ((start_bar, "start bar"), (end_bar, "end bar")):
+        if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+            raise ValueError(f"{label} must be a positive integer")
+    if end_bar < start_bar:
+        raise ValueError("end bar must not precede start bar")
+    if len(song.bar_boundaries) < 2:
+        raise ValueError("song has no structural bar boundaries")
+
+    bar_count = len(song.bar_boundaries) - 1
+    if end_bar > bar_count:
+        raise ValueError(f"bar range exceeds song bar count ({bar_count})")
+
+    left = song.bar_boundaries[start_bar - 1]
+    right = song.bar_boundaries[end_bar]
+    duration = right - left
+
+    def effective_tempo() -> float:
+        bpm = 120.0
+        for point in song.tempo_map:
+            if point.position > left:
+                break
+            bpm = point.bpm
+        return bpm
+
+    def effective_meter() -> tuple[int, int]:
+        numerator, denominator = 4, 4
+        for point in song.meter_map:
+            if point.position > left:
+                break
+            numerator, denominator = point.numerator, point.denominator
+        return numerator, denominator
+
+    sliced_tracks = []
+    for track in song.tracks:
+        notes = []
+        for note in track.notes:
+            note_start = max(note.position, left)
+            note_end = min(note.position + note.duration, right)
+            if note_start < note_end:
+                notes.append(
+                    replace(
+                        note,
+                        position=note_start - left,
+                        duration=note_end - note_start,
+                    )
+                )
+        sliced_tracks.append(replace(track, notes=tuple(notes)))
+
+    tempo_map = [TempoPoint(position=0.0, bpm=effective_tempo())]
+    tempo_map.extend(
+        TempoPoint(position=point.position - left, bpm=point.bpm)
+        for point in song.tempo_map
+        if left < point.position < right
+    )
+
+    numerator, denominator = effective_meter()
+    meter_map = [MeterPoint(position=0.0, numerator=numerator, denominator=denominator)]
+    meter_map.extend(
+        MeterPoint(
+            position=point.position - left,
+            numerator=point.numerator,
+            denominator=point.denominator,
+        )
+        for point in song.meter_map
+        if left < point.position < right
+    )
+
+    boundaries = tuple(
+        point - left
+        for point in song.bar_boundaries[start_bar - 1 : end_bar + 1]
+    )
+    return replace(
+        song,
+        tracks=tuple(sliced_tracks),
+        tempo_map=tuple(tempo_map),
+        meter_map=tuple(meter_map),
+        duration_quarters=duration,
+        bar_boundaries=boundaries,
     )

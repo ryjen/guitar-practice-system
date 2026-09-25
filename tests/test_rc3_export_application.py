@@ -70,6 +70,7 @@ def _song_document() -> Mapping[str, Any]:
         source_id="fixture",
         title="Fixture",
         duration_quarters=4.0,
+        bar_boundaries=(0.0, 2.0, 4.0),
         tempo_map=(TempoPoint(position=0.0, bpm=120.0),),
         tracks=(
             SongTrack(
@@ -84,7 +85,10 @@ def _song_document() -> Mapping[str, Any]:
                 classification=TrackClassification(TrackRole.DRUMS, ClassificationSource.PERCUSSION),
                 midi_channel=10,
                 is_percussion=True,
-                notes=(NoteEvent(position=0.0, duration=1.0, midi_note=36),),
+                notes=(
+                    NoteEvent(position=0.0, duration=1.0, midi_note=36),
+                    NoteEvent(position=2.0, duration=1.0, midi_note=38),
+                ),
             ),
         ),
     )
@@ -125,6 +129,22 @@ class Rc3ExportApplicationTests(unittest.TestCase):
             "generated/rc3/fixture-drums-75pct.wav",
             metadata["artifact"],
         )
+
+    def test_exports_selected_bar_range_and_records_provenance(self) -> None:
+        documents = MemoryDocuments({"songs/fixture.json": _song_document()})
+        artifacts = MemoryArtifacts()
+        metadata = ExportBossRc3Drums(documents, artifacts, FakeRenderer()).execute(
+            "songs/fixture.json",
+            None,
+            tempo_factor=1.0,
+            bar_range=(2, 2),
+        )
+
+        self.assertEqual("generated/rc3/fixture-drums-100pct-bars2-2.wav", metadata["artifact"])
+        self.assertEqual([2, 2], metadata["bar_range"])
+        self.assertEqual(1.0, metadata["duration_seconds"])
+        with wave.open(BytesIO(artifacts.writes[metadata["artifact"]]), "rb") as audio:
+            self.assertEqual(44_100, audio.getnframes())
 
     def test_rejects_non_wav_output_before_rendering(self) -> None:
         documents = MemoryDocuments({"songs/fixture.json": _song_document()})

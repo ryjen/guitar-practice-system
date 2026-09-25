@@ -68,6 +68,8 @@ class SongStemApplicationTests(unittest.TestCase):
                 TempoPoint(position=0.0, bpm=120.0),
                 TempoPoint(position=4.0, bpm=90.0),
             ),
+            duration_quarters=8.0,
+            bar_boundaries=(0.0, 4.0, 8.0),
         )
         self.wrapper = {
             "schema_version": 1,
@@ -98,6 +100,18 @@ class SongStemApplicationTests(unittest.TestCase):
         self.assertEqual(0.75, metadata["tempo_factor"])
         self.assertEqual("fixture", metadata["source_id"])
         self.assertEqual(metadata, documents.writes["practice/backing.mid.json"])
+
+    def test_bar_range_is_applied_before_backing_render_and_recorded(self) -> None:
+        documents = MemoryDocuments({"songs/fixture.json": self.wrapper})
+        artifacts = MemoryArtifacts()
+        metadata = RenderBackingStem(documents=documents, artifacts=artifacts).execute(
+            "songs/fixture.json",
+            "practice/focused.mid",
+            tempo_factor=0.75,
+            bar_range=(2, 2),
+        )
+        self.assertEqual([2, 2], metadata["bar_range"])
+        self.assertIn("practice/focused.mid", artifacts.writes)
 
     def test_explicit_track_overrides_are_recorded(self) -> None:
         documents = MemoryDocuments({"song.json": self.wrapper})

@@ -56,6 +56,26 @@ class NativeStemCliTests(unittest.TestCase):
             self.assertEqual(["P2", "P3", "P4"], metadata["selected_track_ids"])
             self.assertEqual(["P1"], metadata["excluded_track_ids"])
 
+    def test_renders_inclusive_bar_range(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            self._import_fixture(workspace)
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main([
+                    "--workspace", str(workspace), "backing", "render",
+                    "songs/fixture.json", "--tempo", "75%", "--bars", "2:2",
+                    "--output", "practice/focused.mid",
+                ])
+            self.assertEqual(0, result)
+            self.assertEqual("", stdout.getvalue())
+            self.assertEqual("", stderr.getvalue())
+            metadata = json.loads(
+                (workspace / "practice" / "focused.mid.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual([2, 2], metadata["bar_range"])
+
     def test_include_and_exclude_track_flags_are_forwarded(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             workspace = Path(directory)

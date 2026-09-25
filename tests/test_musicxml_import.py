@@ -21,6 +21,7 @@ class MusicXmlImportTests(unittest.TestCase):
         self.assertEqual([120.0, 90.0], [point.bpm for point in song.tempo_map])
         self.assertEqual([(4, 4)], [(point.numerator, point.denominator) for point in song.meter_map])
         self.assertEqual(8.0, song.duration_quarters)
+        self.assertEqual((0.0, 4.0, 8.0), song.bar_boundaries)
 
     def test_preserves_part_identity_and_midi_metadata(self) -> None:
         song = parse_musicxml(FIXTURE.read_bytes(), source_id="fixture")
@@ -79,6 +80,7 @@ class MusicXmlImportTests(unittest.TestCase):
         </part></score-partwise>"""
         song = parse_musicxml(data, source_id="pickup")
         self.assertEqual(5.0, song.duration_quarters)
+        self.assertEqual((0.0, 1.0, 5.0), song.bar_boundaries)
 
     def test_expands_simple_forward_backward_repeats_using_total_play_count(self) -> None:
         data = b"""<score-partwise><part-list>
@@ -93,6 +95,7 @@ class MusicXmlImportTests(unittest.TestCase):
         </part></score-partwise>"""
         song = parse_musicxml(data, source_id="repeat")
         self.assertEqual(28.0, song.duration_quarters)
+        self.assertEqual(tuple(float(value) for value in range(0, 29, 4)), song.bar_boundaries)
         self.assertEqual(
             [(0.0, 60), (4.0, 62), (8.0, 60), (12.0, 62), (16.0, 60), (20.0, 62), (24.0, 64)],
             [(note.position, note.midi_note) for note in song.tracks[0].notes],

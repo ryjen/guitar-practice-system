@@ -56,7 +56,7 @@ class NativeRc3CliTests(unittest.TestCase):
         self.assertEqual("drums-export", command.native_handler)
 
     def test_exports_default_full_song_rc3_wav_with_quiet_stdout(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as directory:
             workspace = Path(directory)
             self._import_fixture(workspace)
             executable, soundfont = self._fake_fluidsynth(workspace)
@@ -86,8 +86,56 @@ class NativeRc3CliTests(unittest.TestCase):
             self.assertEqual("boss-rc3", metadata["target"])
             self.assertEqual(["P3"], metadata["selected_track_ids"])
 
+    def test_exports_inclusive_bar_range(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as directory:
+            workspace = Path(directory)
+            self._import_fixture(workspace)
+            executable, soundfont = self._fake_fluidsynth(workspace)
+            env = {
+                "PATH": f"{executable.parent}:{os.environ.get('PATH', '')}",
+                "GUITAR_SOUNDFONT": str(soundfont),
+            }
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with mock.patch.dict(os.environ, env, clear=False), contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main([
+                    "--workspace", str(workspace), "drums", "export",
+                    "songs/fixture.json", "--tempo", "75%", "--target", "boss-rc3",
+                    "--bars", "2:2",
+                ])
+
+            self.assertEqual(0, result)
+            self.assertEqual("", stdout.getvalue())
+            self.assertEqual("", stderr.getvalue())
+            wav_path = workspace / "generated/rc3/fixture-drums-75pct-bars2-2.wav"
+            metadata = json.loads(Path(f"{wav_path}.json").read_text())
+            self.assertEqual([2, 2], metadata["bar_range"])
+            with wave.open(str(wav_path), "rb") as audio:
+                self.assertEqual(round(metadata["duration_seconds"] * 44_100), audio.getnframes())
+
+    def test_rejects_invalid_bar_ranges(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as directory:
+            workspace = Path(directory)
+            self._import_fixture(workspace)
+            executable, soundfont = self._fake_fluidsynth(workspace)
+            env = {
+                "PATH": f"{executable.parent}:{os.environ.get('PATH', '')}",
+                "GUITAR_SOUNDFONT": str(soundfont),
+            }
+            for value in ("2", "0:1", "2:1", "1:3"):
+                with self.subTest(value=value):
+                    stderr = io.StringIO()
+                    with mock.patch.dict(os.environ, env, clear=False), contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(stderr):
+                        result = main([
+                            "--workspace", str(workspace), "drums", "export",
+                            "songs/fixture.json", "--tempo", "100%", "--target", "boss-rc3",
+                            "--bars", value,
+                        ])
+                    self.assertEqual(65, result)
+                    self.assertIn("bar", stderr.getvalue().lower())
+
     def test_explicit_output_and_path_boundary(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as directory:
             workspace = Path(directory)
             self._import_fixture(workspace)
             executable, soundfont = self._fake_fluidsynth(workspace)
@@ -119,7 +167,7 @@ class NativeRc3CliTests(unittest.TestCase):
             self.assertIn(".wav", stderr.getvalue())
 
     def test_missing_soundfont_is_unavailable(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as directory:
             workspace = Path(directory)
             self._import_fixture(workspace)
             with mock.patch.dict(os.environ, {"GUITAR_SOUNDFONT": ""}, clear=False), contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):

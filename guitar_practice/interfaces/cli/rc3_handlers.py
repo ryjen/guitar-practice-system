@@ -15,6 +15,7 @@ from guitar_practice.domain.audio_profiles import BossRc3ProfileError
 from guitar_practice.interfaces.cli import exit_codes
 from guitar_practice.interfaces.cli.practice_args import (
     PracticePathError,
+    bar_range,
     tempo_factor,
     workspace_relative,
 )
@@ -38,6 +39,7 @@ def drums_export(argv: Sequence[str], context: CliContext) -> int:
     parser.add_argument("--target", choices=("boss-rc3",), required=True)
     parser.add_argument("--output", help="Optional workspace-relative WAV output path")
     parser.add_argument("--soundfont", help="SoundFont path; defaults to GUITAR_SOUNDFONT")
+    parser.add_argument("--bars", help="1-based inclusive structural bar range, for example 42:58")
     parser.add_argument("--include-track", action="append", default=[])
     parser.add_argument("--exclude-track", action="append", default=[])
     args = parser.parse_args(list(argv))
@@ -50,6 +52,7 @@ def drums_export(argv: Sequence[str], context: CliContext) -> int:
             else None
         )
         factor = tempo_factor(args.tempo)
+        selected_bars = bar_range(args.bars) if args.bars is not None else None
         renderer = FluidSynthAudioRenderer(
             context.workspace,
             soundfont=_soundfont_path(args.soundfont, context.workspace),
@@ -64,6 +67,7 @@ def drums_export(argv: Sequence[str], context: CliContext) -> int:
             tempo_factor=factor,
             include_track_ids=tuple(args.include_track),
             exclude_track_ids=tuple(args.exclude_track),
+            bar_range=selected_bars,
         )
     except AudioRenderError as exc:
         print(f"guitarctl: {exc}", file=context.stderr)
