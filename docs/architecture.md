@@ -59,6 +59,12 @@ A reusable activity intended to improve a specific skill. Exercises include purp
 
 A piece of music the player wants to learn, maintain, or reference. Sections may progress independently and should link to external lawful references rather than copied protected material.
 
+### Score IR
+
+[Score IR](architecture/score-ir.md) is the canonical versioned representation for structured symbolic music used by guided transcription, notation interchange, imported scores, and derived practice/backing workflows. It keeps musical structure independent of MuseScore, Guitar Pro, MusicXML, MIDI byte encoding, audio renderers, hardware profiles, and CLI state.
+
+Score IR uses exact rational musical time, explicit bars/meter/tempo maps, independent harmony and note events, optional guitar string/fret positions, and bounded provenance for imported or inferred facts. External formats remain adapters or derived artifacts.
+
 ### Practice plan
 
 A proposed set of activities for a time box.
@@ -173,3 +179,5 @@ Considerations:
 - How should local recordings be referenced without bloating the repository?
 - What should be versioned in Git versus kept as local private state?
 - Which metrics improve practice without creating false precision?
+
+[executed on device: 2f3498544c93 (a7fd9f41-8002-4c03-ac43-498109dd9775)]
