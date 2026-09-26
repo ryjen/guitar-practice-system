@@ -159,3 +159,30 @@ class ScoreAuthoring:
         )
         self.documents.write(output, result)
         return result
+
+
+    def apply_rhythm(
+        self,
+        source: str,
+        *,
+        part_id: str,
+        input_path: str,
+        output: str,
+    ) -> dict[str, Any]:
+        if self.inputs is None:
+            raise ScoreAuthoringInputError("score rhythm input store is not configured")
+        input_document = self.inputs.read(input_path)
+        if set(input_document) != {"rhythm"}:
+            raise ScoreAuthoringInputError("rhythm input document must contain only rhythm")
+        patches = input_document.get("rhythm")
+        if not isinstance(patches, list):
+            raise ScoreAuthoringInputError("rhythm input rhythm must be a list")
+
+        document = dict(self.documents.read(source))
+        result = score_authoring.apply_note_rhythm(
+            document,
+            part_id=part_id,
+            patches=patches,
+        )
+        self.documents.write(output, result)
+        return result
