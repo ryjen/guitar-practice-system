@@ -6,7 +6,6 @@ import math
 import re
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import Any, Mapping, Sequence
 
 _SAFE_ID = re.compile(r"^[A-Za-z0-9._-]+$")
 
