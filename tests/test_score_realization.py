@@ -263,6 +263,13 @@ class ScoreRealizationTests(unittest.TestCase):
         self.assertEqual(snapshot, original)
         score.validate(realized)
 
+
+    def test_bar_slice_fails_closed_on_canonical_repeat_notation(self) -> None:
+        document = realization_score()
+
+        with self.assertRaisesRegex(ScoreRealizationError, "expand playback form"):
+            slice_bars(document, 2, 3)
+
     def test_section_resolution_and_slice_fail_closed_on_ambiguity(self) -> None:
         document = realization_score()
 
