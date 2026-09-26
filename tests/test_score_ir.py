@@ -45,6 +45,11 @@ class ScoreIrContractTests(unittest.TestCase):
         with self.assertRaisesRegex(score.ScoreError, "version must be 1"):
             score.validate(invalid_version)
 
+        float_version = minimal_score()
+        float_version["version"] = 1.0
+        with self.assertRaisesRegex(score.ScoreError, "version must be 1"):
+            score.validate(float_version)
+
     def test_slug_identifiers_reject_surrounding_whitespace(self) -> None:
         document = minimal_score()
         document["id"] = " blue-thing "
@@ -78,6 +83,31 @@ class ScoreIrContractTests(unittest.TestCase):
 
         with self.assertRaisesRegex(score.ScoreError, "duplicate JSON key: id"):
             score.loads(payload)
+
+    def test_lone_surrogates_are_rejected_before_canonical_utf8_output(self) -> None:
+        document = minimal_score()
+        document["metadata"]["title"] = "\ud800"
+        with self.assertRaisesRegex(score.ScoreError, "surrogate code points"):
+            score.dumps(document)
+
+        payload = (
+            '{"schema":"guitar-practice.score","version":1,'
+            '"id":"blue-thing","metadata":{"title":"\\ud800"},'
+            '"bars":[{"number":1}],'
+            '"meter_map":[{"bar":1,"beats":4,"beat_unit":4}],'
+            '"tempo_map":[],"parts":[]}'
+        )
+        with self.assertRaisesRegex(score.ScoreError, "surrogate code points"):
+            score.loads(payload)
+
+        provenance = minimal_score()
+        provenance["provenance"] = {
+            "kind": "inferred",
+            "source": "test",
+            "alternatives": [{"label": "\ud800"}],
+        }
+        with self.assertRaisesRegex(score.ScoreError, "surrogate code points"):
+            score.dumps(provenance)
 
     def test_required_top_level_fields_are_enforced(self) -> None:
         for field in (
