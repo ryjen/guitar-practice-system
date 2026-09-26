@@ -68,6 +68,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec(("score", "show"), "Show one canonical Score IR document", MigrationState.NATIVE, native_handler="score-show"),
     CommandSpec(("score", "tracks"), "Inspect canonical Score IR parts and roles", MigrationState.NATIVE, native_handler="score-tracks"),
     CommandSpec(("score", "validate"), "Validate one canonical Score IR document", MigrationState.NATIVE, native_handler="score-validate"),
+    CommandSpec(("drums", "export"), "Export a score-derived drum loop for a supported looper target", MigrationState.NATIVE, native_handler="drums-export"),
     CommandSpec(("artifact", "build"), "Build deterministic practice artifacts", MigrationState.LEGACY, legacy=LegacyTarget("scripts/build_practice_artifacts.py")),
     CommandSpec(("export", "practice-data"), "Export portable practice data", MigrationState.LEGACY, legacy=LegacyTarget("scripts/export_practice_data.py")),
     CommandSpec(("validate", "repo"), "Run repository validation", MigrationState.LEGACY, legacy=LegacyTarget("scripts/validate_repo.py")),
