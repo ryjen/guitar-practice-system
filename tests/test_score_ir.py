@@ -223,6 +223,12 @@ class ScoreIrTimelineTests(unittest.TestCase):
     def test_multi_meter_multi_tempo_parts_and_events_validate(self) -> None:
         score.validate(timeline_score())
 
+    def test_unbounded_positive_integer_bpm_is_accepted_without_float_coercion(self) -> None:
+        document = timeline_score()
+        document["tempo_map"][0]["bpm"] = 10**400
+
+        score.validate(document)
+
     def test_non_reduced_and_zero_denominator_rationals_are_rejected(self) -> None:
         non_reduced = timeline_score()
         non_reduced["tempo_map"][0]["location"]["beat"] = [2, 2]
@@ -442,6 +448,13 @@ class ScoreIrStructureTests(unittest.TestCase):
     def test_inference_confidence_is_bounded(self) -> None:
         document = structured_score()
         document["harmony"][0]["provenance"]["confidence"] = 1.01
+
+        with self.assertRaisesRegex(score.ScoreError, "confidence must be between 0 and 1"):
+            score.validate(document)
+
+    def test_unbounded_integer_confidence_stays_in_score_error_boundary(self) -> None:
+        document = structured_score()
+        document["harmony"][0]["provenance"]["confidence"] = 10**400
 
         with self.assertRaisesRegex(score.ScoreError, "confidence must be between 0 and 1"):
             score.validate(document)
