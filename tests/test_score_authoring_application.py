@@ -135,6 +135,50 @@ class ScoreAuthoringApplicationTests(unittest.TestCase):
         self.assertEqual(result, store.values["written.json"])
         score.validate(result)
 
+    def test_rhythm_input_updates_selected_note_without_mutating_inputs(self) -> None:
+        source = timeline_score()
+        source["parts"][0]["events"][2].pop("tuplet")
+        score.validate(source)
+        rhythm_input = {
+            "rhythm": [
+                {
+                    "selector": {
+                        "location": {"bar": 2, "beat": [1, 1]},
+                        "voice": 2,
+                        "pitch": {"step": "G", "alter": 0, "octave": 4},
+                    },
+                    "location": {"bar": 2, "beat": [2, 1]},
+                    "duration": [1, 8],
+                    "voice": 1,
+                }
+            ]
+        }
+        store = MemoryDocuments(
+            {
+                "source.json": source,
+                "rhythm.json": rhythm_input,
+            }
+        )
+        service = ScoreAuthoring(store, inputs=store)
+
+        result = service.apply_rhythm(
+            "source.json",
+            part_id="guitar-1",
+            input_path="rhythm.json",
+            output="written.json",
+        )
+
+        self.assertEqual(source, store.values["source.json"])
+        self.assertEqual(rhythm_input, store.values["rhythm.json"])
+        moved = [
+            event
+            for event in result["parts"][0]["events"]
+            if event.get("pitch") == {"step": "G", "alter": 0, "octave": 4}
+        ][0]
+        self.assertEqual({"bar": 2, "beat": [2, 1]}, moved["location"])
+        self.assertEqual([1, 8], moved["duration"])
+        self.assertEqual(result, store.values["written.json"])
+
     def test_form_then_section_chords_writes_new_documents_without_mutating_sources(self) -> None:
         initial = minimal_score()
         store = MemoryDocuments({"draft.json": initial})
