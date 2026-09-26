@@ -67,6 +67,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec(("score", "form"), "Replace empty-draft form from an explicit section specification", MigrationState.NATIVE, native_handler="score-form"),
     CommandSpec(("score", "chords"), "Replace harmony in an explicit score or section range", MigrationState.NATIVE, native_handler="score-chords"),
     CommandSpec(("score", "notes"), "Replace note events for one explicit score part", MigrationState.NATIVE, native_handler="score-notes"),
+    CommandSpec(("score", "voicing"), "Apply guitar string/fret positions to exactly selected notes", MigrationState.NATIVE, native_handler="score-voicing"),
     CommandSpec(("score", "show"), "Show one canonical Score IR document", MigrationState.NATIVE, native_handler="score-show"),
     CommandSpec(("score", "tracks"), "Inspect canonical Score IR parts and roles", MigrationState.NATIVE, native_handler="score-tracks"),
     CommandSpec(("score", "validate"), "Validate one canonical Score IR document", MigrationState.NATIVE, native_handler="score-validate"),
