@@ -152,6 +152,84 @@ class ScoreAuthoringDomainTests(unittest.TestCase):
                 ],
             )
 
+    def test_apply_note_positions_uses_exact_selector_and_validates_tuning(self) -> None:
+        source = timeline_score()
+        original = copy.deepcopy(source)
+        selector = {
+            "location": {"bar": 1, "beat": [1, 1]},
+            "voice": 1,
+            "pitch": {"step": "E", "alter": 0, "octave": 4},
+        }
+
+        result = score_authoring.apply_note_positions(
+            source,
+            part_id="guitar-1",
+            positions=[
+                {
+                    "selector": selector,
+                    "position": {"string": 2, "fret": 5},
+                }
+            ],
+        )
+
+        self.assertEqual(original, source)
+        self.assertEqual(
+            {"string": 2, "fret": 5},
+            result["parts"][0]["events"][0]["position"],
+        )
+        score.validate(result)
+
+        with self.assertRaisesRegex(score_authoring.ScoreAuthoringError, "pitch"):
+            score_authoring.apply_note_positions(
+                source,
+                part_id="guitar-1",
+                positions=[
+                    {
+                        "selector": selector,
+                        "position": {"string": 1, "fret": 1},
+                    }
+                ],
+            )
+
+    def test_apply_note_positions_fails_closed_on_missing_or_ambiguous_selector(self) -> None:
+        source = timeline_score()
+        selector = {
+            "location": {"bar": 1, "beat": [1, 1]},
+            "voice": 1,
+            "pitch": {"step": "E", "alter": 0, "octave": 4},
+        }
+
+        missing = copy.deepcopy(selector)
+        missing["pitch"] = {"step": "F", "alter": 0, "octave": 4}
+        with self.assertRaisesRegex(score_authoring.ScoreAuthoringError, "matched no note"):
+            score_authoring.apply_note_positions(
+                source,
+                part_id="guitar-1",
+                positions=[
+                    {
+                        "selector": missing,
+                        "position": {"string": 1, "fret": 1},
+                    }
+                ],
+            )
+
+        ambiguous = copy.deepcopy(source)
+        ambiguous["parts"][0]["events"].append(
+            copy.deepcopy(ambiguous["parts"][0]["events"][0])
+        )
+        score.validate(ambiguous)
+        with self.assertRaisesRegex(score_authoring.ScoreAuthoringError, "multiple notes"):
+            score_authoring.apply_note_positions(
+                ambiguous,
+                part_id="guitar-1",
+                positions=[
+                    {
+                        "selector": selector,
+                        "position": {"string": 2, "fret": 5},
+                    }
+                ],
+            )
+
     def test_replace_harmony_requires_exact_bar_count(self) -> None:
         source = minimal_score()
         source = score_authoring.replace_form(

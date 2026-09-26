@@ -132,3 +132,30 @@ class ScoreAuthoring:
         )
         self.documents.write(output, result)
         return result
+
+
+    def apply_voicing(
+        self,
+        source: str,
+        *,
+        part_id: str,
+        input_path: str,
+        output: str,
+    ) -> dict[str, Any]:
+        if self.inputs is None:
+            raise ScoreAuthoringInputError("score voicing input store is not configured")
+        input_document = self.inputs.read(input_path)
+        if set(input_document) != {"positions"}:
+            raise ScoreAuthoringInputError("voicing input document must contain only positions")
+        positions = input_document.get("positions")
+        if not isinstance(positions, list):
+            raise ScoreAuthoringInputError("voicing input positions must be a list")
+
+        document = dict(self.documents.read(source))
+        result = score_authoring.apply_note_positions(
+            document,
+            part_id=part_id,
+            positions=positions,
+        )
+        self.documents.write(output, result)
+        return result

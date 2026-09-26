@@ -25,6 +25,7 @@ class NativeScoreCliTests(unittest.TestCase):
             ["score", "form", "song.score.json", "verse:12"],
             ["score", "chords", "song.score.json", "C | F | G | C"],
             ["score", "notes", "song.score.json", "guitar-1"],
+            ["score", "voicing", "song.score.json", "guitar-1"],
             ["score", "show", "song.score.json"],
             ["score", "tracks", "song.score.json"],
             ["score", "validate", "song.score.json"],
@@ -287,6 +288,71 @@ class NativeScoreCliTests(unittest.TestCase):
             )
             self.assertEqual(source, score.loads((workspace / "source.score.json").read_text()))
             self.assertFalse((workspace / "current.score.json").exists())
+
+    def test_voicing_command_uses_exact_selector_and_explicit_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = timeline_score()
+            (workspace / "source.score.json").write_text(
+                score.dumps(source),
+                encoding="utf-8",
+            )
+            (workspace / "voicing.json").write_text(
+                json.dumps(
+                    {
+                        "positions": [
+                            {
+                                "selector": {
+                                    "location": {"bar": 1, "beat": [1, 1]},
+                                    "voice": 1,
+                                    "pitch": {"step": "E", "alter": 0, "octave": 4},
+                                },
+                                "position": {"string": 2, "fret": 5},
+                            }
+                        ]
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "voicing",
+                        "source.score.json",
+                        "guitar-1",
+                        "--input",
+                        "voicing.json",
+                        "--output",
+                        "voiced.score.json",
+                    ]
+                )
+
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+            self.assertEqual(
+                {
+                    "id": source["id"],
+                    "output": "voiced.score.json",
+                    "part": "guitar-1",
+                    "positioned_notes": 2,
+                },
+                json.loads(stdout.getvalue()),
+            )
+            voiced = score.loads(
+                (workspace / "voiced.score.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                {"string": 2, "fret": 5},
+                voiced["parts"][0]["events"][0]["position"],
+            )
+            self.assertEqual(source, score.loads((workspace / "source.score.json").read_text()))
 
     def test_authoring_commands_require_explicit_output_and_form_rejects_nonempty_score(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
