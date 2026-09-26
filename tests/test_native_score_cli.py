@@ -80,6 +80,14 @@ class NativeScoreCliTests(unittest.TestCase):
                 ["guitar", "bass", "drums", "keys"],
                 [track["role"] for track in tracks["tracks"]],
             )
+            self.assertEqual(
+                {"program": 29, "channel": 1},
+                tracks["tracks"][0]["midi"],
+            )
+            self.assertEqual(
+                {"channel": 10, "percussion": True},
+                tracks["tracks"][2]["midi"],
+            )
             self.assertFalse((workspace / "scripts").exists())
 
     def test_import_rejects_workspace_escape(self) -> None:
