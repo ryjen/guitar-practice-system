@@ -43,9 +43,15 @@ def _object(value: Any, name: str) -> dict[str, Any]:
     return value
 
 
+def _validate_unicode_scalar_text(value: str, name: str) -> None:
+    if any(0xD800 <= ord(character) <= 0xDFFF for character in value):
+        raise ScoreError(f"{name} must not contain surrogate code points")
+
+
 def _string(value: Any, name: str, maximum: int = 200) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ScoreError(f"{name} must be a non-empty string")
+    _validate_unicode_scalar_text(value, name)
     normalized = value.strip()
     if len(normalized) > maximum:
         raise ScoreError(f"{name} must be at most {maximum} characters")
@@ -89,7 +95,10 @@ def _fraction(value: Any, name: str, *, positive: bool = False) -> Fraction:
 
 
 def _validate_json_value(value: Any, name: str) -> None:
-    if value is None or isinstance(value, (str, bool, int)):
+    if isinstance(value, str):
+        _validate_unicode_scalar_text(value, name)
+        return
+    if value is None or isinstance(value, (bool, int)):
         return
     if isinstance(value, float):
         if not math.isfinite(value):
@@ -103,6 +112,7 @@ def _validate_json_value(value: Any, name: str) -> None:
         for key, item in value.items():
             if not isinstance(key, str):
                 raise ScoreError(f"{name} object keys must be strings")
+            _validate_unicode_scalar_text(key, f"{name} object key")
             _validate_json_value(item, f"{name}.{key}")
         return
     raise ScoreError(f"{name} must contain only JSON-compatible values")
@@ -620,7 +630,11 @@ def validate(document: dict[str, Any]) -> None:
     if document.get("schema") != SCHEMA_ID:
         raise ScoreError(f"schema must be {SCHEMA_ID!r}")
     version = document.get("version")
-    if isinstance(version, bool) or version != SCHEMA_VERSION:
+    if (
+        isinstance(version, bool)
+        or not isinstance(version, int)
+        or version != SCHEMA_VERSION
+    ):
         raise ScoreError(f"version must be {SCHEMA_VERSION}")
 
     _slug(document.get("id"), "id")
