@@ -32,6 +32,8 @@ on:
       - "tools/**"
       - "pyproject.toml"
       - "requirements-dev.txt"
+      - "flake.nix"
+      - "flake.lock"
       - ".github/workflows/**"
 
 permissions:
