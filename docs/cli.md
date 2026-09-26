@@ -40,6 +40,12 @@ guitarctl midi validate \
   /tmp/slide-slow-blues.mid
 guitarctl midi generate-exercises
 
+guitarctl score init --title "Blue Thing" > blue-thing.score.json
+guitarctl score validate blue-thing.score.json
+guitarctl score show blue-thing.score.json
+guitarctl score import song.musicxml --output song.score.json
+guitarctl score tracks song.score.json
+
 guitarctl validate public-boundary
 ```
 
@@ -58,9 +64,21 @@ guitarctl progression generate --help
 
 ## Migration status
 
-The musical core is package-native: discovery, scheduling v2, assessment, progression catalog operations, groove catalog operations, backing request resolution, backing generation, MIDI generation/validation, starter MIDI exercises, and practice-progression generation do not require repository scripts at runtime.
+The musical core is package-native: discovery, scheduling v2, assessment, progression catalog operations, groove catalog operations, backing request resolution, backing generation, MIDI generation/validation, starter MIDI exercises, practice-progression generation, and canonical Score IR creation/import/inspection/validation do not require repository scripts at runtime.
 
 The remaining compatibility-process commands are outside this generation subsystem, including scheduling v1, adaptive-session/evidence workflows, repository validation/export, and artifact-bundle tooling. Historical musical `scripts/*.py` and `tools/*.py` entrypoints remain compatibility shims while callers migrate.
+
+## Score documents
+
+`guitarctl score` is the single symbolic-score namespace. The deterministic core commands are:
+
+- `score init --title <title>` — emit the smallest valid Score IR document; add `--output <path>` for an explicit atomic write.
+- `score import <source> --output <path>` — import MusicXML or supported Guitar Pro input through the bounded conversion/import adapters.
+- `score show <score>` — emit the canonical Score IR document.
+- `score tracks <score>` — inspect part/role/instrument metadata.
+- `score validate <score>` — validate through the canonical Score IR contract and emit a machine-readable report.
+
+All input/output paths are explicit and workspace-relative. There is no implicit current score. `score render`, `score play`, and `score edit` are intentionally not registered until their bounded exporter/playback/editor work lands.
 
 ## Musical generation boundaries
 
