@@ -173,3 +173,75 @@ def replace_harmony(
 
     result["harmony"] = sorted(retained + generated, key=_location_key)
     return _validate_result(result)
+
+
+
+def _event_sort_key(event: Mapping[str, Any]) -> tuple[int, Fraction, int, int, str]:
+    bar, beat = _location_key(event)
+    pitch = event.get("pitch")
+    midi_hint = -1
+    if isinstance(pitch, Mapping):
+        step_order = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
+        step = str(pitch.get("step", "C"))
+        alter = pitch.get("alter", 0)
+        octave = pitch.get("octave", -1)
+        if (
+            step in step_order
+            and isinstance(alter, int)
+            and not isinstance(alter, bool)
+            and isinstance(octave, int)
+            and not isinstance(octave, bool)
+        ):
+            midi_hint = 12 * (octave + 1) + step_order[step] + alter
+    return (
+        bar,
+        beat,
+        int(event.get("voice", 0)),
+        midi_hint,
+        str(event.get("kind", "")),
+    )
+
+
+def replace_part_notes(
+    document: Mapping[str, Any],
+    *,
+    part_id: str,
+    notes: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Replace note events for one explicit part while preserving non-note events."""
+
+    result = _document(document)
+    if not isinstance(part_id, str) or not part_id:
+        raise ScoreAuthoringError("part id must be a non-empty string")
+
+    matches = [part for part in result["parts"] if part["id"] == part_id]
+    if not matches:
+        raise ScoreAuthoringError(f"unknown part id: {part_id}")
+    if len(matches) != 1:
+        raise ScoreAuthoringError(f"ambiguous part id: {part_id}")
+    if not isinstance(notes, Sequence) or isinstance(notes, (str, bytes)):
+        raise ScoreAuthoringError("notes must be a sequence")
+
+    generated: list[dict[str, Any]] = []
+    for index, raw_note in enumerate(notes):
+        if not isinstance(raw_note, Mapping):
+            raise ScoreAuthoringError(f"notes[{index}] must be an object")
+        note = copy.deepcopy(dict(raw_note))
+        kind = note.get("kind")
+        if kind not in {None, "note"}:
+            raise ScoreAuthoringError(f"notes[{index}].kind must be note when present")
+        note["kind"] = "note"
+        note.setdefault(
+            "provenance",
+            {"kind": "user", "source": "score-authoring:notes"},
+        )
+        generated.append(note)
+
+    part = matches[0]
+    retained = [
+        copy.deepcopy(event)
+        for event in part["events"]
+        if event.get("kind") != "note"
+    ]
+    part["events"] = sorted(retained + generated, key=_event_sort_key)
+    return _validate_result(result)

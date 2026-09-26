@@ -11,6 +11,7 @@ from pathlib import Path
 from guitar_practice.domain import score
 from guitar_practice.interfaces.cli.commands import MigrationState, find_command
 from guitar_practice.interfaces.cli.main import main
+from tests.test_score_ir import timeline_score
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests" / "fixtures" / "musicxml" / "multitrack.musicxml"
@@ -23,6 +24,7 @@ class NativeScoreCliTests(unittest.TestCase):
             ["score", "import", "song.musicxml"],
             ["score", "form", "song.score.json", "verse:12"],
             ["score", "chords", "song.score.json", "C | F | G | C"],
+            ["score", "notes", "song.score.json", "guitar-1"],
             ["score", "show", "song.score.json"],
             ["score", "tracks", "song.score.json"],
             ["score", "validate", "song.score.json"],
@@ -215,6 +217,76 @@ class NativeScoreCliTests(unittest.TestCase):
             )
             self.assertEqual([2, 3, 3], [item["location"]["bar"] for item in harmonized["harmony"]])
             self.assertNotIn("harmony", formed)
+
+    def test_notes_command_uses_explicit_input_part_and_output(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = timeline_score()
+            (workspace / "source.score.json").write_text(
+                score.dumps(source),
+                encoding="utf-8",
+            )
+            (workspace / "notes.json").write_text(
+                json.dumps(
+                    {
+                        "notes": [
+                            {
+                                "location": {"bar": 1, "beat": [1, 1]},
+                                "duration": [1, 8],
+                                "voice": 1,
+                                "pitch": {"step": "E", "alter": 0, "octave": 4},
+                            },
+                            {
+                                "location": {"bar": 2, "beat": [2, 1]},
+                                "duration": [1, 8],
+                                "voice": 1,
+                                "pitch": {"step": "A", "alter": 0, "octave": 4},
+                            },
+                        ]
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "notes",
+                        "source.score.json",
+                        "guitar-1",
+                        "--input",
+                        "notes.json",
+                        "--output",
+                        "written.score.json",
+                    ]
+                )
+
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+            self.assertEqual(
+                {
+                    "id": source["id"],
+                    "note_events": 2,
+                    "output": "written.score.json",
+                    "part": "guitar-1",
+                },
+                json.loads(stdout.getvalue()),
+            )
+            written = score.loads(
+                (workspace / "written.score.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                ["note", "rest", "note"],
+                [event["kind"] for event in written["parts"][0]["events"]],
+            )
+            self.assertEqual(source, score.loads((workspace / "source.score.json").read_text()))
+            self.assertFalse((workspace / "current.score.json").exists())
 
     def test_authoring_commands_require_explicit_output_and_form_rejects_nonempty_score(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
