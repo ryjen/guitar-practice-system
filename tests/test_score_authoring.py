@@ -87,6 +87,71 @@ class ScoreAuthoringDomainTests(unittest.TestCase):
         )
         score.validate(result)
 
+    def test_replace_part_notes_is_immutable_and_preserves_rests(self) -> None:
+        source = timeline_score()
+        original = copy.deepcopy(source)
+
+        result = score_authoring.replace_part_notes(
+            source,
+            part_id="guitar-1",
+            notes=[
+                {
+                    "location": {"bar": 1, "beat": [1, 1]},
+                    "duration": [1, 8],
+                    "voice": 1,
+                    "pitch": {"step": "E", "alter": 0, "octave": 4},
+                },
+                {
+                    "location": {"bar": 2, "beat": [2, 1]},
+                    "duration": [1, 8],
+                    "voice": 1,
+                    "pitch": {"step": "A", "alter": 0, "octave": 4},
+                    "dynamics": "f",
+                },
+            ],
+        )
+
+        self.assertEqual(original, source)
+        events = result["parts"][0]["events"]
+        self.assertEqual(
+            ["note", "rest", "note"],
+            [event["kind"] for event in events],
+        )
+        self.assertEqual(
+            {"bar": 1, "beat": [2, 1]},
+            events[1]["location"],
+        )
+        self.assertEqual(
+            {"kind": "user", "source": "score-authoring:notes"},
+            events[0]["provenance"],
+        )
+        self.assertEqual("f", events[2]["dynamics"])
+        score.validate(result)
+
+    def test_replace_part_notes_rejects_unknown_part_and_non_note_kind(self) -> None:
+        source = timeline_score()
+
+        with self.assertRaisesRegex(score_authoring.ScoreAuthoringError, "unknown part"):
+            score_authoring.replace_part_notes(
+                source,
+                part_id="missing",
+                notes=[],
+            )
+
+        with self.assertRaisesRegex(score_authoring.ScoreAuthoringError, "kind must be note"):
+            score_authoring.replace_part_notes(
+                source,
+                part_id="guitar-1",
+                notes=[
+                    {
+                        "kind": "rest",
+                        "location": {"bar": 1, "beat": [1, 1]},
+                        "duration": [1, 4],
+                        "voice": 1,
+                    }
+                ],
+            )
+
     def test_replace_harmony_requires_exact_bar_count(self) -> None:
         source = minimal_score()
         source = score_authoring.replace_form(
