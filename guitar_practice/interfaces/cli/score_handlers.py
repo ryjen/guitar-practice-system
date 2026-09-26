@@ -14,11 +14,13 @@ from guitar_practice.adapters.score_conversion import (
     ScoreConversionError,
 )
 from guitar_practice.adapters.score_files import ScoreDocumentError, ScoreFileStore
+from guitar_practice.application.score_documents import ScoreDocuments
 from guitar_practice.application.score_import import (
     ImportScore,
     ScoreImportError,
     UnsupportedScoreFormat,
 )
+from guitar_practice.domain import score
 from guitar_practice.interfaces.cli import exit_codes
 from guitar_practice.interfaces.cli.runtime import CliContext
 
@@ -34,6 +36,83 @@ def _workspace_relative(path: str, *, label: str) -> str:
     if value.is_absolute() or not value.parts or ".." in value.parts:
         raise ScorePathError(f"{label} must be a workspace-relative path")
     return value.as_posix()
+
+
+def _documents(context: CliContext) -> ScoreDocuments:
+    return ScoreDocuments(ScoreFileStore(context.workspace))
+
+
+def _write_json(value: object, context: CliContext) -> None:
+    json.dump(value, context.stdout, indent=2, sort_keys=True)
+    context.stdout.write("\n")
+
+
+def score_init(argv: Sequence[str], context: CliContext) -> int:
+    parser = argparse.ArgumentParser(prog="guitarctl score init")
+    parser.add_argument("--title", required=True, help="Score title")
+    parser.add_argument("--id", dest="score_id", help="Optional canonical score id")
+    parser.add_argument("--output", help="Optional canonical Score IR JSON output")
+    args = parser.parse_args(list(argv))
+
+    try:
+        output = (
+            _workspace_relative(args.output, label="score output")
+            if args.output is not None
+            else None
+        )
+        document = _documents(context).create(
+            title=args.title,
+            score_id=args.score_id,
+            output=output,
+        )
+    except (ScorePathError, ScoreDocumentError, score.ScoreError, OSError, ValueError) as exc:
+        print(f"guitarctl: {exc}", file=context.stderr)
+        return exit_codes.DATA_ERROR
+
+    if output is None:
+        context.stdout.write(score.dumps(document))
+    else:
+        _write_json(
+            {
+                "output": output,
+                "id": document["id"],
+                "title": document["metadata"]["title"],
+            },
+            context,
+        )
+    return exit_codes.OK
+
+
+def score_show(argv: Sequence[str], context: CliContext) -> int:
+    parser = argparse.ArgumentParser(prog="guitarctl score show")
+    parser.add_argument("score", help="Canonical Score IR JSON inside the workspace")
+    args = parser.parse_args(list(argv))
+
+    try:
+        score_path = _workspace_relative(args.score, label="score document")
+        document = _documents(context).load(score_path)
+    except (ScorePathError, ScoreDocumentError, score.ScoreError, OSError, ValueError) as exc:
+        print(f"guitarctl: {exc}", file=context.stderr)
+        return exit_codes.DATA_ERROR
+
+    context.stdout.write(score.dumps(document))
+    return exit_codes.OK
+
+
+def score_validate(argv: Sequence[str], context: CliContext) -> int:
+    parser = argparse.ArgumentParser(prog="guitarctl score validate")
+    parser.add_argument("score", help="Canonical Score IR JSON inside the workspace")
+    args = parser.parse_args(list(argv))
+
+    try:
+        score_path = _workspace_relative(args.score, label="score document")
+        report = _documents(context).validation_report(score_path)
+    except (ScorePathError, ScoreDocumentError, score.ScoreError, OSError, ValueError) as exc:
+        print(f"guitarctl: {exc}", file=context.stderr)
+        return exit_codes.DATA_ERROR
+
+    _write_json(report, context)
+    return exit_codes.OK
 
 
 def score_import(argv: Sequence[str], context: CliContext) -> int:
@@ -123,6 +202,9 @@ def score_tracks(argv: Sequence[str], context: CliContext) -> int:
 
 
 SCORE_HANDLERS: dict[str, NativeHandler] = {
+    "score-init": score_init,
     "score-import": score_import,
+    "score-show": score_show,
     "score-tracks": score_tracks,
+    "score-validate": score_validate,
 }
