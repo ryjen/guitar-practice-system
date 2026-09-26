@@ -300,6 +300,35 @@ class ScoreIrTimelineTests(unittest.TestCase):
         with self.assertRaisesRegex(score.ScoreError, "does not match guitar position"):
             score.validate(mismatched_pitch)
 
+    def test_optional_midi_instrument_identity_is_bounded(self) -> None:
+        document = timeline_score()
+        document["parts"][0]["instrument"]["midi"] = {
+            "program": 29,
+            "channel": 1,
+            "percussion": False,
+        }
+        score.validate(document)
+
+        invalid_program = timeline_score()
+        invalid_program["parts"][0]["instrument"]["midi"] = {"program": True}
+        with self.assertRaisesRegex(score.ScoreError, "midi.program"):
+            score.validate(invalid_program)
+
+        invalid_channel = timeline_score()
+        invalid_channel["parts"][0]["instrument"]["midi"] = {"channel": 17}
+        with self.assertRaisesRegex(score.ScoreError, "midi.channel"):
+            score.validate(invalid_channel)
+
+        invalid_percussion = timeline_score()
+        invalid_percussion["parts"][0]["instrument"]["midi"] = {"percussion": "yes"}
+        with self.assertRaisesRegex(score.ScoreError, "midi.percussion"):
+            score.validate(invalid_percussion)
+
+        empty = timeline_score()
+        empty["parts"][0]["instrument"]["midi"] = {}
+        with self.assertRaisesRegex(score.ScoreError, "must not be empty"):
+            score.validate(empty)
+
     def test_tuplet_duration_and_definition_must_be_consistent(self) -> None:
         wrong_duration = timeline_score()
         wrong_duration["parts"][0]["events"][2]["duration"] = [1, 8]
