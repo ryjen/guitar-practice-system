@@ -14,19 +14,19 @@ The roadmap covers only independently useful public capabilities. Private produc
 
 M1 practice/progression contracts, M2 evidence/assessment contracts, and the initial M4 deterministic catalog workflow have working versioned implementations with deterministic tests and CI coverage. They should receive bounded fixes when evidence finds a defect, not remain permanent "stabilization" projects.
 
-The two near-term engineering dependencies that may proceed alongside M3 are:
+The previous near-term engineering dependencies are complete: **#89** established the common validation/static-analysis trust gate and **#83** landed tonal-centre-aware modal request semantics.
 
-- **#89** — unify static analysis and CI trust gates;
-- **#83** — add the minimal tonal-centre-aware modal request/catalog boundary needed for Dorian and Mixolydian backing tracks.
+A bounded **M5 music-artifact track** may proceed alongside M3, but it must not displace real-session validation. Canonical Score IR is now landed through **#110 / #115**. The immediate engineering convergence work is to reconcile **#109** onto that one representation and finish the remaining `guitarctl` strangler migration without introducing another song/score model.
 
 ## Near-term sequence
 
 1. Execute the first canonical real-session validation through **#87 / #4** using `slide-slow-blues-a-60`.
-2. Complete **#89** so material repository changes receive consistent static-analysis, public-boundary, and pinned-action validation.
-3. Complete **#83** for deterministic D Dorian and G Mixolydian backing-track semantics without conflating tonal centre and MIDI key signature.
+2. Reconcile draft **#109** onto the landed canonical Score IR from **#110 / #115**. Remove the parallel imported `Song` model, preserve import/render behavior as adapters and derived realizations, and add bounded MuseScore subprocess timeouts.
+3. Finish the remaining package/CLI strangler slices **#97** and **#100** so CI, evidence/adaptive-session workflows, export, validation, and artifact building use stable package-native boundaries.
 4. Continue **#87** through wah and E-Bow sessions; use repeated playing friction to drive only necessary docs/spec/code changes.
-5. Expand **#85** from the validated Dorian/Mixolydian pattern rather than implementing all seven modes in one slice.
-6. Keep **#67** versioned release packaging planned until a concrete public distribution need justifies moving it into P1.
+5. Continue the Score Builder dependency chain through **#111**, then bounded playback/export work (**#113 / #112**), with the interactive editor **#114** after the deterministic command and IR contracts are stable.
+6. Expand **#85** from the validated Dorian/Mixolydian pattern rather than implementing all seven modes in one slice.
+7. Keep **#67** versioned release packaging planned until a concrete public distribution need justifies moving it into P1.
 
 ## Milestones
 
@@ -114,6 +114,7 @@ Goal: connect source specs to actual music-making tools while keeping sources po
 
 Implemented baseline includes:
 
+- canonical versioned Score IR with deterministic validation/serialization;
 - deterministic Type-1 MIDI generation;
 - backing-track, groove, bass, and progression contracts/engines;
 - deterministic practice-progression variants;
