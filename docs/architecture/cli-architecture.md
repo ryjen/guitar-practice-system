@@ -38,7 +38,7 @@ guitarctl
 ├── progression validate | list | show | resolve | fourths | generate
 ├── backing resolve | generate
 ├── midi generate | validate | generate-exercises
-├── score init | import | show | tracks | validate
+├── score init | import | form | chords | show | tracks | validate
 ├── artifact build
 ├── export practice-data
 └── validate repo | public-boundary
@@ -61,7 +61,7 @@ The command surface follows these rules:
 
 These rules intentionally make the public core straightforward to call from shells, CI, desktop tools, services, or other external orchestration without coupling those callers to Python module topology.
 
-The canonical score namespace follows the same contract. `score init` emits canonical Score IR to stdout unless an explicit `--output` path is supplied; `score show`, `score tracks`, and `score validate` always require an explicit input document. No command infers a current score from the workspace. MusicXML rendering, MIDI playback, and interactive editing remain separate bounded slices (#112, #113, and #114) rather than placeholder handlers in the stable registry.
+The canonical score namespace follows the same contract. `score init` emits canonical Score IR to stdout unless an explicit `--output` path is supplied; `score show`, `score tracks`, and `score validate` always require an explicit input document. Authoring transforms such as `score form` and `score chords` require both an explicit source and `--output` target, producing a new validated Score IR document rather than mutating ambient state. No command infers a current score from the workspace. MusicXML rendering, MIDI playback, and interactive editing remain separate bounded slices (#112, #113, and #114) rather than placeholder handlers in the stable registry.
 
 ## Migration boundary
 
