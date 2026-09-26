@@ -7,7 +7,7 @@ import json
 from collections.abc import Callable, Sequence
 from pathlib import PurePosixPath
 
-from guitar_practice.adapters.musicxml_import import MusicXmlError
+from guitar_practice.adapters.musicxml_import import MusicXmlError, MusicXmlParser
 from guitar_practice.adapters.score_conversion import (
     DirectMusicXmlConverter,
     MuseScoreConverter,
@@ -58,6 +58,7 @@ def score_import(argv: Sequence[str], context: CliContext) -> int:
         )
         document = ImportScore(
             converter=converter,
+            parser=MusicXmlParser(),
             documents=ScoreFileStore(context.workspace),
         ).execute(source, output)
     except (
