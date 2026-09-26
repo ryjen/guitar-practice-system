@@ -14,6 +14,7 @@ from guitar_practice.adapters.score_conversion import (
     ScoreConversionError,
 )
 from guitar_practice.adapters.score_files import ScoreDocumentError, ScoreFileStore
+from guitar_practice.application.score_authoring import ScoreAuthoring
 from guitar_practice.application.score_documents import ScoreDocuments
 from guitar_practice.application.score_import import (
     ImportScore,
@@ -115,6 +116,69 @@ def score_validate(argv: Sequence[str], context: CliContext) -> int:
     return exit_codes.OK
 
 
+def _authoring(context: CliContext) -> ScoreAuthoring:
+    return ScoreAuthoring(ScoreFileStore(context.workspace))
+
+
+def score_form(argv: Sequence[str], context: CliContext) -> int:
+    parser = argparse.ArgumentParser(prog="guitarctl score form")
+    parser.add_argument("score", help="Canonical Score IR JSON inside the workspace")
+    parser.add_argument("form", help="Section specification such as 'intro:4 verse:12'")
+    parser.add_argument("--output", required=True, help="New canonical Score IR JSON output")
+    args = parser.parse_args(list(argv))
+
+    try:
+        source = _workspace_relative(args.score, label="score document")
+        output = _workspace_relative(args.output, label="score output")
+        document = _authoring(context).replace_form(source, args.form, output)
+    except (ScorePathError, ScoreDocumentError, OSError, ValueError) as exc:
+        print(f"guitarctl: {exc}", file=context.stderr)
+        return exit_codes.DATA_ERROR
+
+    _write_json(
+        {
+            "output": output,
+            "id": document["id"],
+            "bars": len(document["bars"]),
+            "sections": len(document.get("sections", [])),
+        },
+        context,
+    )
+    return exit_codes.OK
+
+
+def score_chords(argv: Sequence[str], context: CliContext) -> int:
+    parser = argparse.ArgumentParser(prog="guitarctl score chords")
+    parser.add_argument("score", help="Canonical Score IR JSON inside the workspace")
+    parser.add_argument("grid", help="Bar-separated chord grid, for example 'C | Dm7 G7'")
+    parser.add_argument("--section", help="Optional section label to replace")
+    parser.add_argument("--output", required=True, help="New canonical Score IR JSON output")
+    args = parser.parse_args(list(argv))
+
+    try:
+        source = _workspace_relative(args.score, label="score document")
+        output = _workspace_relative(args.output, label="score output")
+        document = _authoring(context).replace_chords(
+            source,
+            args.grid,
+            output,
+            section=args.section,
+        )
+    except (ScorePathError, ScoreDocumentError, OSError, ValueError) as exc:
+        print(f"guitarctl: {exc}", file=context.stderr)
+        return exit_codes.DATA_ERROR
+
+    _write_json(
+        {
+            "output": output,
+            "id": document["id"],
+            "harmony_events": len(document.get("harmony", [])),
+        },
+        context,
+    )
+    return exit_codes.OK
+
+
 def score_import(argv: Sequence[str], context: CliContext) -> int:
     parser = argparse.ArgumentParser(prog="guitarctl score import")
     parser.add_argument("source", help="Guitar Pro or MusicXML score inside the workspace")
@@ -204,6 +268,8 @@ def score_tracks(argv: Sequence[str], context: CliContext) -> int:
 SCORE_HANDLERS: dict[str, NativeHandler] = {
     "score-init": score_init,
     "score-import": score_import,
+    "score-form": score_form,
+    "score-chords": score_chords,
     "score-show": score_show,
     "score-tracks": score_tracks,
     "score-validate": score_validate,

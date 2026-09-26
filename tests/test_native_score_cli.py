@@ -21,6 +21,8 @@ class NativeScoreCliTests(unittest.TestCase):
         for tokens in (
             ["score", "init", "--title", "Blue Thing"],
             ["score", "import", "song.musicxml"],
+            ["score", "form", "song.score.json", "verse:12"],
+            ["score", "chords", "song.score.json", "C | F | G | C"],
             ["score", "show", "song.score.json"],
             ["score", "tracks", "song.score.json"],
             ["score", "validate", "song.score.json"],
@@ -136,6 +138,135 @@ class NativeScoreCliTests(unittest.TestCase):
         command, consumed = find_command(["song", "show", "song.score.json"])
         self.assertIsNone(command)
         self.assertEqual(0, consumed)
+
+    def test_form_and_chords_are_explicit_immutable_transforms(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "init",
+                        "--title",
+                        "Blue Thing",
+                        "--output",
+                        "draft.score.json",
+                    ]
+                )
+            self.assertEqual(0, result)
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "form",
+                        "draft.score.json",
+                        "intro:1 verse:2 outro:1",
+                        "--output",
+                        "formed.score.json",
+                    ]
+                )
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+            self.assertEqual(
+                {"bars": 4, "id": "blue-thing", "output": "formed.score.json", "sections": 3},
+                json.loads(stdout.getvalue()),
+            )
+
+            formed = score.loads((workspace / "formed.score.json").read_text(encoding="utf-8"))
+            self.assertEqual(1, len(score.loads((workspace / "draft.score.json").read_text(encoding="utf-8"))["bars"]))
+            self.assertNotIn("harmony", formed)
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "chords",
+                        "formed.score.json",
+                        "Cmaj7 | Dm7 G7",
+                        "--section",
+                        "Verse",
+                        "--output",
+                        "harmonized.score.json",
+                    ]
+                )
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+            self.assertEqual(
+                {"harmony_events": 3, "id": "blue-thing", "output": "harmonized.score.json"},
+                json.loads(stdout.getvalue()),
+            )
+
+            harmonized = score.loads(
+                (workspace / "harmonized.score.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual([2, 3, 3], [item["location"]["bar"] for item in harmonized["harmony"]])
+            self.assertNotIn("harmony", formed)
+
+    def test_authoring_commands_require_explicit_output_and_form_rejects_nonempty_score(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            draft = {
+                "schema": score.SCHEMA_ID,
+                "version": score.SCHEMA_VERSION,
+                "id": "draft",
+                "metadata": {"title": "Draft"},
+                "bars": [{"number": 1}],
+                "meter_map": [{"bar": 1, "beats": 4, "beat_unit": 4}],
+                "tempo_map": [],
+                "parts": [],
+                "harmony": [
+                    {"location": {"bar": 1, "beat": [1, 1]}, "symbol": "C"}
+                ],
+            }
+            (workspace / "draft.score.json").write_text(score.dumps(draft), encoding="utf-8")
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                missing_output = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "chords",
+                        "draft.score.json",
+                        "C",
+                    ]
+                )
+            self.assertEqual(2, missing_output)
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                unsafe_form = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "form",
+                        "draft.score.json",
+                        "verse:4",
+                        "--output",
+                        "changed.score.json",
+                    ]
+                )
+            self.assertEqual(65, unsafe_form)
+            self.assertIn("empty draft", stderr.getvalue())
+            self.assertFalse((workspace / "changed.score.json").exists())
 
     def test_import_writes_canonical_score_ir_and_tracks_reads_it(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
