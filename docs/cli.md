@@ -31,6 +31,9 @@ guitarctl groove show jazz-swing
 
 guitarctl backing resolve examples/backing-tracks/jazz-blues-12-request.json
 guitarctl backing generate
+guitarctl backing render generated/song.score.json \
+  --tempo 75% \
+  --output generated/practice/song-backing-75.mid
 
 guitarctl midi generate \
   backing-tracks/slide-slow-blues/manifest.json \
@@ -53,6 +56,10 @@ guitarctl score show blue-thing-harmony.score.json
 guitarctl score import song.musicxml --output song.score.json
 guitarctl score tracks song.score.json
 
+guitarctl drums export song.score.json \
+  --tempo 75% \
+  --target boss-rc3
+
 guitarctl validate public-boundary
 ```
 
@@ -71,7 +78,7 @@ guitarctl progression generate --help
 
 ## Migration status
 
-The musical core is package-native: discovery, scheduling v2, assessment, progression catalog operations, groove catalog operations, backing request resolution, backing generation, MIDI generation/validation, starter MIDI exercises, practice-progression generation, and canonical Score IR creation/import/authoring/inspection/validation do not require repository scripts at runtime.
+The musical core is package-native: discovery, scheduling v2, assessment, progression catalog operations, groove catalog operations, backing request resolution/generation, Score IR-derived backing rendering, MIDI generation/validation, starter MIDI exercises, practice-progression generation, canonical Score IR creation/import/authoring/inspection/validation, and RC-3 drum export do not require repository scripts at runtime.
 
 The remaining compatibility-process commands are outside this generation subsystem, including scheduling v1, adaptive-session/evidence workflows, repository validation/export, and artifact-bundle tooling. Historical musical `scripts/*.py` and `tools/*.py` entrypoints remain compatibility shims while callers migrate.
 
@@ -91,7 +98,7 @@ All input/output paths are explicit and workspace-relative. Authoring transforms
 
 ## Musical generation boundaries
 
-MIDI encoding and structural validation are pure package-domain operations over explicit manifests and byte strings. Groove and bass rules consume MIDI primitives without filesystem access. Backing request resolution consumes explicit groove/progression catalogs and returns a canonical `BackingTrackSpec`; backing rendering consumes that spec and returns deterministic MIDI bytes.
+MIDI encoding and structural validation are pure package-domain operations over explicit manifests and byte strings. Groove and bass rules consume MIDI primitives without filesystem access. Backing request resolution consumes explicit groove/progression catalogs and returns a canonical `BackingTrackSpec`; backing rendering consumes that spec and returns deterministic MIDI bytes. Score-derived `backing render` instead consumes canonical Score IR through immutable realization and Score IR-to-MIDI domain layers; authoritative guitar parts are excluded by default while inferred guitar roles remain non-destructive.
 
 Practice-progression rules derive slow/medium/fast stages as pure domain data. Starter MIDI exercises are also pure byte generators. Application services own catalog loading, bounded manifest discovery, and artifact persistence through structured-document and binary-artifact ports.
 
@@ -104,3 +111,20 @@ Compatibility entrypoints are parity-tested while callers migrate. CI compares n
 Shells, CI, services, and other external callers should target `guitarctl` rather than individual Python files.
 
 See [`architecture/cli-architecture.md`](architecture/cli-architecture.md) for dependency and migration rules.
+
+
+## Score-derived practice artifacts
+
+Imported or authored Score IR can be realized without mutating canonical state:
+
+```bash
+guitarctl backing render generated/song.score.json \
+  --tempo 75% \
+  --output generated/practice/song-backing-75.mid
+
+guitarctl drums export generated/song.score.json \
+  --tempo 75% \
+  --target boss-rc3
+```
+
+Both commands support explicit part overrides and structural `--bars` / `--section` selection where the form can be sliced safely. See [Guitar Pro to practice backing and BOSS RC-3](workflows/guitar-pro-rc3.md) for the complete workflow and artifact/provenance contracts.
