@@ -97,6 +97,44 @@ class ScoreAuthoringApplicationTests(unittest.TestCase):
             )
         self.assertNotIn("written.json", store.values)
 
+    def test_voicing_input_applies_exact_selector_to_explicit_part(self) -> None:
+        source = timeline_score()
+        voicing_input = {
+            "positions": [
+                {
+                    "selector": {
+                        "location": {"bar": 1, "beat": [1, 1]},
+                        "voice": 1,
+                        "pitch": {"step": "E", "alter": 0, "octave": 4},
+                    },
+                    "position": {"string": 2, "fret": 5},
+                }
+            ]
+        }
+        store = MemoryDocuments(
+            {
+                "source.json": source,
+                "voicing.json": voicing_input,
+            }
+        )
+        service = ScoreAuthoring(store, inputs=store)
+
+        result = service.apply_voicing(
+            "source.json",
+            part_id="guitar-1",
+            input_path="voicing.json",
+            output="written.json",
+        )
+
+        self.assertEqual(source, store.values["source.json"])
+        self.assertEqual(voicing_input, store.values["voicing.json"])
+        self.assertEqual(
+            {"string": 2, "fret": 5},
+            result["parts"][0]["events"][0]["position"],
+        )
+        self.assertEqual(result, store.values["written.json"])
+        score.validate(result)
+
     def test_form_then_section_chords_writes_new_documents_without_mutating_sources(self) -> None:
         initial = minimal_score()
         store = MemoryDocuments({"draft.json": initial})
