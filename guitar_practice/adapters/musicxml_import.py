@@ -9,7 +9,7 @@ from collections.abc import Iterable
 from dataclasses import replace
 from typing import TypeVar
 
-from guitar_practice.adapters.imported_score import (
+from guitar_practice.application.imported_score import (
     ImportedMeterPoint,
     ImportedNoteEvent,
     ImportedScore,
@@ -612,3 +612,10 @@ def parse_musicxml(data: bytes, *, source_id: str) -> ImportedScore:
         raise
     except (TypeError, ValueError, KeyError) as exc:
         raise MusicXmlError(str(exc)) from exc
+
+
+class MusicXmlParser:
+    """Application-port adapter for bounded MusicXML parsing."""
+
+    def parse(self, data: bytes, *, source_id: str) -> ImportedScore:
+        return parse_musicxml(data, source_id=source_id)
