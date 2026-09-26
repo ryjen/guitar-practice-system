@@ -9,15 +9,14 @@ from fractions import Fraction
 from pathlib import PurePosixPath
 from typing import Any, Mapping
 
-from guitar_practice.adapters.imported_score import (
+from guitar_practice.application.imported_score import (
     ClassificationSource,
     ImportedMeterPoint,
     ImportedNoteEvent,
     ImportedScore,
     ImportedTrack,
 )
-from guitar_practice.adapters.musicxml_import import parse_musicxml
-from guitar_practice.application.ports import JsonDocumentStore, ScoreConverter
+from guitar_practice.application.ports import JsonDocumentStore, ScoreConverter, ScoreParser
 from guitar_practice.domain import score
 
 SUPPORTED_SCORE_SUFFIXES = frozenset(
@@ -324,12 +323,13 @@ def imported_to_score_ir(
 @dataclass(frozen=True)
 class ImportScore:
     converter: ScoreConverter
+    parser: ScoreParser
     documents: JsonDocumentStore
 
     def execute(self, source_path: str, output_path: str) -> Mapping[str, Any]:
         validate_source_format(source_path)
         converted = self.converter.convert(source_path)
-        imported = parse_musicxml(
+        imported = self.parser.parse(
             converted.musicxml,
             source_id=source_id_for(source_path),
         )
