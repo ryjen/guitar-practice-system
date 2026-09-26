@@ -4,13 +4,14 @@ import unittest
 from pathlib import Path
 from typing import Any, Mapping
 
+from guitar_practice.adapters.musicxml_import import MusicXmlParser
 from guitar_practice.application.ports import ConvertedScore
 from guitar_practice.application.score_import import (
     ImportScore,
     imported_to_score_ir,
     source_id_for,
 )
-from guitar_practice.adapters.imported_score import (
+from guitar_practice.application.imported_score import (
     ClassificationSource,
     ImportedMeterPoint,
     ImportedNoteEvent,
@@ -52,6 +53,7 @@ class ScoreImportApplicationTests(unittest.TestCase):
         store = MemoryStore()
         document = ImportScore(
             converter=FakeConverter(FIXTURE.read_bytes()),
+            parser=MusicXmlParser(),
             documents=store,
         ).execute("Fixture Song.musicxml", "generated/fixture.score.json")
 
@@ -67,6 +69,7 @@ class ScoreImportApplicationTests(unittest.TestCase):
     def test_import_maps_tracks_tempo_meter_and_notes_to_score_ir(self) -> None:
         document = ImportScore(
             converter=FakeConverter(FIXTURE.read_bytes()),
+            parser=MusicXmlParser(),
             documents=MemoryStore(),
         ).execute("fixture.musicxml", "fixture.score.json")
 
