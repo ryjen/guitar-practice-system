@@ -94,6 +94,14 @@ def _fraction(value: Any, name: str, *, positive: bool = False) -> Fraction:
     return Fraction(numerator, denominator)
 
 
+def _is_finite_number(value: Any) -> bool:
+    return (
+        not isinstance(value, bool)
+        and isinstance(value, (int, float))
+        and (not isinstance(value, float) or math.isfinite(value))
+    )
+
+
 def _validate_json_value(value: Any, name: str) -> None:
     if isinstance(value, str):
         _validate_unicode_scalar_text(value, name)
@@ -136,12 +144,7 @@ def _validate_provenance(value: Any, name: str) -> None:
         )
     if "confidence" in provenance:
         confidence = provenance["confidence"]
-        if (
-            isinstance(confidence, bool)
-            or not isinstance(confidence, (int, float))
-            or not math.isfinite(confidence)
-            or not 0 <= confidence <= 1
-        ):
+        if not _is_finite_number(confidence) or not 0 <= confidence <= 1:
             raise ScoreError(f"{name}.confidence must be between 0 and 1")
     if "alternatives" in provenance:
         alternatives = provenance["alternatives"]
@@ -303,12 +306,7 @@ def _validate_tempo_map(
             meters=meters,
         )
         bpm = entry.get("bpm")
-        if (
-            isinstance(bpm, bool)
-            or not isinstance(bpm, (int, float))
-            or not math.isfinite(bpm)
-            or bpm <= 0
-        ):
+        if not _is_finite_number(bpm) or bpm <= 0:
             raise ScoreError(f"tempo_map[{index}].bpm must be a positive finite number")
         _fraction(entry.get("beat_unit"), f"tempo_map[{index}].beat_unit", positive=True)
         _validate_optional_provenance(entry, f"tempo_map[{index}]")
