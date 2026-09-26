@@ -64,3 +64,29 @@ class ScoreParser(Protocol):
 
     def parse(self, data: bytes, *, source_id: str) -> ImportedScore:
         ...
+
+
+@dataclass(frozen=True)
+class AudioRenderProfile:
+    """Explicit PCM render contract for local audio adapters."""
+
+    sample_rate: int
+    channels: int
+    sample_format: str
+
+
+@dataclass(frozen=True)
+class RenderedAudio:
+    """Rendered WAV bytes plus renderer provenance."""
+
+    wav: bytes
+    renderer: str
+    renderer_version: str | None
+    soundfont: str | None
+
+
+class AudioRenderer(Protocol):
+    """Render symbolic MIDI bytes to WAV audio for one explicit profile."""
+
+    def render(self, midi: bytes, profile: AudioRenderProfile) -> RenderedAudio:
+        ...
