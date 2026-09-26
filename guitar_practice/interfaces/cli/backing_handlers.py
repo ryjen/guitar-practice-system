@@ -13,7 +13,12 @@ from guitar_practice.application.score_backing import RenderScoreBacking
 from guitar_practice.domain.midi import ManifestError
 from guitar_practice.domain.score_realization import ScoreRealizationError
 from guitar_practice.interfaces.cli import exit_codes
-from guitar_practice.interfaces.cli.practice_args import PracticePathError, bar_range, tempo_factor, workspace_relative
+from guitar_practice.interfaces.cli.practice_args import (
+    PracticePathError,
+    bar_range,
+    tempo_factor,
+    workspace_relative,
+)
 from guitar_practice.interfaces.cli.runtime import CliContext
 
 NativeHandler = Callable[[Sequence[str], CliContext], int]
@@ -37,12 +42,6 @@ def backing_resolve(argv: Sequence[str], context: CliContext) -> int:
     json.dump(result, context.stdout, indent=2, sort_keys=True)
     context.stdout.write("\n")
     return exit_codes.OK
-
-
-BACKING_HANDLERS: dict[str, NativeHandler] = {
-    "backing-resolve": backing_resolve,
-    "backing-render": backing_render,
-}
 
 
 def backing_render(argv: Sequence[str], context: CliContext) -> int:
@@ -86,3 +85,9 @@ def backing_render(argv: Sequence[str], context: CliContext) -> int:
         print(f"guitarctl: {exc}", file=context.stderr)
         return exit_codes.DATA_ERROR
     return exit_codes.OK
+
+
+BACKING_HANDLERS: dict[str, NativeHandler] = {
+    "backing-resolve": backing_resolve,
+    "backing-render": backing_render,
+}
