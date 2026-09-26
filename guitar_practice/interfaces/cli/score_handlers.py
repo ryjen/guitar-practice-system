@@ -229,6 +229,53 @@ def score_notes(argv: Sequence[str], context: CliContext) -> int:
     return exit_codes.OK
 
 
+def score_voicing(argv: Sequence[str], context: CliContext) -> int:
+    parser = argparse.ArgumentParser(prog="guitarctl score voicing")
+    parser.add_argument("score", help="Canonical Score IR JSON inside the workspace")
+    parser.add_argument("part", help="Explicit part id whose note positions will be updated")
+    parser.add_argument("--input", required=True, help="JSON input document containing positions")
+    parser.add_argument("--output", required=True, help="New canonical Score IR JSON output")
+    args = parser.parse_args(list(argv))
+
+    try:
+        source = _workspace_relative(args.score, label="score document")
+        input_path = _workspace_relative(args.input, label="voicing input")
+        output = _workspace_relative(args.output, label="score output")
+        document = _authoring(context).apply_voicing(
+            source,
+            part_id=args.part,
+            input_path=input_path,
+            output=output,
+        )
+    except (
+        ScorePathError,
+        ScoreDocumentError,
+        JsonDocumentError,
+        OSError,
+        ValueError,
+    ) as exc:
+        print(f"guitarctl: {exc}", file=context.stderr)
+        return exit_codes.DATA_ERROR
+
+    positioned = sum(
+        1
+        for part in document["parts"]
+        if part["id"] == args.part
+        for event in part["events"]
+        if event["kind"] == "note" and "position" in event
+    )
+    _write_json(
+        {
+            "output": output,
+            "id": document["id"],
+            "part": args.part,
+            "positioned_notes": positioned,
+        },
+        context,
+    )
+    return exit_codes.OK
+
+
 def score_import(argv: Sequence[str], context: CliContext) -> int:
     parser = argparse.ArgumentParser(prog="guitarctl score import")
     parser.add_argument("source", help="Guitar Pro or MusicXML score inside the workspace")
@@ -321,6 +368,7 @@ SCORE_HANDLERS: dict[str, NativeHandler] = {
     "score-form": score_form,
     "score-chords": score_chords,
     "score-notes": score_notes,
+    "score-voicing": score_voicing,
     "score-show": score_show,
     "score-tracks": score_tracks,
     "score-validate": score_validate,
