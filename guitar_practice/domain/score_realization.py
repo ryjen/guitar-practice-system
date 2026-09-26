@@ -5,7 +5,7 @@ from __future__ import annotations
 import copy
 import math
 import re
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from fractions import Fraction
 from typing import Any
 
@@ -74,7 +74,7 @@ def scale_tempo(document: Mapping[str, Any], factor: float) -> dict[str, Any]:
     for point in result["tempo_map"]:
         point["bpm"] = point["bpm"] * numeric
 
-    percent = round(numeric * 1000)
+    percent = round(numeric * 100)
     _mark_generated(
         result,
         suffix=f"tempo-{percent}",
@@ -111,7 +111,7 @@ def _role_is_inferred(part: Mapping[str, Any]) -> bool:
 def _select_parts(
     document: Mapping[str, Any],
     *,
-    default_selected: Any,
+    default_selected: Callable[[Mapping[str, Any]], bool],
     include_part_ids: Iterable[str],
     exclude_part_ids: Iterable[str],
     suffix: str,
