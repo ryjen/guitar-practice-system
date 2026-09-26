@@ -265,6 +265,16 @@ def slice_bars(
         raise ScoreRealizationError("end bar must not precede start bar")
 
     result = _document(document)
+    selected_bars = result["bars"][start_bar - 1 : end_bar]
+    if any(
+        set(bar) & {"repeat_start", "repeat_end", "ending_numbers"}
+        for bar in selected_bars
+    ):
+        raise ScoreRealizationError(
+            "practice slicing of canonical repeat/ending bars is not supported; "
+            "expand playback form before slicing"
+        )
+
     bar_count = len(result["bars"])
     if end_bar > bar_count:
         raise ScoreRealizationError(
