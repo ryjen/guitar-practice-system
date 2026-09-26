@@ -60,6 +60,10 @@ guitarctl score notes song.score.json guitar-1 \
   --input notes.json \
   --output song-with-notes.score.json
 
+guitarctl score voicing song-with-notes.score.json guitar-1 \
+  --input voicing.json \
+  --output song-with-voicing.score.json
+
 guitarctl drums export song.score.json \
   --tempo 75% \
   --target boss-rc3
@@ -95,6 +99,7 @@ The remaining compatibility-process commands are outside this generation subsyst
 - `score form <score> "intro:4 verse:12 ..." --output <path>` — replace section/bar structure while the score is still an empty draft; repeated section names receive deterministic numeric suffixes.
 - `score chords <score> "C | Dm7 G7 | ..." --output <path>` — replace harmony across the whole score, or add `--section <label>` for one explicit section. Chords inside a bar are spaced evenly using that bar's active meter; an empty bar cell adds no new harmony event.
 - `score notes <score> <part-id> --input <notes.json> --output <path>` — replace note events for one explicit part while preserving non-note events. The input document contains only a `notes` array of Score IR note fields; `kind: "note"` and user provenance are supplied when omitted.
+- `score voicing <score> <part-id> --input <voicing.json> --output <path>` — apply string/fret positions to existing notes. Each patch selects exactly one note by current location + voice + pitch; missing or ambiguous selectors fail closed, and Score IR validates the resulting position against declared guitar tuning.
 - `score show <score>` — emit the canonical Score IR document.
 - `score tracks <score>` — inspect part/role/instrument metadata.
 - `score validate <score>` — validate through the canonical Score IR contract and emit a machine-readable report.
@@ -153,3 +158,25 @@ Both commands support explicit part overrides and structural `--bars` / `--secti
 ```
 
 The source score and input document are read-only; the command writes a new validated Score IR document to the required `--output` path. Existing rests in the selected part are preserved. Later voicing/rhythm/technique commands target existing notes through explicit canonical selectors rather than array indexes.
+
+
+### Voicing authoring input
+
+Voicing patches do not address notes by array index. Each selector describes the current canonical note identity:
+
+```json
+{
+  "positions": [
+    {
+      "selector": {
+        "location": {"bar": 1, "beat": [1, 1]},
+        "voice": 1,
+        "pitch": {"step": "E", "alter": 0, "octave": 4}
+      },
+      "position": {"string": 2, "fret": 5}
+    }
+  ]
+}
+```
+
+A selector must resolve exactly one note in the named part. The source score and voicing input remain unchanged; the required output is independently validated before persistence.
