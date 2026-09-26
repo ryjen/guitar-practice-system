@@ -6,6 +6,8 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any, Mapping, Protocol
 
+from guitar_practice.application.imported_score import ImportedScore
+
 
 class Clock(Protocol):
     """Explicit time source for deterministic use cases that require a clock."""
@@ -54,4 +56,11 @@ class ScoreConverter(Protocol):
     """Convert a supported score source into MusicXML without exposing process details."""
 
     def convert(self, source_path: str) -> ConvertedScore:
+        ...
+
+
+class ScoreParser(Protocol):
+    """Parse normalized MusicXML bytes into the transient import contract."""
+
+    def parse(self, data: bytes, *, source_id: str) -> ImportedScore:
         ...
