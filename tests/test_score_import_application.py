@@ -92,6 +92,15 @@ class ScoreImportApplicationTests(unittest.TestCase):
         guitar = document["parts"][0]
         self.assertEqual("p1", guitar["id"])
         self.assertEqual(
+            {"program": 29, "channel": 1},
+            guitar["instrument"]["midi"],
+        )
+        drums = document["parts"][2]
+        self.assertEqual(
+            {"channel": 10, "percussion": True},
+            drums["instrument"]["midi"],
+        )
+        self.assertEqual(
             [
                 ({"bar": 1, "beat": [1, 1]}, [1, 1], {"step": "E", "alter": 0, "octave": 4}),
                 ({"bar": 2, "beat": [1, 1]}, [1, 1], {"step": "G", "alter": 0, "octave": 4}),
