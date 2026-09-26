@@ -26,6 +26,7 @@ class NativeScoreCliTests(unittest.TestCase):
             ["score", "chords", "song.score.json", "C | F | G | C"],
             ["score", "notes", "song.score.json", "guitar-1"],
             ["score", "voicing", "song.score.json", "guitar-1"],
+            ["score", "rhythm", "song.score.json", "guitar-1"],
             ["score", "show", "song.score.json"],
             ["score", "tracks", "song.score.json"],
             ["score", "validate", "song.score.json"],
@@ -352,6 +353,69 @@ class NativeScoreCliTests(unittest.TestCase):
                 {"string": 2, "fret": 5},
                 voiced["parts"][0]["events"][0]["position"],
             )
+            self.assertEqual(source, score.loads((workspace / "source.score.json").read_text()))
+
+    def test_rhythm_command_uses_explicit_selector_input_and_output(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = timeline_score()
+            source["parts"][0]["events"][2].pop("tuplet")
+            score.validate(source)
+            (workspace / "source.score.json").write_text(
+                score.dumps(source),
+                encoding="utf-8",
+            )
+            (workspace / "rhythm.json").write_text(
+                json.dumps(
+                    {
+                        "rhythm": [
+                            {
+                                "selector": {
+                                    "location": {"bar": 2, "beat": [1, 1]},
+                                    "voice": 2,
+                                    "pitch": {"step": "G", "alter": 0, "octave": 4},
+                                },
+                                "location": {"bar": 2, "beat": [2, 1]},
+                                "duration": [1, 8],
+                                "voice": 1,
+                            }
+                        ]
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "rhythm",
+                        "source.score.json",
+                        "guitar-1",
+                        "--input",
+                        "rhythm.json",
+                        "--output",
+                        "rhythmic.score.json",
+                    ]
+                )
+
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+            written = score.loads(
+                (workspace / "rhythmic.score.json").read_text(encoding="utf-8")
+            )
+            moved = [
+                event
+                for event in written["parts"][0]["events"]
+                if event.get("pitch") == {"step": "G", "alter": 0, "octave": 4}
+            ][0]
+            self.assertEqual({"bar": 2, "beat": [2, 1]}, moved["location"])
+            self.assertEqual([1, 8], moved["duration"])
             self.assertEqual(source, score.loads((workspace / "source.score.json").read_text()))
 
     def test_authoring_commands_require_explicit_output_and_form_rejects_nonempty_score(self) -> None:
