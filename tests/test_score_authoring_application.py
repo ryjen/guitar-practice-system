@@ -9,7 +9,7 @@ from guitar_practice.application.score_authoring import (
     parse_form_spec,
 )
 from guitar_practice.domain import score
-from tests.test_score_ir import minimal_score
+from tests.test_score_ir import minimal_score, timeline_score
 
 
 class MemoryDocuments:
@@ -42,6 +42,60 @@ class ScoreAuthoringApplicationTests(unittest.TestCase):
             (("Cmaj7",), (), ("Dm7", "G7")),
             parse_chord_grid("| Cmaj7 |   | Dm7 G7 |"),
         )
+
+    def test_note_input_document_drives_explicit_part_replacement(self) -> None:
+        source = timeline_score()
+        note_input = {
+            "notes": [
+                {
+                    "location": {"bar": 1, "beat": [1, 1]},
+                    "duration": [1, 8],
+                    "voice": 1,
+                    "pitch": {"step": "E", "alter": 0, "octave": 4},
+                }
+            ]
+        }
+        store = MemoryDocuments(
+            {
+                "source.json": source,
+                "notes.json": note_input,
+            }
+        )
+        service = ScoreAuthoring(store, inputs=store)
+
+        result = service.replace_notes(
+            "source.json",
+            part_id="guitar-1",
+            input_path="notes.json",
+            output="written.json",
+        )
+
+        self.assertEqual(source, store.values["source.json"])
+        self.assertEqual(note_input, store.values["notes.json"])
+        self.assertEqual(result, store.values["written.json"])
+        self.assertEqual(
+            ["note", "rest"],
+            [event["kind"] for event in result["parts"][0]["events"]],
+        )
+        score.validate(result)
+
+    def test_note_input_document_rejects_unknown_top_level_fields(self) -> None:
+        store = MemoryDocuments(
+            {
+                "source.json": timeline_score(),
+                "notes.json": {"notes": [], "ambient_current_score": "no"},
+            }
+        )
+        service = ScoreAuthoring(store, inputs=store)
+
+        with self.assertRaisesRegex(ValueError, "contain only notes"):
+            service.replace_notes(
+                "source.json",
+                part_id="guitar-1",
+                input_path="notes.json",
+                output="written.json",
+            )
+        self.assertNotIn("written.json", store.values)
 
     def test_form_then_section_chords_writes_new_documents_without_mutating_sources(self) -> None:
         initial = minimal_score()
