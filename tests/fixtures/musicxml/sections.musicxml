@@ -1,0 +1,15 @@
+<score-partwise version="4.0">
+  <work><work-title>Section Fixture</work-title></work>
+  <part-list>
+    <score-part id="P1"><part-name>Guitar</part-name><score-instrument id="P1-I1"><instrument-name>Electric Guitar</instrument-name></score-instrument><midi-instrument id="P1-I1"><midi-channel>1</midi-channel><midi-program>30</midi-program></midi-instrument></score-part>
+    <score-part id="P2"><part-name>Drums</part-name><score-instrument id="P2-I1"><instrument-name>Drum Kit</instrument-name></score-instrument><midi-instrument id="P2-I1"><midi-channel>10</midi-channel><midi-unpitched>37</midi-unpitched></midi-instrument></score-part>
+  </part-list>
+  <part id="P1">
+    <measure number="1"><attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes><direction><direction-type><rehearsal>Intro</rehearsal></direction-type><sound tempo="120"/></direction><note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration></note></measure>
+    <measure number="2"><direction><direction-type><rehearsal>Chorus A/B</rehearsal></direction-type><sound tempo="90"/></direction><note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration></note></measure>
+  </part>
+  <part id="P2">
+    <measure number="1"><attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes><note><unpitched><display-step>C</display-step><display-octave>5</display-octave></unpitched><instrument id="P2-I1"/><duration>1</duration></note><forward><duration>3</duration></forward></measure>
+    <measure number="2"><note><unpitched><display-step>D</display-step><display-octave>5</display-octave></unpitched><instrument id="P2-I1"/><duration>1</duration></note><forward><duration>3</duration></forward></measure>
+  </part>
+</score-partwise>
