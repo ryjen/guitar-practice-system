@@ -258,12 +258,27 @@ def imported_to_score_ir(
         events: list[dict[str, Any]] = []
         for note in track.notes:
             events.extend(_note_events(note, boundaries, meters))
+
+        instrument: dict[str, Any] = {
+            "name": instrument_name,
+            "family": family,
+        }
+        midi_identity: dict[str, Any] = {}
+        if track.midi_program is not None:
+            midi_identity["program"] = track.midi_program
+        if track.midi_channel is not None:
+            midi_identity["channel"] = track.midi_channel
+        if track.is_percussion:
+            midi_identity["percussion"] = True
+        if midi_identity:
+            instrument["midi"] = midi_identity
+
         parts.append(
             {
                 "id": part_id,
                 "name": track.name.strip() or part_id,
                 "role": role,
-                "instrument": {"name": instrument_name, "family": family},
+                "instrument": instrument,
                 "events": events,
                 "provenance": _classification_provenance(track),
             }
