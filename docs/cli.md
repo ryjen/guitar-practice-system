@@ -32,6 +32,15 @@ guitarctl groove show jazz-swing
 guitarctl backing resolve examples/backing-tracks/jazz-blues-12-request.json
 guitarctl backing generate
 
+guitarctl score import song.musicxml --output generated/song.score.json
+guitarctl score tracks generated/song.score.json
+guitarctl backing render generated/song.score.json \
+  --tempo 75% \
+  --output generated/song-backing-075.mid
+guitarctl drums render generated/song.score.json \
+  --section chorus \
+  --output generated/song-drums-chorus.mid
+
 guitarctl midi generate \
   backing-tracks/slide-slow-blues/manifest.json \
   /tmp/slide-slow-blues.mid
@@ -58,7 +67,7 @@ guitarctl progression generate --help
 
 ## Migration status
 
-The musical core is package-native: discovery, scheduling v2, assessment, progression catalog operations, groove catalog operations, backing request resolution, backing generation, MIDI generation/validation, starter MIDI exercises, and practice-progression generation do not require repository scripts at runtime.
+The musical core is package-native: discovery, scheduling v2, assessment, progression catalog operations, groove catalog operations, backing request resolution/generation, canonical Score IR import/inspection, Score IR-derived backing/drum MIDI rendering, MIDI generation/validation, starter MIDI exercises, and practice-progression generation do not require repository scripts at runtime.
 
 The remaining compatibility-process commands are outside this generation subsystem, including scheduling v1, adaptive-session/evidence workflows, repository validation/export, and artifact-bundle tooling. Historical musical `scripts/*.py` and `tools/*.py` entrypoints remain compatibility shims while callers migrate.
 
@@ -67,6 +76,8 @@ The remaining compatibility-process commands are outside this generation subsyst
 MIDI encoding and structural validation are pure package-domain operations over explicit manifests and byte strings. Groove and bass rules consume MIDI primitives without filesystem access. Backing request resolution consumes explicit groove/progression catalogs and returns a canonical `BackingTrackSpec`; backing rendering consumes that spec and returns deterministic MIDI bytes.
 
 Practice-progression rules derive slow/medium/fast stages as pure domain data. Starter MIDI exercises are also pure byte generators. Application services own catalog loading, bounded manifest discovery, and artifact persistence through structured-document and binary-artifact ports.
+
+Canonical Score IR is the only persisted structured score model. `backing render` and `drums render` derive immutable practice realizations, optionally apply a percentage tempo scale and bar/section slice, select parts conservatively, and render deterministic Type-1 MIDI. `--include-part` / `--exclude-part` accept explicit Score IR part ids; `--include-track` / `--exclude-track` remain accepted aliases for the imported-track workflow. Symbolic render output paths are workspace-bounded and written atomically.
 
 Compatibility entrypoints are parity-tested while callers migrate. CI compares native and historical command JSON/text output as well as generated MIDI directories and byte streams.
 
