@@ -381,12 +381,33 @@ def _validate_tuning(value: Any, name: str) -> dict[int, int]:
 
 def _validate_instrument(value: Any, name: str) -> None:
     instrument = _object(value, name)
-    allowed = {"name", "family"}
+    allowed = {"name", "family", "midi"}
     unknown = set(instrument) - allowed
     if unknown:
         raise ScoreError(f"{name} has unsupported fields: {sorted(unknown)}")
     _string(instrument.get("name"), f"{name}.name")
     _string(instrument.get("family"), f"{name}.family", maximum=64)
+
+    if "midi" in instrument:
+        midi = _object(instrument["midi"], f"{name}.midi")
+        allowed_midi = {"program", "channel", "percussion"}
+        unknown_midi = set(midi) - allowed_midi
+        if unknown_midi:
+            raise ScoreError(
+                f"{name}.midi has unsupported fields: {sorted(unknown_midi)}"
+            )
+        if not midi:
+            raise ScoreError(f"{name}.midi must not be empty")
+        if "program" in midi:
+            program = midi["program"]
+            if isinstance(program, bool) or not isinstance(program, int) or not 0 <= program <= 127:
+                raise ScoreError(f"{name}.midi.program must be an integer from 0 to 127")
+        if "channel" in midi:
+            channel = midi["channel"]
+            if isinstance(channel, bool) or not isinstance(channel, int) or not 1 <= channel <= 16:
+                raise ScoreError(f"{name}.midi.channel must be an integer from 1 to 16")
+        if "percussion" in midi and not isinstance(midi["percussion"], bool):
+            raise ScoreError(f"{name}.midi.percussion must be a boolean")
 
 
 def _validate_string_list(value: Any, name: str) -> None:

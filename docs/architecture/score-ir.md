@@ -96,7 +96,12 @@ Events may not cross a bar boundary. Tied notes are represented as separate bar-
       "role": "guitar",
       "instrument": {
         "name": "Electric Guitar",
-        "family": "guitar"
+        "family": "guitar",
+        "midi": {
+          "program": 29,
+          "channel": 1,
+          "percussion": false
+        }
       },
       "guitar": {
         "tuning": [
@@ -159,7 +164,7 @@ Harmony events are global and location-anchored. The `symbol` is the explicit ch
 
 ## Parts, instruments, and roles
 
-A part has a stable `id`, display `name`, semantic `role`, normalized `instrument`, and events. Instrument identity is semantic, not a renderer selection. Import adapters may derive these fields from source metadata but source-format-specific state remains outside the canonical type.
+A part has a stable `id`, display `name`, semantic `role`, normalized `instrument`, and events. Instrument identity is semantic, not a renderer selection. Import adapters may derive these fields from source metadata. An instrument may additionally carry a bounded `midi` interoperability hint (`program`, `channel`, `percussion`) when the source provides that identity; it preserves imported routing/program facts without making MIDI byte encoding or a specific synthesizer canonical.
 
 A guitar part may declare tuning. String numbers are explicit so alternate tunings and non-six-string instruments do not require implicit conventions.
 

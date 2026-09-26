@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import Any, Mapping, Protocol
+
+from guitar_practice.application.imported_score import ImportedScore
 
 
 class Clock(Protocol):
@@ -37,4 +40,27 @@ class BinaryArtifactStore(Protocol):
         ...
 
     def write_bytes(self, path: str, data: bytes) -> None:
+        ...
+
+
+@dataclass(frozen=True)
+class ConvertedScore:
+    """MusicXML plus explicit provenance returned by a score-conversion adapter."""
+
+    musicxml: bytes
+    converter: str
+    converter_version: str | None = None
+
+
+class ScoreConverter(Protocol):
+    """Convert a supported score source into MusicXML without exposing process details."""
+
+    def convert(self, source_path: str) -> ConvertedScore:
+        ...
+
+
+class ScoreParser(Protocol):
+    """Parse normalized MusicXML bytes into the transient import contract."""
+
+    def parse(self, data: bytes, *, source_id: str) -> ImportedScore:
         ...
