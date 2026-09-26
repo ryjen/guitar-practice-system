@@ -230,6 +230,75 @@ class ScoreAuthoringDomainTests(unittest.TestCase):
                 ],
             )
 
+    def test_apply_note_rhythm_uses_pre_edit_selector_and_resorts_events(self) -> None:
+        source = timeline_score()
+        source["parts"][0]["events"][2].pop("tuplet")
+        score.validate(source)
+        original = copy.deepcopy(source)
+        selector = {
+            "location": {"bar": 2, "beat": [1, 1]},
+            "voice": 2,
+            "pitch": {"step": "G", "alter": 0, "octave": 4},
+        }
+
+        result = score_authoring.apply_note_rhythm(
+            source,
+            part_id="guitar-1",
+            patches=[
+                {
+                    "selector": selector,
+                    "location": {"bar": 1, "beat": [3, 1]},
+                    "duration": [1, 8],
+                    "voice": 1,
+                }
+            ],
+        )
+
+        self.assertEqual(original, source)
+        moved = [
+            event
+            for event in result["parts"][0]["events"]
+            if event.get("pitch") == {"step": "G", "alter": 0, "octave": 4}
+        ][0]
+        self.assertEqual({"bar": 1, "beat": [3, 1]}, moved["location"])
+        self.assertEqual([1, 8], moved["duration"])
+        self.assertEqual(1, moved["voice"])
+        score.validate(result)
+
+    def test_apply_note_rhythm_rejects_ties_and_duplicate_targets(self) -> None:
+        source = timeline_score()
+        tied_selector = {
+            "location": {"bar": 1, "beat": [1, 1]},
+            "voice": 1,
+            "pitch": {"step": "E", "alter": 0, "octave": 4},
+        }
+        with self.assertRaisesRegex(score_authoring.ScoreAuthoringError, "tied note"):
+            score_authoring.apply_note_rhythm(
+                source,
+                part_id="guitar-1",
+                patches=[
+                    {
+                        "selector": tied_selector,
+                        "duration": [1, 8],
+                    }
+                ],
+            )
+
+        untied_selector = {
+            "location": {"bar": 2, "beat": [1, 1]},
+            "voice": 2,
+            "pitch": {"step": "G", "alter": 0, "octave": 4},
+        }
+        with self.assertRaisesRegex(score_authoring.ScoreAuthoringError, "already selected"):
+            score_authoring.apply_note_rhythm(
+                source,
+                part_id="guitar-1",
+                patches=[
+                    {"selector": untied_selector, "location": {"bar": 2, "beat": [2, 1]}},
+                    {"selector": untied_selector, "voice": 3},
+                ],
+            )
+
     def test_replace_harmony_requires_exact_bar_count(self) -> None:
         source = minimal_score()
         source = score_authoring.replace_form(

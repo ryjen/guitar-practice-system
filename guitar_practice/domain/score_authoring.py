@@ -325,3 +325,80 @@ def apply_note_positions(
         )
 
     return _validate_result(result)
+
+
+
+def apply_note_rhythm(
+    document: Mapping[str, Any],
+    *,
+    part_id: str,
+    patches: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Relocate/resize exactly selected untied notes using pre-edit selectors."""
+
+    result = _document(document)
+    matches = [part for part in result["parts"] if part["id"] == part_id]
+    if not matches:
+        raise ScoreAuthoringError(f"unknown part id: {part_id}")
+    if len(matches) != 1:
+        raise ScoreAuthoringError(f"ambiguous part id: {part_id}")
+    if not isinstance(patches, Sequence) or isinstance(patches, (str, bytes)):
+        raise ScoreAuthoringError("rhythm patches must be a sequence")
+
+    part = matches[0]
+    targets: list[tuple[dict[str, Any], Mapping[str, Any], int]] = []
+    seen_targets: set[int] = set()
+    for index, raw_patch in enumerate(patches):
+        if not isinstance(raw_patch, Mapping):
+            raise ScoreAuthoringError(f"rhythm[{index}] must be an object")
+        allowed = {"selector", "location", "duration", "voice"}
+        unknown = set(raw_patch) - allowed
+        if unknown:
+            raise ScoreAuthoringError(
+                f"rhythm[{index}] has unsupported fields: {sorted(unknown)}"
+            )
+        if "selector" not in raw_patch:
+            raise ScoreAuthoringError(f"rhythm[{index}] requires selector")
+        if not ({"location", "duration", "voice"} & set(raw_patch)):
+            raise ScoreAuthoringError(
+                f"rhythm[{index}] must change location, duration, or voice"
+            )
+        note = _select_note(
+            part,
+            raw_patch["selector"],
+            label=f"rhythm[{index}].selector",
+        )
+        target_id = id(note)
+        if target_id in seen_targets:
+            raise ScoreAuthoringError(
+                f"rhythm[{index}] targets a note already selected by another patch"
+            )
+        seen_targets.add(target_id)
+        if "tie" in note:
+            raise ScoreAuthoringError(
+                f"rhythm[{index}] cannot edit a tied note segment; replace the note chain explicitly"
+            )
+        targets.append((note, raw_patch, index))
+
+    for note, patch, index in targets:
+        if "location" in patch:
+            if not isinstance(patch["location"], Mapping):
+                raise ScoreAuthoringError(f"rhythm[{index}].location must be an object")
+            note["location"] = copy.deepcopy(dict(patch["location"]))
+        if "duration" in patch:
+            duration = patch["duration"]
+            if not isinstance(duration, Sequence) or isinstance(duration, (str, bytes)):
+                raise ScoreAuthoringError(f"rhythm[{index}].duration must be a rational array")
+            note["duration"] = list(duration)
+        if "voice" in patch:
+            voice = patch["voice"]
+            if isinstance(voice, bool) or not isinstance(voice, int) or voice <= 0:
+                raise ScoreAuthoringError(f"rhythm[{index}].voice must be a positive integer")
+            note["voice"] = voice
+        note.setdefault(
+            "provenance",
+            {"kind": "user", "source": "score-authoring:rhythm"},
+        )
+
+    part["events"] = sorted(part["events"], key=_event_sort_key)
+    return _validate_result(result)

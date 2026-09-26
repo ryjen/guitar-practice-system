@@ -64,6 +64,10 @@ guitarctl score voicing song-with-notes.score.json guitar-1 \
   --input voicing.json \
   --output song-with-voicing.score.json
 
+guitarctl score rhythm song-with-voicing.score.json guitar-1 \
+  --input rhythm.json \
+  --output song-with-rhythm.score.json
+
 guitarctl drums export song.score.json \
   --tempo 75% \
   --target boss-rc3
@@ -100,6 +104,7 @@ The remaining compatibility-process commands are outside this generation subsyst
 - `score chords <score> "C | Dm7 G7 | ..." --output <path>` — replace harmony across the whole score, or add `--section <label>` for one explicit section. Chords inside a bar are spaced evenly using that bar's active meter; an empty bar cell adds no new harmony event.
 - `score notes <score> <part-id> --input <notes.json> --output <path>` — replace note events for one explicit part while preserving non-note events. The input document contains only a `notes` array of Score IR note fields; `kind: "note"` and user provenance are supplied when omitted.
 - `score voicing <score> <part-id> --input <voicing.json> --output <path>` — apply string/fret positions to existing notes. Each patch selects exactly one note by current location + voice + pitch; missing or ambiguous selectors fail closed, and Score IR validates the resulting position against declared guitar tuning.
+- `score rhythm <score> <part-id> --input <rhythm.json> --output <path>` — relocate, resize, or revoice exactly selected untied notes. All selectors resolve against the pre-edit score, duplicate targets fail closed, and the output is re-sorted and fully Score IR-validated.
 - `score show <score>` — emit the canonical Score IR document.
 - `score tracks <score>` — inspect part/role/instrument metadata.
 - `score validate <score>` — validate through the canonical Score IR contract and emit a machine-readable report.
@@ -180,3 +185,26 @@ Voicing patches do not address notes by array index. Each selector describes the
 ```
 
 A selector must resolve exactly one note in the named part. The source score and voicing input remain unchanged; the required output is independently validated before persistence.
+
+
+### Rhythm authoring input
+
+Rhythm patches select the current note state and describe only the timing fields that change:
+
+```json
+{
+  "rhythm": [
+    {
+      "selector": {
+        "location": {"bar": 2, "beat": [1, 1]},
+        "voice": 1,
+        "pitch": {"step": "G", "alter": 0, "octave": 4}
+      },
+      "location": {"bar": 2, "beat": [3, 2]},
+      "duration": [1, 8]
+    }
+  ]
+}
+```
+
+At least one of `location`, `duration`, or `voice` is required. Selectors are resolved before any patch is applied, so moving one note cannot change the identity used by another patch. The first deterministic slice rejects tied note segments; edit or replace the complete tie chain explicitly rather than silently breaking playback semantics.
