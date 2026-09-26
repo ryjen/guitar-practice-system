@@ -402,3 +402,85 @@ def apply_note_rhythm(
 
     part["events"] = sorted(part["events"], key=_event_sort_key)
     return _validate_result(result)
+
+
+
+def apply_note_technique(
+    document: Mapping[str, Any],
+    *,
+    part_id: str,
+    patches: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Replace technique/articulation/dynamics fields on exactly selected notes."""
+
+    result = _document(document)
+    matches = [part for part in result["parts"] if part["id"] == part_id]
+    if not matches:
+        raise ScoreAuthoringError(f"unknown part id: {part_id}")
+    if len(matches) != 1:
+        raise ScoreAuthoringError(f"ambiguous part id: {part_id}")
+    if not isinstance(patches, Sequence) or isinstance(patches, (str, bytes)):
+        raise ScoreAuthoringError("technique patches must be a sequence")
+
+    part = matches[0]
+    targets: list[tuple[dict[str, Any], Mapping[str, Any], int]] = []
+    seen_targets: set[int] = set()
+    for index, raw_patch in enumerate(patches):
+        if not isinstance(raw_patch, Mapping):
+            raise ScoreAuthoringError(f"technique[{index}] must be an object")
+        allowed = {"selector", "articulations", "techniques", "dynamics"}
+        unknown = set(raw_patch) - allowed
+        if unknown:
+            raise ScoreAuthoringError(
+                f"technique[{index}] has unsupported fields: {sorted(unknown)}"
+            )
+        if "selector" not in raw_patch:
+            raise ScoreAuthoringError(f"technique[{index}] requires selector")
+        if not ({"articulations", "techniques", "dynamics"} & set(raw_patch)):
+            raise ScoreAuthoringError(
+                f"technique[{index}] must change articulations, techniques, or dynamics"
+            )
+        note = _select_note(
+            part,
+            raw_patch["selector"],
+            label=f"technique[{index}].selector",
+        )
+        target_id = id(note)
+        if target_id in seen_targets:
+            raise ScoreAuthoringError(
+                f"technique[{index}] targets a note already selected by another patch"
+            )
+        seen_targets.add(target_id)
+        targets.append((note, raw_patch, index))
+
+    for note, patch, index in targets:
+        if "articulations" in patch:
+            articulations = patch["articulations"]
+            if not isinstance(articulations, list):
+                raise ScoreAuthoringError(
+                    f"technique[{index}].articulations must be a list"
+                )
+            note["articulations"] = copy.deepcopy(articulations)
+        if "techniques" in patch:
+            techniques = patch["techniques"]
+            if not isinstance(techniques, list):
+                raise ScoreAuthoringError(
+                    f"technique[{index}].techniques must be a list"
+                )
+            note["techniques"] = copy.deepcopy(techniques)
+        if "dynamics" in patch:
+            dynamics = patch["dynamics"]
+            if dynamics is None:
+                note.pop("dynamics", None)
+            elif not isinstance(dynamics, str) or not dynamics.strip():
+                raise ScoreAuthoringError(
+                    f"technique[{index}].dynamics must be a non-empty string or null"
+                )
+            else:
+                note["dynamics"] = dynamics.strip()
+        note.setdefault(
+            "provenance",
+            {"kind": "user", "source": "score-authoring:technique"},
+        )
+
+    return _validate_result(result)
