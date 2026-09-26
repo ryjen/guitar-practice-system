@@ -7,6 +7,7 @@ import json
 from collections.abc import Callable, Sequence
 from pathlib import PurePosixPath
 
+from guitar_practice.adapters.json_files import JsonDocumentError, JsonFileStore
 from guitar_practice.adapters.musicxml_import import MusicXmlError, MusicXmlParser
 from guitar_practice.adapters.score_conversion import (
     DirectMusicXmlConverter,
@@ -117,7 +118,10 @@ def score_validate(argv: Sequence[str], context: CliContext) -> int:
 
 
 def _authoring(context: CliContext) -> ScoreAuthoring:
-    return ScoreAuthoring(ScoreFileStore(context.workspace))
+    return ScoreAuthoring(
+        ScoreFileStore(context.workspace),
+        inputs=JsonFileStore(context.workspace),
+    )
 
 
 def score_form(argv: Sequence[str], context: CliContext) -> int:
@@ -173,6 +177,52 @@ def score_chords(argv: Sequence[str], context: CliContext) -> int:
             "output": output,
             "id": document["id"],
             "harmony_events": len(document.get("harmony", [])),
+        },
+        context,
+    )
+    return exit_codes.OK
+
+
+def score_notes(argv: Sequence[str], context: CliContext) -> int:
+    parser = argparse.ArgumentParser(prog="guitarctl score notes")
+    parser.add_argument("score", help="Canonical Score IR JSON inside the workspace")
+    parser.add_argument("part", help="Explicit part id whose note events will be replaced")
+    parser.add_argument("--input", required=True, help="JSON input document containing a notes array")
+    parser.add_argument("--output", required=True, help="New canonical Score IR JSON output")
+    args = parser.parse_args(list(argv))
+
+    try:
+        source = _workspace_relative(args.score, label="score document")
+        input_path = _workspace_relative(args.input, label="note input")
+        output = _workspace_relative(args.output, label="score output")
+        document = _authoring(context).replace_notes(
+            source,
+            part_id=args.part,
+            input_path=input_path,
+            output=output,
+        )
+    except (
+        ScorePathError,
+        ScoreDocumentError,
+        JsonDocumentError,
+        OSError,
+        ValueError,
+    ) as exc:
+        print(f"guitarctl: {exc}", file=context.stderr)
+        return exit_codes.DATA_ERROR
+
+    _write_json(
+        {
+            "output": output,
+            "id": document["id"],
+            "part": args.part,
+            "note_events": sum(
+                1
+                for part in document["parts"]
+                if part["id"] == args.part
+                for event in part["events"]
+                if event["kind"] == "note"
+            ),
         },
         context,
     )
@@ -270,6 +320,7 @@ SCORE_HANDLERS: dict[str, NativeHandler] = {
     "score-import": score_import,
     "score-form": score_form,
     "score-chords": score_chords,
+    "score-notes": score_notes,
     "score-show": score_show,
     "score-tracks": score_tracks,
     "score-validate": score_validate,
