@@ -56,6 +56,10 @@ guitarctl score show blue-thing-harmony.score.json
 guitarctl score import song.musicxml --output song.score.json
 guitarctl score tracks song.score.json
 
+guitarctl score notes song.score.json guitar-1 \
+  --input notes.json \
+  --output song-with-notes.score.json
+
 guitarctl drums export song.score.json \
   --tempo 75% \
   --target boss-rc3
@@ -90,6 +94,7 @@ The remaining compatibility-process commands are outside this generation subsyst
 - `score import <source> --output <path>` — import MusicXML or supported Guitar Pro input through the bounded conversion/import adapters.
 - `score form <score> "intro:4 verse:12 ..." --output <path>` — replace section/bar structure while the score is still an empty draft; repeated section names receive deterministic numeric suffixes.
 - `score chords <score> "C | Dm7 G7 | ..." --output <path>` — replace harmony across the whole score, or add `--section <label>` for one explicit section. Chords inside a bar are spaced evenly using that bar's active meter; an empty bar cell adds no new harmony event.
+- `score notes <score> <part-id> --input <notes.json> --output <path>` — replace note events for one explicit part while preserving non-note events. The input document contains only a `notes` array of Score IR note fields; `kind: "note"` and user provenance are supplied when omitted.
 - `score show <score>` — emit the canonical Score IR document.
 - `score tracks <score>` — inspect part/role/instrument metadata.
 - `score validate <score>` — validate through the canonical Score IR contract and emit a machine-readable report.
@@ -128,3 +133,23 @@ guitarctl drums export generated/song.score.json \
 ```
 
 Both commands support explicit part overrides and structural `--bars` / `--section` selection where the form can be sliced safely. See [Guitar Pro to practice backing and BOSS RC-3](workflows/guitar-pro-rc3.md) for the complete workflow and artifact/provenance contracts.
+
+
+### Note authoring input
+
+`score notes` consumes an explicit JSON object rather than a shell-specific note mini-language:
+
+```json
+{
+  "notes": [
+    {
+      "location": {"bar": 1, "beat": [1, 1]},
+      "duration": [1, 8],
+      "voice": 1,
+      "pitch": {"step": "E", "alter": 0, "octave": 4}
+    }
+  ]
+}
+```
+
+The source score and input document are read-only; the command writes a new validated Score IR document to the required `--output` path. Existing rests in the selected part are preserved. Later voicing/rhythm/technique commands target existing notes through explicit canonical selectors rather than array indexes.
