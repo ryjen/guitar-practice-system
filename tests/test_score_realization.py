@@ -23,9 +23,9 @@ def realization_score() -> dict:
         "metadata": {"title": "Practice Song"},
         "bars": [
             {"number": 1},
-            {"number": 2, "repeat_start": True},
+            {"number": 2},
             {"number": 3},
-            {"number": 4, "repeat_end": 2},
+            {"number": 4},
         ],
         "meter_map": [
             {"bar": 1, "beats": 4, "beat_unit": 4},
@@ -266,6 +266,9 @@ class ScoreRealizationTests(unittest.TestCase):
 
     def test_bar_slice_fails_closed_on_canonical_repeat_notation(self) -> None:
         document = realization_score()
+        document["bars"][1]["repeat_start"] = True
+        document["bars"][3]["repeat_end"] = 2
+        score.validate(document)
 
         with self.assertRaisesRegex(ScoreRealizationError, "expand playback form"):
             slice_bars(document, 2, 3)
