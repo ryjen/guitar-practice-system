@@ -111,6 +111,7 @@ def score_tracks(argv: Sequence[str], context: CliContext) -> int:
                 "role": part["role"],
                 "instrument_name": part["instrument"]["name"],
                 "instrument_family": part["instrument"]["family"],
+                "midi": part["instrument"].get("midi"),
                 "provenance": part.get("provenance"),
             }
             for part in document["parts"]
