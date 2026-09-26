@@ -73,6 +73,7 @@ def parse_chord_grid(spec: str) -> tuple[tuple[str, ...], ...]:
 @dataclass(frozen=True)
 class ScoreAuthoring:
     documents: JsonDocumentStore
+    inputs: JsonDocumentStore | None = None
 
     def replace_form(self, source: str, spec: str, output: str) -> dict[str, Any]:
         document = dict(self.documents.read(source))
@@ -101,6 +102,33 @@ class ScoreAuthoring:
             start_bar=start_bar,
             end_bar=end_bar,
             bars=parse_chord_grid(spec),
+        )
+        self.documents.write(output, result)
+        return result
+
+
+    def replace_notes(
+        self,
+        source: str,
+        *,
+        part_id: str,
+        input_path: str,
+        output: str,
+    ) -> dict[str, Any]:
+        if self.inputs is None:
+            raise ScoreAuthoringInputError("score note authoring input store is not configured")
+        input_document = self.inputs.read(input_path)
+        if set(input_document) != {"notes"}:
+            raise ScoreAuthoringInputError("note input document must contain only notes")
+        notes = input_document.get("notes")
+        if not isinstance(notes, list):
+            raise ScoreAuthoringInputError("note input notes must be a list")
+
+        document = dict(self.documents.read(source))
+        result = score_authoring.replace_part_notes(
+            document,
+            part_id=part_id,
+            notes=notes,
         )
         self.documents.write(output, result)
         return result
