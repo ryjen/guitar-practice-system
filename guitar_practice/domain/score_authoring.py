@@ -245,3 +245,83 @@ def replace_part_notes(
     ]
     part["events"] = sorted(retained + generated, key=_event_sort_key)
     return _validate_result(result)
+
+
+
+def _note_selector(value: Mapping[str, Any], label: str) -> tuple[dict[str, Any], int, dict[str, Any]]:
+    if set(value) != {"location", "voice", "pitch"}:
+        raise ScoreAuthoringError(
+            f"{label} must contain exactly location, voice, and pitch"
+        )
+    location = value["location"]
+    pitch = value["pitch"]
+    voice = value["voice"]
+    if not isinstance(location, Mapping) or not isinstance(pitch, Mapping):
+        raise ScoreAuthoringError(f"{label} location and pitch must be objects")
+    if isinstance(voice, bool) or not isinstance(voice, int) or voice <= 0:
+        raise ScoreAuthoringError(f"{label}.voice must be a positive integer")
+    return copy.deepcopy(dict(location)), voice, copy.deepcopy(dict(pitch))
+
+
+def _select_note(
+    part: Mapping[str, Any],
+    selector: Mapping[str, Any],
+    *,
+    label: str,
+) -> dict[str, Any]:
+    location, voice, pitch = _note_selector(selector, label)
+    matches = [
+        event
+        for event in part["events"]
+        if event.get("kind") == "note"
+        and event.get("location") == location
+        and event.get("voice") == voice
+        and event.get("pitch") == pitch
+    ]
+    if not matches:
+        raise ScoreAuthoringError(f"{label} matched no note")
+    if len(matches) != 1:
+        raise ScoreAuthoringError(f"{label} matched multiple notes")
+    return matches[0]
+
+
+def apply_note_positions(
+    document: Mapping[str, Any],
+    *,
+    part_id: str,
+    positions: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Apply string/fret positions through exact canonical note selectors."""
+
+    result = _document(document)
+    matches = [part for part in result["parts"] if part["id"] == part_id]
+    if not matches:
+        raise ScoreAuthoringError(f"unknown part id: {part_id}")
+    if len(matches) != 1:
+        raise ScoreAuthoringError(f"ambiguous part id: {part_id}")
+    if not isinstance(positions, Sequence) or isinstance(positions, (str, bytes)):
+        raise ScoreAuthoringError("positions must be a sequence")
+
+    part = matches[0]
+    for index, raw_patch in enumerate(positions):
+        if not isinstance(raw_patch, Mapping):
+            raise ScoreAuthoringError(f"positions[{index}] must be an object")
+        if set(raw_patch) != {"selector", "position"}:
+            raise ScoreAuthoringError(
+                f"positions[{index}] must contain exactly selector and position"
+            )
+        position = raw_patch["position"]
+        if not isinstance(position, Mapping):
+            raise ScoreAuthoringError(f"positions[{index}].position must be an object")
+        note = _select_note(
+            part,
+            raw_patch["selector"],
+            label=f"positions[{index}].selector",
+        )
+        note["position"] = copy.deepcopy(dict(position))
+        note.setdefault(
+            "provenance",
+            {"kind": "user", "source": "score-authoring:voicing"},
+        )
+
+    return _validate_result(result)
