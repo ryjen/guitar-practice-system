@@ -199,6 +199,7 @@ class MuseScoreMusicXmlIntegrationTests(unittest.TestCase):
             env.update(
                 {
                     "QT_QPA_PLATFORM": "offscreen",
+                    "MU_QT_QPA_PLATFORM": "offscreen",
                     "QT_QUICK_BACKEND": "software",
                     "XDG_RUNTIME_DIR": str(runtime),
                 }
