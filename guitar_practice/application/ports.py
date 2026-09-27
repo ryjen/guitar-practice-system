@@ -67,6 +67,39 @@ class ScoreParser(Protocol):
 
 
 @dataclass(frozen=True)
+class ScoreExportDiagnostic:
+    """Portable diagnostic emitted while adapting canonical score data."""
+
+    severity: str
+    code: str
+    path: str
+    message: str
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "severity": self.severity,
+            "code": self.code,
+            "path": self.path,
+            "message": self.message,
+        }
+
+
+@dataclass(frozen=True)
+class ExportedScore:
+    """Bytes produced by a score exporter plus explicit mapping diagnostics."""
+
+    data: bytes
+    diagnostics: tuple[ScoreExportDiagnostic, ...] = ()
+
+
+class ScoreExporter(Protocol):
+    """Export canonical Score IR without exposing adapter implementation details."""
+
+    def export(self, document: Mapping[str, Any]) -> ExportedScore:
+        ...
+
+
+@dataclass(frozen=True)
 class AudioRenderProfile:
     """Explicit PCM render contract for local audio adapters."""
 

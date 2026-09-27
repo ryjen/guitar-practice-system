@@ -1,0 +1,55 @@
+name: Validate Score MusicXML
+
+on:
+  pull_request:
+    paths:
+      - "flake.nix"
+      - "flake.lock"
+      - "guitar_practice/adapters/musicxml_export.py"
+      - "guitar_practice/application/ports.py"
+      - "guitar_practice/application/score_export.py"
+      - "guitar_practice/interfaces/cli/commands.py"
+      - "guitar_practice/interfaces/cli/score_handlers.py"
+      - "tests/test_musicxml_export.py"
+      - "tests/test_score_export_application.py"
+      - "tests/test_native_score_cli.py"
+      - ".github/workflows/validate-score-musicxml.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "flake.nix"
+      - "flake.lock"
+      - "guitar_practice/adapters/musicxml_export.py"
+      - "guitar_practice/application/ports.py"
+      - "guitar_practice/application/score_export.py"
+      - "guitar_practice/interfaces/cli/commands.py"
+      - "guitar_practice/interfaces/cli/score_handlers.py"
+      - "tests/test_musicxml_export.py"
+      - "tests/test_score_export_application.py"
+      - "tests/test_native_score_cli.py"
+      - ".github/workflows/validate-score-musicxml.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-score-musicxml-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  musescore-import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: cachix/install-nix-action@8aa03977d8d733052d78f4e008a241fd1dbf36b3 # v31.10.6
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Import exported MusicXML with pinned MuseScore
+        run: |
+          nix develop --command bash -euc '
+            command -v mscore
+            PYTHONPATH=. python -m unittest \
+              tests.test_musicxml_export.MuseScoreMusicXmlIntegrationTests -v
+          '
