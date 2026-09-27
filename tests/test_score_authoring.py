@@ -299,6 +299,93 @@ class ScoreAuthoringDomainTests(unittest.TestCase):
                 ],
             )
 
+    def test_apply_note_technique_patches_expression_fields_immutably(self) -> None:
+        source = timeline_score()
+        original = copy.deepcopy(source)
+        selector = {
+            "location": {"bar": 1, "beat": [1, 1]},
+            "voice": 1,
+            "pitch": {"step": "E", "alter": 0, "octave": 4},
+        }
+
+        result = score_authoring.apply_note_technique(
+            source,
+            part_id="guitar-1",
+            patches=[
+                {
+                    "selector": selector,
+                    "articulations": ["staccato", "accent"],
+                    "techniques": [
+                        {"name": "bend", "amount": [1, 1]},
+                        {"name": "vibrato"},
+                    ],
+                    "dynamics": "f",
+                }
+            ],
+        )
+
+        self.assertEqual(original, source)
+        note = result["parts"][0]["events"][0]
+        self.assertEqual(["staccato", "accent"], note["articulations"])
+        self.assertEqual(
+            [{"name": "bend", "amount": [1, 1]}, {"name": "vibrato"}],
+            note["techniques"],
+        )
+        self.assertEqual("f", note["dynamics"])
+        score.validate(result)
+
+    def test_apply_note_technique_can_clear_expression_fields_explicitly(self) -> None:
+        source = timeline_score()
+        selector = {
+            "location": {"bar": 1, "beat": [1, 1]},
+            "voice": 1,
+            "pitch": {"step": "E", "alter": 0, "octave": 4},
+        }
+
+        result = score_authoring.apply_note_technique(
+            source,
+            part_id="guitar-1",
+            patches=[
+                {
+                    "selector": selector,
+                    "articulations": [],
+                    "techniques": [],
+                    "dynamics": None,
+                }
+            ],
+        )
+
+        note = result["parts"][0]["events"][0]
+        self.assertNotIn("articulations", note)
+        self.assertNotIn("techniques", note)
+        self.assertNotIn("dynamics", note)
+        score.validate(result)
+
+    def test_apply_note_technique_fails_closed_on_duplicate_or_empty_patch(self) -> None:
+        source = timeline_score()
+        selector = {
+            "location": {"bar": 1, "beat": [1, 1]},
+            "voice": 1,
+            "pitch": {"step": "E", "alter": 0, "octave": 4},
+        }
+
+        with self.assertRaisesRegex(score_authoring.ScoreAuthoringError, "must change"):
+            score_authoring.apply_note_technique(
+                source,
+                part_id="guitar-1",
+                patches=[{"selector": selector}],
+            )
+
+        with self.assertRaisesRegex(score_authoring.ScoreAuthoringError, "already selected"):
+            score_authoring.apply_note_technique(
+                source,
+                part_id="guitar-1",
+                patches=[
+                    {"selector": selector, "dynamics": "p"},
+                    {"selector": selector, "articulations": ["accent"]},
+                ],
+            )
+
     def test_replace_harmony_requires_exact_bar_count(self) -> None:
         source = minimal_score()
         source = score_authoring.replace_form(

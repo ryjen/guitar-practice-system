@@ -322,6 +322,54 @@ def score_rhythm(argv: Sequence[str], context: CliContext) -> int:
     return exit_codes.OK
 
 
+def score_technique(argv: Sequence[str], context: CliContext) -> int:
+    parser = argparse.ArgumentParser(prog="guitarctl score technique")
+    parser.add_argument("score", help="Canonical Score IR JSON inside the workspace")
+    parser.add_argument("part", help="Explicit part id whose selected note expression will be updated")
+    parser.add_argument("--input", required=True, help="JSON input document containing technique patches")
+    parser.add_argument("--output", required=True, help="New canonical Score IR JSON output")
+    args = parser.parse_args(list(argv))
+
+    try:
+        source = _workspace_relative(args.score, label="score document")
+        input_path = _workspace_relative(args.input, label="technique input")
+        output = _workspace_relative(args.output, label="score output")
+        document = _authoring(context).apply_technique(
+            source,
+            part_id=args.part,
+            input_path=input_path,
+            output=output,
+        )
+    except (
+        ScorePathError,
+        ScoreDocumentError,
+        JsonDocumentError,
+        OSError,
+        ValueError,
+    ) as exc:
+        print(f"guitarctl: {exc}", file=context.stderr)
+        return exit_codes.DATA_ERROR
+
+    expressive = sum(
+        1
+        for part in document["parts"]
+        if part["id"] == args.part
+        for event in part["events"]
+        if event["kind"] == "note"
+        and ({"articulations", "techniques", "dynamics"} & set(event))
+    )
+    _write_json(
+        {
+            "output": output,
+            "id": document["id"],
+            "part": args.part,
+            "expressive_notes": expressive,
+        },
+        context,
+    )
+    return exit_codes.OK
+
+
 def score_import(argv: Sequence[str], context: CliContext) -> int:
     parser = argparse.ArgumentParser(prog="guitarctl score import")
     parser.add_argument("source", help="Guitar Pro or MusicXML score inside the workspace")
@@ -416,6 +464,7 @@ SCORE_HANDLERS: dict[str, NativeHandler] = {
     "score-notes": score_notes,
     "score-voicing": score_voicing,
     "score-rhythm": score_rhythm,
+    "score-technique": score_technique,
     "score-show": score_show,
     "score-tracks": score_tracks,
     "score-validate": score_validate,
