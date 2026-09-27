@@ -72,6 +72,10 @@ guitarctl score technique song-with-rhythm.score.json guitar-1 \
   --input technique.json \
   --output song-with-expression.score.json
 
+guitarctl score render song-with-expression.score.json \
+  --format musicxml \
+  --output song.musicxml
+
 guitarctl drums export song.score.json \
   --tempo 75% \
   --target boss-rc3
@@ -110,11 +114,12 @@ The remaining compatibility-process commands are outside this generation subsyst
 - `score voicing <score> <part-id> --input <voicing.json> --output <path>` — apply string/fret positions to existing notes. Each patch selects exactly one note by current location + voice + pitch; missing or ambiguous selectors fail closed, and Score IR validates the resulting position against declared guitar tuning.
 - `score rhythm <score> <part-id> --input <rhythm.json> --output <path>` — relocate, resize, or revoice exactly selected untied notes. All selectors resolve against the pre-edit score, duplicate targets fail closed, and the output is re-sorted and fully Score IR-validated.
 - `score technique <score> <part-id> --input <technique.json> --output <path>` — patch `articulations`, structured `techniques`, and/or `dynamics` on exactly selected notes without changing pitch, position, or timing. Omitted fields are preserved; empty articulation/technique arrays and `dynamics: null` explicitly clear those optional fields. Duplicate note targets fail closed.
+- `score render <score> --format musicxml [--output <path>]` — export deterministic MusicXML 4.0. Without `--output`, MusicXML is written to stdout and mapping warnings go to stderr; with an explicit output path, the artifact is written and stdout returns a JSON diagnostics summary. Guitar parts with declared tuning emit standard notation plus an alternate TAB staff and string/fret technical notation where positions exist.
 - `score show <score>` — emit the canonical Score IR document.
 - `score tracks <score>` — inspect part/role/instrument metadata.
 - `score validate <score>` — validate through the canonical Score IR contract and emit a machine-readable report.
 
-All input/output paths are explicit and workspace-relative. Authoring transforms write a new target and leave the source unchanged. There is no implicit current score. `score render`, `score play`, and `score edit` are intentionally not registered until their bounded exporter/playback/editor work lands.
+All input/output paths are explicit and workspace-relative. Authoring transforms write a new target and leave the source unchanged. There is no implicit current score. `score render --format musicxml` is package-native; MIDI render/playback and `score edit` remain owned by #113 and #114.
 
 ## Musical generation boundaries
 

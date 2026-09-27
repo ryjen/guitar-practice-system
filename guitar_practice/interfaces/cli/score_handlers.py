@@ -7,7 +7,9 @@ import json
 from collections.abc import Callable, Sequence
 from pathlib import PurePosixPath
 
+from guitar_practice.adapters.binary_files import BinaryFileStore
 from guitar_practice.adapters.json_files import JsonDocumentError, JsonFileStore
+from guitar_practice.adapters.musicxml_export import MusicXmlExportError, MusicXmlExporter
 from guitar_practice.adapters.musicxml_import import MusicXmlError, MusicXmlParser
 from guitar_practice.adapters.score_conversion import (
     DirectMusicXmlConverter,
@@ -17,6 +19,7 @@ from guitar_practice.adapters.score_conversion import (
 from guitar_practice.adapters.score_files import ScoreDocumentError, ScoreFileStore
 from guitar_practice.application.score_authoring import ScoreAuthoring
 from guitar_practice.application.score_documents import ScoreDocuments
+from guitar_practice.application.score_export import ExportScore
 from guitar_practice.application.score_import import (
     ImportScore,
     ScoreImportError,
@@ -370,6 +373,56 @@ def score_technique(argv: Sequence[str], context: CliContext) -> int:
     return exit_codes.OK
 
 
+def score_render(argv: Sequence[str], context: CliContext) -> int:
+    parser = argparse.ArgumentParser(prog="guitarctl score render")
+    parser.add_argument("score", help="Canonical Score IR JSON inside the workspace")
+    parser.add_argument("--format", required=True, choices=["musicxml"])
+    parser.add_argument("--output", help="Optional notation artifact output path")
+    args = parser.parse_args(list(argv))
+
+    try:
+        source = _workspace_relative(args.score, label="score document")
+        output = (
+            _workspace_relative(args.output, label="score output")
+            if args.output is not None
+            else None
+        )
+        service = ExportScore(
+            documents=ScoreFileStore(context.workspace),
+            artifacts=BinaryFileStore(context.workspace),
+            exporter=MusicXmlExporter(),
+        )
+        result = service.render(source) if output is None else service.render_to(source, output)
+    except (
+        ScorePathError,
+        ScoreDocumentError,
+        MusicXmlExportError,
+        OSError,
+        ValueError,
+    ) as exc:
+        print(f"guitarctl: {exc}", file=context.stderr)
+        return exit_codes.DATA_ERROR
+
+    if output is None:
+        context.stdout.write(result.data.decode("utf-8"))
+        for diagnostic in result.diagnostics:
+            print(
+                f"guitarctl: {diagnostic.severity}: {diagnostic.code}: "
+                f"{diagnostic.path}: {diagnostic.message}",
+                file=context.stderr,
+            )
+    else:
+        _write_json(
+            {
+                "output": output,
+                "format": args.format,
+                "diagnostics": [item.as_dict() for item in result.diagnostics],
+            },
+            context,
+        )
+    return exit_codes.OK
+
+
 def score_import(argv: Sequence[str], context: CliContext) -> int:
     parser = argparse.ArgumentParser(prog="guitarctl score import")
     parser.add_argument("source", help="Guitar Pro or MusicXML score inside the workspace")
@@ -465,6 +518,7 @@ SCORE_HANDLERS: dict[str, NativeHandler] = {
     "score-voicing": score_voicing,
     "score-rhythm": score_rhythm,
     "score-technique": score_technique,
+    "score-render": score_render,
     "score-show": score_show,
     "score-tracks": score_tracks,
     "score-validate": score_validate,

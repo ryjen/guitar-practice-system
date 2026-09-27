@@ -28,6 +28,7 @@ class NativeScoreCliTests(unittest.TestCase):
             ["score", "voicing", "song.score.json", "guitar-1"],
             ["score", "rhythm", "song.score.json", "guitar-1"],
             ["score", "technique", "song.score.json", "guitar-1"],
+            ["score", "render", "song.score.json", "--format", "musicxml"],
             ["score", "show", "song.score.json"],
             ["score", "tracks", "song.score.json"],
             ["score", "validate", "song.score.json"],
@@ -488,6 +489,93 @@ class NativeScoreCliTests(unittest.TestCase):
                 source,
                 score.loads((workspace / "source.score.json").read_text(encoding="utf-8")),
             )
+
+    def test_render_musicxml_to_stdout_or_explicit_output(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = timeline_score()
+            (workspace / "source.score.json").write_text(
+                score.dumps(source),
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "render",
+                        "source.score.json",
+                        "--format",
+                        "musicxml",
+                    ]
+                )
+
+            self.assertEqual(0, result)
+            self.assertTrue(stdout.getvalue().startswith('<?xml version="1.0" encoding="UTF-8"?>'))
+            self.assertIn("generic-technique", stderr.getvalue())
+            self.assertFalse((workspace / "source.musicxml").exists())
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "render",
+                        "source.score.json",
+                        "--format",
+                        "musicxml",
+                        "--output",
+                        "generated/source.musicxml",
+                    ]
+                )
+
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+            summary = json.loads(stdout.getvalue())
+            self.assertEqual("musicxml", summary["format"])
+            self.assertEqual("generated/source.musicxml", summary["output"])
+            self.assertEqual("generic-technique", summary["diagnostics"][0]["code"])
+            exported = (workspace / "generated" / "source.musicxml").read_text(encoding="utf-8")
+            self.assertTrue(exported.startswith('<?xml version="1.0" encoding="UTF-8"?>'))
+            self.assertEqual(source, score.loads((workspace / "source.score.json").read_text()))
+
+    def test_render_requires_explicit_score_and_rejects_output_escape(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = timeline_score()
+            (workspace / "source.score.json").write_text(score.dumps(source), encoding="utf-8")
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                missing_score = main(["--workspace", str(workspace), "score", "render"])
+            self.assertEqual(2, missing_score)
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                escaped = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "render",
+                        "source.score.json",
+                        "--format",
+                        "musicxml",
+                        "--output",
+                        "../escaped.musicxml",
+                    ]
+                )
+            self.assertEqual(65, escaped)
+            self.assertIn("workspace-relative", stderr.getvalue())
 
     def test_authoring_commands_require_explicit_output_and_form_rejects_nonempty_score(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
