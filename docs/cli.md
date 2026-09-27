@@ -68,6 +68,10 @@ guitarctl score rhythm song-with-voicing.score.json guitar-1 \
   --input rhythm.json \
   --output song-with-rhythm.score.json
 
+guitarctl score technique song-with-rhythm.score.json guitar-1 \
+  --input technique.json \
+  --output song-with-expression.score.json
+
 guitarctl drums export song.score.json \
   --tempo 75% \
   --target boss-rc3
@@ -105,6 +109,7 @@ The remaining compatibility-process commands are outside this generation subsyst
 - `score notes <score> <part-id> --input <notes.json> --output <path>` — replace note events for one explicit part while preserving non-note events. The input document contains only a `notes` array of Score IR note fields; `kind: "note"` and user provenance are supplied when omitted.
 - `score voicing <score> <part-id> --input <voicing.json> --output <path>` — apply string/fret positions to existing notes. Each patch selects exactly one note by current location + voice + pitch; missing or ambiguous selectors fail closed, and Score IR validates the resulting position against declared guitar tuning.
 - `score rhythm <score> <part-id> --input <rhythm.json> --output <path>` — relocate, resize, or revoice exactly selected untied notes. All selectors resolve against the pre-edit score, duplicate targets fail closed, and the output is re-sorted and fully Score IR-validated.
+- `score technique <score> <part-id> --input <technique.json> --output <path>` — patch `articulations`, structured `techniques`, and/or `dynamics` on exactly selected notes without changing pitch, position, or timing. Omitted fields are preserved; empty articulation/technique arrays and `dynamics: null` explicitly clear those optional fields. Duplicate note targets fail closed.
 - `score show <score>` — emit the canonical Score IR document.
 - `score tracks <score>` — inspect part/role/instrument metadata.
 - `score validate <score>` — validate through the canonical Score IR contract and emit a machine-readable report.

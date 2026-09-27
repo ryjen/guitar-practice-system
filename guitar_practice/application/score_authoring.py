@@ -186,3 +186,31 @@ class ScoreAuthoring:
         )
         self.documents.write(output, result)
         return result
+
+    def apply_technique(
+        self,
+        source: str,
+        *,
+        part_id: str,
+        input_path: str,
+        output: str,
+    ) -> dict[str, Any]:
+        if self.inputs is None:
+            raise ScoreAuthoringInputError("score technique input store is not configured")
+        input_document = self.inputs.read(input_path)
+        if set(input_document) != {"technique"}:
+            raise ScoreAuthoringInputError(
+                "technique input document must contain only technique"
+            )
+        patches = input_document.get("technique")
+        if not isinstance(patches, list):
+            raise ScoreAuthoringInputError("technique input technique must be a list")
+
+        document = dict(self.documents.read(source))
+        result = score_authoring.apply_note_technique(
+            document,
+            part_id=part_id,
+            patches=patches,
+        )
+        self.documents.write(output, result)
+        return result

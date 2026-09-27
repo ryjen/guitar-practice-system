@@ -179,6 +179,64 @@ class ScoreAuthoringApplicationTests(unittest.TestCase):
         self.assertEqual([1, 8], moved["duration"])
         self.assertEqual(result, store.values["written.json"])
 
+    def test_technique_input_patches_expression_without_mutating_inputs(self) -> None:
+        source = timeline_score()
+        technique_input = {
+            "technique": [
+                {
+                    "selector": {
+                        "location": {"bar": 1, "beat": [1, 1]},
+                        "voice": 1,
+                        "pitch": {"step": "E", "alter": 0, "octave": 4},
+                    },
+                    "articulations": ["accent", "tenuto"],
+                    "techniques": [{"name": "vibrato"}],
+                    "dynamics": "ff",
+                }
+            ]
+        }
+        store = MemoryDocuments(
+            {
+                "source.json": source,
+                "technique.json": technique_input,
+            }
+        )
+        service = ScoreAuthoring(store, inputs=store)
+
+        result = service.apply_technique(
+            "source.json",
+            part_id="guitar-1",
+            input_path="technique.json",
+            output="written.json",
+        )
+
+        self.assertEqual(source, store.values["source.json"])
+        self.assertEqual(technique_input, store.values["technique.json"])
+        note = result["parts"][0]["events"][0]
+        self.assertEqual(["accent", "tenuto"], note["articulations"])
+        self.assertEqual([{"name": "vibrato"}], note["techniques"])
+        self.assertEqual("ff", note["dynamics"])
+        self.assertEqual(result, store.values["written.json"])
+        score.validate(result)
+
+    def test_technique_input_rejects_unknown_top_level_fields(self) -> None:
+        store = MemoryDocuments(
+            {
+                "source.json": timeline_score(),
+                "technique.json": {"technique": [], "current_score": "no"},
+            }
+        )
+        service = ScoreAuthoring(store, inputs=store)
+
+        with self.assertRaisesRegex(ValueError, "contain only technique"):
+            service.apply_technique(
+                "source.json",
+                part_id="guitar-1",
+                input_path="technique.json",
+                output="written.json",
+            )
+        self.assertNotIn("written.json", store.values)
+
     def test_form_then_section_chords_writes_new_documents_without_mutating_sources(self) -> None:
         initial = minimal_score()
         store = MemoryDocuments({"draft.json": initial})
