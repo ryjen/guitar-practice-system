@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import tempfile
@@ -192,12 +193,23 @@ class MuseScoreMusicXmlIntegrationTests(unittest.TestCase):
             output = root / "guitar.mscz"
             source.write_bytes(data)
 
+            runtime = root / "runtime"
+            runtime.mkdir(mode=0o700)
+            env = os.environ.copy()
+            env.update(
+                {
+                    "QT_QPA_PLATFORM": "offscreen",
+                    "QT_QUICK_BACKEND": "software",
+                    "XDG_RUNTIME_DIR": str(runtime),
+                }
+            )
             result = subprocess.run(
                 ["mscore", "-o", str(output), str(source)],
                 check=False,
                 capture_output=True,
                 text=True,
                 timeout=60,
+                env=env,
             )
 
             self.assertEqual(0, result.returncode, result.stderr)
