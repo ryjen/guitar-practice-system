@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import unittest
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Mapping
 
-from guitar_practice.adapters.musicxml_import import MusicXmlParser
+from guitar_practice.adapters.musicxml_export import MusicXmlExporter
+from guitar_practice.adapters.musicxml_import import MusicXmlError, MusicXmlParser
 from guitar_practice.application.ports import ConvertedScore
 from guitar_practice.application.score_import import (
     ImportScore,
@@ -110,6 +112,88 @@ class ScoreImportApplicationTests(unittest.TestCase):
                 for event in guitar["events"]
             ],
         )
+
+    def test_import_preserves_first_second_ending_form_in_score_ir(self) -> None:
+        musicxml = b"""<score-partwise><part-list>
+        <score-part id='P1'><part-name>Guitar</part-name></score-part>
+        </part-list><part id='P1'>
+        <measure number='1'><attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes>
+          <barline location='left'><repeat direction='forward'/></barline>
+          <note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration></note></measure>
+        <measure number='2'><note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration></note></measure>
+        <measure number='3'><barline location='left'><ending number='1' type='start'/></barline>
+          <note><pitch><step>E</step><octave>4</octave></pitch><duration>4</duration></note>
+          <barline location='right'><ending number='1' type='stop'/><repeat direction='backward' times='2'/></barline></measure>
+        <measure number='4'><barline location='left'><ending number='2' type='start'/></barline>
+          <note><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration></note>
+          <barline location='right'><ending number='2' type='discontinue'/></barline></measure>
+        </part></score-partwise>"""
+        document = ImportScore(
+            converter=FakeConverter(musicxml),
+            parser=MusicXmlParser(),
+            documents=MemoryStore(),
+        ).execute("endings.musicxml", "endings.score.json")
+
+        self.assertEqual(4, len(document["bars"]))
+        self.assertEqual(
+            [
+                {"number": 1, "repeat_start": True},
+                {"number": 2},
+                {"number": 3, "repeat_end": 2, "ending_numbers": [1]},
+                {"number": 4, "ending_numbers": [2]},
+            ],
+            [
+                {key: value for key, value in bar.items() if key != "provenance"}
+                for bar in document["bars"]
+            ],
+        )
+        self.assertEqual(
+            [1, 2, 3, 4],
+            [event["location"]["bar"] for event in document["parts"][0]["events"]],
+        )
+        score.validate(document)
+
+        exported = ET.fromstring(MusicXmlExporter().export(document).data)
+        first = exported.find("./part[1]/measure[@number='1']")
+        third = exported.find("./part[1]/measure[@number='3']")
+        fourth = exported.find("./part[1]/measure[@number='4']")
+        assert first is not None and third is not None and fourth is not None
+        self.assertEqual(
+            "forward",
+            first.find("./barline[@location='left']/repeat").attrib["direction"],
+        )
+        self.assertEqual(
+            "2",
+            third.find("./barline[@location='right']/repeat").attrib["times"],
+        )
+        endings = exported.findall("./part[1]/measure/barline/ending")
+        self.assertTrue(any(item.attrib.get("number") == "1" for item in endings))
+        self.assertTrue(any(item.attrib.get("number") == "2" for item in endings))
+
+    def test_import_rejects_unsupported_ending_and_jump_navigation(self) -> None:
+        third_ending = b"""<score-partwise><part-list>
+        <score-part id='P1'><part-name>Guitar</part-name></score-part>
+        </part-list><part id='P1'><measure number='1'>
+        <barline><ending number='3' type='start'/></barline>
+        <barline><ending number='3' type='stop'/></barline>
+        </measure></part></score-partwise>"""
+        jump = b"""<score-partwise><part-list>
+        <score-part id='P1'><part-name>Guitar</part-name></score-part>
+        </part-list><part id='P1'><measure number='1'>
+        <direction><sound dacapo='yes'/></direction>
+        </measure></part></score-partwise>"""
+
+        for data, message in (
+            (third_ending, "first and second endings"),
+            (jump, "navigation"),
+        ):
+            with self.subTest(message=message):
+                with self.assertRaisesRegex(MusicXmlError, message):
+                    ImportScore(
+                        converter=FakeConverter(data),
+                        parser=MusicXmlParser(),
+                        documents=MemoryStore(),
+                    ).execute("unsupported.musicxml", "unsupported.score.json")
 
     def test_cross_bar_notes_are_split_with_tie_semantics(self) -> None:
         imported = ImportedScore(

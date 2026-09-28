@@ -150,6 +150,8 @@ Bars are globally numbered, contiguous, and 1-based. Bar records may carry notat
 
 Sections use inclusive `start_bar` / `end_bar` ranges. Rehearsal marks are location-anchored.
 
+Repeat and ending fields describe the **written canonical form**; import adapters preserve them instead of duplicating bars. Playback consumers that need a linear full-song timeline derive an immutable generated realization from this form. The bounded realization supports simple repeat counts and ordinary first/second endings, restores meter/key/tempo state on backward jumps, and removes form markers only from the generated linear document. Unsupported jump navigation remains outside Score IR playback realization rather than being guessed.
+
 ## Meter, tempo, and key maps
 
 `meter_map` entries take effect at the start of the given bar. The first entry must start at bar 1. Meter changes are ordered by bar and unique per bar.

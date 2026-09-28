@@ -6,6 +6,7 @@ import unittest
 from guitar_practice.domain import score
 from guitar_practice.domain.score_realization import (
     ScoreRealizationError,
+    expand_playback_form,
     resolve_section,
     scale_tempo,
     select_backing_parts,
@@ -200,6 +201,114 @@ class ScoreRealizationTests(unittest.TestCase):
                 include_part_ids=("drums",),
                 exclude_part_ids=("drums",),
             )
+
+    def test_playback_form_expands_first_second_endings_without_mutating_source(self) -> None:
+        document = {
+            "schema": score.SCHEMA_ID,
+            "version": score.SCHEMA_VERSION,
+            "id": "ending-song",
+            "metadata": {"title": "Ending Song"},
+            "bars": [
+                {"number": 1, "repeat_start": True},
+                {"number": 2},
+                {"number": 3, "repeat_end": 2, "ending_numbers": [1]},
+                {"number": 4, "ending_numbers": [2]},
+            ],
+            "meter_map": [
+                {"bar": 1, "beats": 4, "beat_unit": 4},
+                {"bar": 3, "beats": 3, "beat_unit": 4},
+            ],
+            "tempo_map": [
+                {"location": {"bar": 1, "beat": [1, 1]}, "bpm": 120, "beat_unit": [1, 4]},
+                {"location": {"bar": 3, "beat": [1, 1]}, "bpm": 60, "beat_unit": [1, 4]},
+            ],
+            "parts": [
+                {
+                    "id": "guitar",
+                    "name": "Guitar",
+                    "role": "guitar",
+                    "instrument": {"name": "Guitar", "family": "guitar"},
+                    "events": [
+                        {
+                            "kind": "note",
+                            "location": {"bar": bar, "beat": [1, 1]},
+                            "duration": [1, 4],
+                            "voice": 1,
+                            "pitch": {"step": step, "alter": 0, "octave": 4},
+                        }
+                        for bar, step in ((1, "C"), (2, "D"), (3, "E"), (4, "F"))
+                    ],
+                }
+            ],
+        }
+        score.validate(document)
+        snapshot = copy.deepcopy(document)
+
+        realized = expand_playback_form(document)
+
+        self.assertEqual(snapshot, document)
+        self.assertEqual([1, 2, 3, 4, 5, 6], [bar["number"] for bar in realized["bars"]])
+        self.assertTrue(
+            all(
+                not (set(bar) & {"repeat_start", "repeat_end", "ending_numbers"})
+                for bar in realized["bars"]
+            )
+        )
+        self.assertEqual(
+            ["C", "D", "E", "C", "D", "F"],
+            [event["pitch"]["step"] for event in realized["parts"][0]["events"]],
+        )
+        self.assertEqual(
+            [(1, 120), (3, 60), (4, 120)],
+            [
+                (entry["location"]["bar"], entry["bpm"])
+                for entry in realized["tempo_map"]
+            ],
+        )
+        self.assertEqual(
+            [(1, 4, 4), (3, 3, 4), (4, 4, 4)],
+            [
+                (entry["bar"], entry["beats"], entry["beat_unit"])
+                for entry in realized["meter_map"]
+            ],
+        )
+        score.validate(realized)
+
+    def test_playback_form_preserves_simple_repeat_play_count(self) -> None:
+        document = realization_score()
+        document["bars"] = [
+            {"number": 1, "repeat_start": True},
+            {"number": 2, "repeat_end": 3},
+            {"number": 3},
+        ]
+        document["meter_map"] = [{"bar": 1, "beats": 4, "beat_unit": 4}]
+        document["tempo_map"] = []
+        document.pop("key_map", None)
+        document.pop("sections", None)
+        document.pop("rehearsal_marks", None)
+        document.pop("harmony", None)
+        for part in document["parts"]:
+            part["events"] = []
+        document["parts"][2]["events"] = [
+            {
+                "kind": "note",
+                "location": {"bar": bar, "beat": [1, 1]},
+                "duration": [1, 4],
+                "voice": 1,
+                "pitch": {"step": step, "alter": 0, "octave": 3},
+            }
+            for bar, step in ((1, "C"), (2, "D"), (3, "E"))
+        ]
+        score.validate(document)
+
+        realized = expand_playback_form(document)
+
+        self.assertEqual(7, len(realized["bars"]))
+        self.assertEqual(
+            ["C", "D", "C", "D", "C", "D", "E"],
+            [event["pitch"]["step"] for event in realized["parts"][2]["events"]],
+        )
+        score.validate(realized)
 
     def test_bar_slice_rebases_structural_state_and_events(self) -> None:
         original = realization_score()

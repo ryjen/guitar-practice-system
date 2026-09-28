@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import copy
 from dataclasses import dataclass
 from typing import Any, Mapping
 
@@ -10,6 +9,7 @@ from guitar_practice.application.ports import BinaryArtifactStore, JsonDocumentS
 from guitar_practice.domain import score
 from guitar_practice.domain.score_midi import render_score_midi
 from guitar_practice.domain.score_realization import (
+    expand_playback_form,
     resolve_section,
     scale_tempo,
     select_backing_parts,
@@ -47,7 +47,7 @@ class RenderScoreBacking:
         focused = (
             slice_bars(source, *selected_range)
             if selected_range is not None
-            else copy.deepcopy(source)
+            else expand_playback_form(source)
         )
         realized = scale_tempo(focused, tempo_factor)
         selected = select_backing_parts(

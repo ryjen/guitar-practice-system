@@ -91,6 +91,25 @@ class ImportedSection:
 
 
 @dataclass(frozen=True)
+class ImportedBar:
+    repeat_start: bool = False
+    repeat_end: int | None = None
+    ending_numbers: tuple[int, ...] = field(default_factory=tuple)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.repeat_start, bool):
+            raise ValueError("repeat_start must be boolean")
+        if self.repeat_end is not None:
+            if isinstance(self.repeat_end, bool) or not isinstance(self.repeat_end, int) or self.repeat_end < 2:
+                raise ValueError("repeat_end must be an integer of at least 2")
+        if self.ending_numbers:
+            if any(isinstance(value, bool) or not isinstance(value, int) or value <= 0 for value in self.ending_numbers):
+                raise ValueError("ending numbers must be positive integers")
+            if tuple(sorted(set(self.ending_numbers))) != self.ending_numbers:
+                raise ValueError("ending numbers must be sorted and unique")
+
+
+@dataclass(frozen=True)
 class ImportedTrack:
     id: str
     name: str
@@ -122,6 +141,7 @@ class ImportedScore:
     meter_map: tuple[ImportedMeterPoint, ...] = field(default_factory=tuple)
     duration_quarters: float | None = None
     bar_boundaries: tuple[float, ...] = field(default_factory=tuple)
+    bars: tuple[ImportedBar, ...] = field(default_factory=tuple)
     sections: tuple[ImportedSection, ...] = field(default_factory=tuple)
 
     def __post_init__(self) -> None:
@@ -161,6 +181,11 @@ class ImportedScore:
                 raise ValueError("bar boundaries must increase strictly")
             if not math.isclose(float(boundaries[-1]), float(self.duration_quarters)):
                 raise ValueError("bar boundaries must end at structural duration")
+        if self.bars:
+            if len(self.bar_boundaries) < 2:
+                raise ValueError("imported bars require structural bar boundaries")
+            if len(self.bars) != len(self.bar_boundaries) - 1:
+                raise ValueError("imported bars must match structural bar count")
         if self.sections:
             if len(self.bar_boundaries) < 2:
                 raise ValueError("sections require structural bar boundaries")
