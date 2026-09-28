@@ -120,7 +120,7 @@ class Rc3ExportApplicationTests(unittest.TestCase):
             section_name="chorus a/b",
         )
         self.assertEqual(
-            "generated/rc3/fixture-drums-100pct-section-Chorus-A-B-bars2-2.wav",
+            "generated/rc3/fixture-drums-100pct-section-Chorus-A-B-chorus-bars2-2.wav",
             metadata["artifact"],
         )
         self.assertEqual([2, 2], metadata["bar_range"])
@@ -129,7 +129,7 @@ class Rc3ExportApplicationTests(unittest.TestCase):
         document = _document()
         document["sections"] = [
             {"id": "first", "label": "A/B", "start_bar": 1, "end_bar": 1},
-            {"id": "second", "label": "A B", "start_bar": 2, "end_bar": 2},
+            {"id": "second", "label": "A B", "start_bar": 1, "end_bar": 1},
         ]
         score.validate(document)
         first = ExportBossRc3Drums(
