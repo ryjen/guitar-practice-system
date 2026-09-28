@@ -159,7 +159,7 @@ class NativeRc3CliTests(unittest.TestCase):
             self.assertEqual(0, result)
             self.assertEqual("", stdout.getvalue())
             self.assertEqual("", stderr.getvalue())
-            wav_path = workspace / "generated/rc3/sections-drums-75pct-section-Chorus-A-B.wav"
+            wav_path = workspace / "generated/rc3/sections-drums-75pct-section-Chorus-A-B-bars2-2.wav"
             metadata = json.loads(Path(f"{wav_path}.json").read_text())
             self.assertEqual("Chorus A/B", metadata["section"])
             self.assertEqual([2, 2], metadata["bar_range"])

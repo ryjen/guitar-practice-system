@@ -161,11 +161,45 @@ class Rc3ExportApplicationTests(unittest.TestCase):
             section_name="chorus a/b",
         )
         self.assertEqual(
-            "generated/rc3/fixture-drums-100pct-section-Chorus-A-B.wav",
+            "generated/rc3/fixture-drums-100pct-section-Chorus-A-B-bars2-2.wav",
             metadata["artifact"],
         )
         self.assertEqual("Chorus A/B", metadata["section"])
         self.assertEqual([2, 2], metadata["bar_range"])
+
+    def test_distinct_section_names_do_not_collide_after_filename_sanitization(self) -> None:
+        song = Song(
+            source_id="fixture",
+            title="Fixture",
+            duration_quarters=4.0,
+            bar_boundaries=(0.0, 2.0, 4.0),
+            sections=(
+                SongSection(name="A/B", start_bar=1, end_bar=1),
+                SongSection(name="A B", start_bar=2, end_bar=2),
+            ),
+            tempo_map=(TempoPoint(position=0.0, bpm=120.0),),
+            tracks=(
+                SongTrack(
+                    id="drums",
+                    name="Drums",
+                    classification=TrackClassification(TrackRole.DRUMS, ClassificationSource.PERCUSSION),
+                    midi_channel=10,
+                    is_percussion=True,
+                    notes=(
+                        NoteEvent(position=0.0, duration=1.0, midi_note=36),
+                        NoteEvent(position=2.0, duration=1.0, midi_note=38),
+                    ),
+                ),
+            ),
+        )
+        document = {"schema_version": 1, "song": song_to_dict(song), "import": {"source": "fixture.gp5"}}
+        first = ExportBossRc3Drums(MemoryDocuments({"song.json": document}), MemoryArtifacts(), FakeRenderer()).execute(
+            "song.json", None, tempo_factor=1.0, section_name="A/B"
+        )
+        second = ExportBossRc3Drums(MemoryDocuments({"song.json": document}), MemoryArtifacts(), FakeRenderer()).execute(
+            "song.json", None, tempo_factor=1.0, section_name="A B"
+        )
+        self.assertNotEqual(first["artifact"], second["artifact"])
 
     def test_rejects_non_wav_output_before_rendering(self) -> None:
         documents = MemoryDocuments({"songs/fixture.json": _song_document()})

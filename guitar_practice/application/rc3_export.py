@@ -79,7 +79,7 @@ class ExportBossRc3Drums:
             )
             if section is not None:
                 filename = filename.with_name(
-                    f"{filename.stem}-section-{_filename_token(section.name)}{filename.suffix}"
+                    f"{filename.stem}-section-{_filename_token(section.name)}-bars{section.start_bar}-{section.end_bar}{filename.suffix}"
                 )
             elif bar_range is not None:
                 start_bar, end_bar = bar_range
