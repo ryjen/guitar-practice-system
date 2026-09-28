@@ -122,13 +122,51 @@ class MusicXmlImportTests(unittest.TestCase):
             [(point.position, point.bpm) for point in song.tempo_map],
         )
 
-    def test_rejects_endings_and_jump_navigation_until_supported(self) -> None:
-        ending = b"""<score-partwise><part-list><score-part id='P1'><part-name>Guitar</part-name></score-part></part-list>
-        <part id='P1'><measure number='1'><barline><ending number='1' type='start'/></barline></measure></part></score-partwise>"""
+    def test_expands_first_and_second_endings(self) -> None:
+        data = b"""<score-partwise><part-list>
+        <score-part id='P1'><part-name>Guitar</part-name></score-part>
+        </part-list><part id='P1'>
+        <measure number='1'><attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes>
+          <barline location='left'><repeat direction='forward'/></barline>
+          <note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration></note></measure>
+        <measure number='2'><note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration></note></measure>
+        <measure number='3'><barline location='left'><ending number='1' type='start'/></barline>
+          <note><pitch><step>E</step><octave>4</octave></pitch><duration>4</duration></note>
+          <barline location='right'><ending number='1' type='stop'/><repeat direction='backward'/></barline></measure>
+        <measure number='4'><barline location='left'><ending number='2' type='start'/></barline>
+          <note><pitch><step>F</step><octave>4</octave></pitch><duration>4</duration></note>
+          <barline location='right'><ending number='2' type='discontinue'/></barline></measure>
+        </part></score-partwise>"""
+        song = parse_musicxml(data, source_id="endings")
+        self.assertEqual(24.0, song.duration_quarters)
+        self.assertEqual(
+            [(0.0, 60), (4.0, 62), (8.0, 64), (12.0, 60), (16.0, 62), (20.0, 65)],
+            [(note.position, note.midi_note) for note in song.tracks[0].notes],
+        )
+
+    def test_skipped_first_ending_state_does_not_leak_into_second_ending(self) -> None:
+        data = b"""<score-partwise><part-list>
+        <score-part id='P1'><part-name>Guitar</part-name></score-part>
+        </part-list><part id='P1'>
+        <measure number='1'><attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes>
+          <barline location='left'><repeat direction='forward'/></barline>
+          <direction><sound tempo='120'/></direction><note><rest/><duration>4</duration></note></measure>
+        <measure number='2'><barline location='left'><ending number='1' type='start'/></barline>
+          <direction><sound tempo='60'/></direction><note><rest/><duration>4</duration></note>
+          <barline location='right'><ending number='1' type='stop'/><repeat direction='backward'/></barline></measure>
+        <measure number='3'><barline location='left'><ending number='2' type='start'/></barline>
+          <note><rest/><duration>4</duration></note>
+          <barline location='right'><ending number='2' type='discontinue'/></barline></measure>
+        </part></score-partwise>"""
+        song = parse_musicxml(data, source_id="ending-state")
+        self.assertEqual(
+            [(0.0, 120.0), (4.0, 60.0), (8.0, 120.0)],
+            [(point.position, point.bpm) for point in song.tempo_map],
+        )
+
+    def test_rejects_jump_navigation_until_supported(self) -> None:
         jump = b"""<score-partwise><part-list><score-part id='P1'><part-name>Guitar</part-name></score-part></part-list>
         <part id='P1'><measure number='1'><direction><direction-type><words>D.C.</words></direction-type><sound dacapo='yes'/></direction></measure></part></score-partwise>"""
-        with self.assertRaisesRegex(MusicXmlError, "ending"):
-            parse_musicxml(ending, source_id="ending")
         with self.assertRaisesRegex(MusicXmlError, "navigation"):
             parse_musicxml(jump, source_id="jump")
 

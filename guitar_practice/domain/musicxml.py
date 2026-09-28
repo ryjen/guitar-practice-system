@@ -333,7 +333,9 @@ def _parse_maps(root: ET.Element) -> tuple[tuple[TempoPoint, ...], tuple[MeterPo
             for sound in _descendants(direction, "sound"):
                 bpm = _float_value(sound.attrib.get("tempo"), "sound tempo")
                 if bpm is not None:
-                    tempo_points.append(TempoPoint(position=position + offset, bpm=bpm))
+                    tempo = TempoPoint(position=position + offset, bpm=bpm)
+                    if not tempo_points or tempo_points[-1] != tempo:
+                        tempo_points.append(tempo)
 
         position += numerator * (4.0 / denominator)
 
@@ -426,39 +428,142 @@ _NAVIGATION_SOUND_ATTRIBUTES = frozenset({
 })
 
 
+def _ending_numbers(ending: ET.Element) -> frozenset[int]:
+    raw = ending.attrib.get("number", "")
+    values: set[int] = set()
+    for token in re.split(r"[,\s]+", raw.strip()):
+        if not token:
+            continue
+        try:
+            value = int(token)
+        except ValueError as exc:
+            raise MusicXmlError("ending numbers must be integers") from exc
+        if value not in {1, 2}:
+            raise MusicXmlError("only first and second endings are supported")
+        values.add(value)
+    if not values:
+        raise MusicXmlError("ending number is required")
+    return frozenset(values)
+
+
+def _ending_memberships(measures: list[ET.Element]) -> tuple[frozenset[int] | None, ...]:
+    active: frozenset[int] | None = None
+    memberships: list[frozenset[int] | None] = []
+    for measure in measures:
+        endings = list(_descendants(measure, "ending"))
+        starts = [item for item in endings if item.attrib.get("type") == "start"]
+        closes = [
+            item
+            for item in endings
+            if item.attrib.get("type") in {"stop", "discontinue"}
+        ]
+        if any(
+            item.attrib.get("type") not in {"start", "stop", "discontinue"}
+            for item in endings
+        ):
+            raise MusicXmlError("unsupported MusicXML ending type")
+        if len(starts) > 1 or len(closes) > 1:
+            raise MusicXmlError("multiple ending boundaries in one measure are not supported")
+        if starts:
+            if active is not None:
+                raise MusicXmlError("overlapping endings are not supported")
+            active = _ending_numbers(starts[0])
+        memberships.append(active)
+        if closes:
+            numbers = _ending_numbers(closes[0])
+            if active is None or numbers != active:
+                raise MusicXmlError("ending start/stop numbers must match")
+            active = None
+    if active is not None:
+        raise MusicXmlError("unterminated MusicXML ending")
+    return tuple(memberships)
+
+
+def _ending_closes(measure: ET.Element) -> bool:
+    return any(
+        item.attrib.get("type") in {"stop", "discontinue"}
+        for item in _descendants(measure, "ending")
+    )
+
+
+def _repeat_plays(repeat: ET.Element, *, inside_ending: bool) -> int:
+    raw_times = repeat.attrib.get("times")
+    if inside_ending:
+        if raw_times is not None:
+            raise MusicXmlError("repeat times are not supported inside an ending")
+        return 2
+    try:
+        plays = int(raw_times) if raw_times is not None else 2
+    except ValueError as exc:
+        raise MusicXmlError("repeat times must be an integer") from exc
+    if not 1 <= plays <= 32:
+        raise MusicXmlError("repeat times must be between 1 and 32")
+    return plays
+
+
 def _repeat_play_order(measures: list[ET.Element]) -> list[int]:
+    memberships = _ending_memberships(measures)
+    has_endings = any(item is not None for item in memberships)
+    if has_endings and not any(
+        any(True for _ in _descendants(measure, "repeat"))
+        for measure in measures
+    ):
+        raise MusicXmlError("MusicXML endings require repeat marks")
+
     active_start: int | None = None
+    repeat_in_progress = False
+    pass_number = 1
     order: list[int] = []
-    for index, measure in enumerate(measures):
-        if any(True for _ in _descendants(measure, "ending")):
-            raise MusicXmlError("MusicXML ending playback is not yet supported")
+    index = 0
+    steps = 0
+
+    while index < len(measures):
+        measure = measures[index]
         repeats = list(_descendants(measure, "repeat"))
         forwards = [item for item in repeats if item.attrib.get("direction") == "forward"]
         backwards = [item for item in repeats if item.attrib.get("direction") == "backward"]
         if len(forwards) > 1 or len(backwards) > 1:
             raise MusicXmlError("multiple repeat marks in one measure are not supported")
         if forwards:
-            if active_start is not None:
+            if repeat_in_progress and index != active_start:
                 raise MusicXmlError("nested forward repeats are not supported")
-            active_start = index
+            if not repeat_in_progress:
+                active_start = index
+                pass_number = 1
+                repeat_in_progress = True
 
-        order.append(index)
-        if backwards:
+        ending = memberships[index]
+        should_play = ending is None or pass_number in ending
+        if should_play:
+            order.append(index)
+
+        if backwards and should_play:
             repeat = backwards[0]
-            raw_times = repeat.attrib.get("times")
-            try:
-                plays = int(raw_times) if raw_times is not None else 2
-            except ValueError as exc:
-                raise MusicXmlError("repeat times must be an integer") from exc
-            if not 1 <= plays <= 32:
-                raise MusicXmlError("repeat times must be between 1 and 32")
+            plays = _repeat_plays(repeat, inside_ending=ending is not None)
             start = active_start if active_start is not None else 0
-            section = list(range(start, index + 1))
-            for _ in range(plays - 1):
-                order.extend(section)
+            if pass_number < plays:
+                pass_number += 1
+                active_start = start
+                repeat_in_progress = True
+                index = start
+                steps += 1
+                if len(order) > 10_000 or steps > 20_000:
+                    raise MusicXmlError("expanded repeat form is too large")
+                continue
             active_start = None
-        if len(order) > 10_000:
+            repeat_in_progress = False
+            pass_number = 1
+
+        if should_play and ending is not None and _ending_closes(measure) and pass_number > 1:
+            active_start = None
+            repeat_in_progress = False
+            pass_number = 1
+
+        index += 1
+        steps += 1
+        if len(order) > 10_000 or steps > 20_000:
             raise MusicXmlError("expanded repeat form is too large")
+
     return order
 
 
@@ -537,28 +642,29 @@ def _expand_simple_repeats(root: ET.Element) -> ET.Element:
         if _NAVIGATION_SOUND_ATTRIBUTES & set(sound.attrib):
             raise MusicXmlError("MusicXML jump navigation is not yet supported")
 
-    if any(True for _ in _descendants(root, "ending")):
-        raise MusicXmlError("MusicXML ending playback is not yet supported")
-
     parts = list(_children(root, "part"))
     if not parts:
         return root
     measure_sets = [list(_children(part, "measure")) for part in parts]
-    repeat_flags = [
-        any(any(True for _ in _descendants(measure, "repeat")) for measure in measures)
+    playback_flags = [
+        any(
+            any(True for _ in _descendants(measure, "repeat"))
+            or any(True for _ in _descendants(measure, "ending"))
+            for measure in measures
+        )
         for measures in measure_sets
     ]
-    if not any(repeat_flags):
+    if not any(playback_flags):
         return root
 
-    reference_index = repeat_flags.index(True)
+    reference_index = playback_flags.index(True)
     expected_count = len(measure_sets[reference_index])
     if any(len(measures) != expected_count for measures in measure_sets):
         raise MusicXmlError("parts must have aligned measure counts for repeat expansion")
     order = _repeat_play_order(measure_sets[reference_index])
-    for has_repeats, measures in zip(repeat_flags, measure_sets, strict=True):
-        if has_repeats and _repeat_play_order(measures) != order:
-            raise MusicXmlError("parts must use consistent repeat marks")
+    for has_playback_marks, measures in zip(playback_flags, measure_sets, strict=True):
+        if has_playback_marks and _repeat_play_order(measures) != order:
+            raise MusicXmlError("parts must use consistent repeat and ending marks")
 
     state_sets = [_measure_start_states(measures) for measures in measure_sets]
     tempo_states = _tempo_start_states(measure_sets[0])
@@ -569,8 +675,8 @@ def _expand_simple_repeats(root: ET.Element) -> ET.Element:
             part.remove(measure)
         for occurrence, index in enumerate(order):
             measure = copy.deepcopy(measures[index])
-            is_jump = occurrence > 0 and index != order[occurrence - 1] + 1
-            if is_jump:
+            is_backward_jump = occurrence > 0 and index <= order[occurrence - 1]
+            if is_backward_jump:
                 divisions, numerator, denominator = state_sets[part_index][index]
                 _inject_repeat_start_state(
                     measure,
