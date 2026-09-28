@@ -120,10 +120,25 @@ class Rc3ExportApplicationTests(unittest.TestCase):
             section_name="chorus a/b",
         )
         self.assertEqual(
-            "generated/rc3/fixture-drums-100pct-section-Chorus-A-B.wav",
+            "generated/rc3/fixture-drums-100pct-section-Chorus-A-B-chorus-bars2-2.wav",
             metadata["artifact"],
         )
         self.assertEqual([2, 2], metadata["bar_range"])
+
+    def test_distinct_section_labels_do_not_collide_after_sanitization(self) -> None:
+        document = _document()
+        document["sections"] = [
+            {"id": "first", "label": "A/B", "start_bar": 1, "end_bar": 1},
+            {"id": "second", "label": "A B", "start_bar": 1, "end_bar": 1},
+        ]
+        score.validate(document)
+        first = ExportBossRc3Drums(
+            MemoryDocuments({"score.json": document}), MemoryArtifacts(), FakeRenderer()
+        ).execute("score.json", None, tempo_factor=1.0, section_name="A/B")
+        second = ExportBossRc3Drums(
+            MemoryDocuments({"score.json": document}), MemoryArtifacts(), FakeRenderer()
+        ).execute("score.json", None, tempo_factor=1.0, section_name="A B")
+        self.assertNotEqual(first["artifact"], second["artifact"])
 
 
 if __name__ == "__main__":
