@@ -2,22 +2,45 @@
 
 This workflow uses canonical Score IR as the only editable state and reaches a MuseScore-importable MusicXML artifact without introducing a wizard-specific song model.
 
-## 1. Start from a score with an explicit guitar part
+## 1. Create the score and guitar part
 
-For the current end-to-end workflow, import an existing MusicXML or Guitar Pro skeleton so the canonical Score IR already contains the guitar part/instrument identity that later note and TAB authoring targets:
+Start with the minimal canonical score, then add the explicit guitar part through the same deterministic authoring boundary used by the editor:
 
 ```bash
-guitarctl score import inputs/blue-thing.musicxml \
+guitarctl score init --title "Blue Thing" \
   --output scores/blue-thing.score.json
+```
 
+Create `inputs/guitar-part.json`:
+
+```json
+{
+  "part": {
+    "id": "guitar-1",
+    "name": "Guitar",
+    "role": "guitar",
+    "instrument": {
+      "name": "Electric Guitar",
+      "family": "guitar",
+      "midi": {"program": 29, "channel": 1}
+    },
+    "guitar": {"tuning": "standard"}
+  }
+}
+```
+
+Then enter the editor and add the part to the in-memory working Score IR:
+
+```bash
 guitarctl score edit scores/blue-thing.score.json
 ```
 
-A Guitar Pro source can be used instead; the bounded MuseScore conversion adapter still produces the same canonical Score IR.
+```text
+score-edit> part add inputs/guitar-part.json
+score-edit> context
+```
 
-`score init` intentionally creates a minimal score with no parts. From-scratch part/instrument creation is a separate deterministic authoring capability and is not implied by this workflow.
-
-Inside the editor, changes remain in memory until `save`.
+The authoring convenience `"tuning": "standard"` is normalized to explicit six-string E-A-D-G-B-E pitch records before it enters Score IR. Changes remain in memory until `save`.
 
 ## 2. Establish form and harmony
 
@@ -85,7 +108,7 @@ score-edit> export generated/blue-thing.musicxml
 
 The export uses the #112 deterministic MusicXML exporter directly against the unsaved working Score IR. Standard notation and guitar TAB/string/fret information are included where represented. The repository's flake-backed CI verifies that generated guitar MusicXML imports in MuseScore.
 
-The canonical score is still unchanged at this point. Use `cancel` to discard the working copy.
+The canonical source file is still unchanged at this point, including the newly authored in-memory part. Use `cancel` to discard the complete working copy.
 
 ## 7. Commit the edit
 
