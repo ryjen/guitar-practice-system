@@ -57,6 +57,7 @@ guitarctl score import song.musicxml --output song.score.json
 guitarctl score tracks song.score.json
 guitarctl score render song.score.json --format midi --output generated/song.mid
 guitarctl score play song.score.json --section Verse
+guitarctl score edit song.score.json
 
 guitarctl score notes song.score.json guitar-1 \
   --input notes.json \
@@ -122,6 +123,7 @@ The remaining compatibility-process commands are outside this generation subsyst
 - `score validate <score>` — validate through the canonical Score IR contract and emit a machine-readable report.
 - `score render <score> --format midi --output <path>` — render deterministic Type-1 MIDI plus a JSON provenance sidecar. Optional `--section` or `--bars START:END` uses immutable Score IR structural realizations.
 - `score play <score>` — persist the same MIDI artifact first, then audition it through the bounded FluidSynth player. `--section`, `--bars`, `--output`, and `--soundfont` are explicit; the flake-provided `GUITAR_SOUNDFONT` is the default SoundFont.
+- `score edit <score>` — open an interactive in-memory edit session over one explicit Score IR document. Changes reuse the deterministic authoring application service and reach the source only through explicit validated `save`; `cancel` or EOF leaves the source unchanged.
 
 All input/output paths are explicit and workspace-relative. Authoring transforms write a new target and leave the source unchanged. There is no implicit current score. `score render --format musicxml` is package-native; MIDI render/playback and `score edit` remain owned by #113 and #114.
 
@@ -242,3 +244,27 @@ Binary MIDI is never emitted to terminal stdout. `score render --format midi` th
 `score play` chooses `generated/playback/<score-id>.mid` when no output is supplied, with deterministic section/bar suffixes for focused playback. Artifact generation completes before FluidSynth is invoked. A missing SoundFont, player executable, audio backend, non-zero player exit, or playback timeout returns an unavailable-player error while leaving the MIDI artifact and pre-playback sidecar available for inspection.
 
 The concrete adapter invokes FluidSynth with an argv list, `shell=False`, a 10-second version query, and a bounded playback timeout. Player/SoundFont provenance is added to the sidecar only after successful playback.
+
+
+## Interactive score editing
+
+`score edit` never creates a wizard-specific canonical model. The working copy is valid Score IR held in memory, and every edit delegates to the same `ScoreAuthoring` application/domain contracts used by non-interactive commands.
+
+```text
+score-edit> context
+score-edit> form intro:4 verse:12 solo:24 outro:4
+score-edit> chords Cmaj7 | Dm7 G7 | Em7 | A7
+score-edit> notes guitar-1 notes.json
+score-edit> voicing guitar-1 voicing.json
+score-edit> rhythm guitar-1 rhythm.json
+score-edit> technique guitar-1 technique.json
+score-edit> validate
+score-edit> show
+score-edit> save
+```
+
+The structured stages reuse the same JSON input envelopes documented for their non-interactive equivalents. `context` summarizes bars, sections, parts, and note counts; `show` emits the complete current working Score IR.
+
+The source file is not written during editing. `save` validates the working document, re-reads the source, and refuses to overwrite if the source changed after the session began. Persistence then uses the atomic `ScoreFileStore` replacement path. `cancel`, `quit`, or EOF discards the in-memory working copy.
+
+Playback/export commands are integrated in the next editor slice through their application boundaries rather than by invoking sibling `guitarctl` processes.
