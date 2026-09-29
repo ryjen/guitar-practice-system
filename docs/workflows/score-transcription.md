@@ -83,7 +83,7 @@ Playback uses the #113 Score IR MIDI realization/application boundary. MIDI and 
 score-edit> export generated/blue-thing.musicxml
 ```
 
-The export uses the #112 deterministic MusicXML exporter directly against the unsaved working Score IR. Standard notation and guitar TAB/string/fret information are included where represented. The repository's flake-backed CI verifies that generated guitar MusicXML imports in MuseScore.
+The export uses the #112 deterministic MusicXML exporter directly against the unsaved working Score IR. Standard notation and guitar TAB/string/fret information are included where represented. The repository's flake-backed CI now runs a representative `ScoreEditSession` through form, harmony, notes, voicing, rhythm, technique, unsaved MusicXML export, and a real MuseScore import to `.mscz`.
 
 The canonical score is still unchanged at this point. Use `cancel` to discard the working copy.
 

@@ -8,13 +8,125 @@ import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+from guitar_practice.adapters.binary_files import BinaryFileStore
 from guitar_practice.adapters.musicxml_export import MusicXmlExporter
 from guitar_practice.adapters.musicxml_import import MusicXmlParser
-from tests.test_score_ir import structured_score, timeline_score
+from guitar_practice.adapters.score_files import ScoreFileStore
+from guitar_practice.application.score_editor import ScoreEditSession
+from guitar_practice.domain import score
+from tests.test_score_ir import minimal_score, standard_tuning, structured_score, timeline_score
 
 
 def _texts(root: ET.Element, path: str) -> list[str]:
     return [element.text or "" for element in root.findall(path)]
+
+
+def _guided_editor_musicxml(workspace: Path) -> tuple[bytes, dict]:
+    document = minimal_score()
+    document["id"] = "guided-musescore"
+    document["metadata"]["title"] = "Guided MuseScore"
+    document["parts"] = [
+        {
+            "id": "guitar-1",
+            "name": "Guitar",
+            "role": "guitar",
+            "instrument": {"name": "Electric Guitar", "family": "guitar"},
+            "guitar": {"tuning": standard_tuning()},
+            "events": [],
+        }
+    ]
+    score.validate(document)
+
+    documents = ScoreFileStore(workspace)
+    documents.write("guided.score.json", document)
+    session = ScoreEditSession("guided.score.json", documents)
+    session.replace_form("intro:2")
+    session.replace_chords("C | G")
+    session.apply_structured(
+        "notes",
+        part_id="guitar-1",
+        input_document={
+            "notes": [
+                {
+                    "location": {"bar": 1, "beat": [1, 1]},
+                    "duration": [1, 4],
+                    "voice": 1,
+                    "pitch": {"step": "E", "alter": 0, "octave": 4},
+                },
+                {
+                    "location": {"bar": 2, "beat": [1, 1]},
+                    "duration": [1, 4],
+                    "voice": 1,
+                    "pitch": {"step": "G", "alter": 0, "octave": 4},
+                },
+            ]
+        },
+    )
+    session.apply_structured(
+        "voicing",
+        part_id="guitar-1",
+        input_document={
+            "positions": [
+                {
+                    "selector": {
+                        "location": {"bar": 1, "beat": [1, 1]},
+                        "voice": 1,
+                        "pitch": {"step": "E", "alter": 0, "octave": 4},
+                    },
+                    "position": {"string": 1, "fret": 0},
+                },
+                {
+                    "selector": {
+                        "location": {"bar": 2, "beat": [1, 1]},
+                        "voice": 1,
+                        "pitch": {"step": "G", "alter": 0, "octave": 4},
+                    },
+                    "position": {"string": 1, "fret": 3},
+                },
+            ]
+        },
+    )
+    session.apply_structured(
+        "rhythm",
+        part_id="guitar-1",
+        input_document={
+            "rhythm": [
+                {
+                    "selector": {
+                        "location": {"bar": 2, "beat": [1, 1]},
+                        "voice": 1,
+                        "pitch": {"step": "G", "alter": 0, "octave": 4},
+                    },
+                    "location": {"bar": 2, "beat": [3, 2]},
+                    "duration": [1, 8],
+                }
+            ]
+        },
+    )
+    session.apply_structured(
+        "technique",
+        part_id="guitar-1",
+        input_document={
+            "technique": [
+                {
+                    "selector": {
+                        "location": {"bar": 1, "beat": [1, 1]},
+                        "voice": 1,
+                        "pitch": {"step": "E", "alter": 0, "octave": 4},
+                    },
+                    "articulations": ["accent"],
+                    "techniques": [{"name": "vibrato"}],
+                    "dynamics": "mf",
+                }
+            ]
+        },
+    )
+    result = session.export_musicxml(
+        artifacts=BinaryFileStore(workspace),
+        exporter=MusicXmlExporter(),
+        output="guided.musicxml",
+    )
+    return result.data, document
 
 
 class MusicXmlExporterTests(unittest.TestCase):
@@ -183,14 +295,29 @@ class MusicXmlExporterTests(unittest.TestCase):
         self.assertIn("parts[guitar-1]", diagnostic.path)
 
 
+class GuidedScoreMusicXmlTests(unittest.TestCase):
+    def test_unsaved_guided_edit_session_exports_musicxml_without_mutating_source(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            data, original = _guided_editor_musicxml(workspace)
+
+            self.assertTrue(data.startswith(b'<?xml version="1.0" encoding="UTF-8"?>'))
+            self.assertEqual(
+                original,
+                dict(ScoreFileStore(workspace).read("guided.score.json")),
+            )
+            root = ET.fromstring(data)
+            self.assertEqual("Guided MuseScore", root.findtext("./work/work-title"))
+            self.assertEqual(2, len(root.findall("./part/measure")))
+            self.assertEqual("1", root.findtext("./part/measure/note/notations/technical/string"))
+
+
 class MuseScoreMusicXmlIntegrationTests(unittest.TestCase):
-    @unittest.skipUnless(shutil.which("mscore"), "MuseScore CLI is not available")
-    def test_musescore_imports_exported_guitar_score(self) -> None:
-        data = MusicXmlExporter().export(timeline_score()).data
+    def _assert_musescore_imports(self, data: bytes, *, stem: str) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            source = root / "guitar.musicxml"
-            output = root / "guitar.mscz"
+            source = root / f"{stem}.musicxml"
+            output = root / f"{stem}.mscz"
             source.write_bytes(data)
 
             runtime = root / "runtime"
@@ -216,6 +343,19 @@ class MuseScoreMusicXmlIntegrationTests(unittest.TestCase):
             self.assertEqual(0, result.returncode, result.stderr)
             self.assertTrue(output.is_file())
             self.assertGreater(output.stat().st_size, 0)
+
+    @unittest.skipUnless(shutil.which("mscore"), "MuseScore CLI is not available")
+    def test_musescore_imports_exported_guitar_score(self) -> None:
+        self._assert_musescore_imports(
+            MusicXmlExporter().export(timeline_score()).data,
+            stem="guitar",
+        )
+
+    @unittest.skipUnless(shutil.which("mscore"), "MuseScore CLI is not available")
+    def test_musescore_imports_guided_editor_working_copy(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            data, _ = _guided_editor_musicxml(Path(directory))
+        self._assert_musescore_imports(data, stem="guided-preview")
 
 
 if __name__ == "__main__":
