@@ -14,7 +14,6 @@ class ScoreAuthoringInputError(ValueError):
     """Human-facing score authoring syntax is invalid or ambiguous."""
 
 
-
 _STANDARD_GUITAR_TUNING = [
     {"string": 6, "pitch": {"step": "E", "alter": 0, "octave": 2}},
     {"string": 5, "pitch": {"step": "A", "alter": 0, "octave": 2}},
@@ -52,7 +51,13 @@ def normalize_part_input(value: Any) -> dict[str, Any]:
         tuning = guitar["tuning"]
         if tuning == "standard":
             part["guitar"] = {
-                "tuning": [dict(item) for item in _STANDARD_GUITAR_TUNING]
+                "tuning": [
+                    {
+                        "string": item["string"],
+                        "pitch": dict(item["pitch"]),
+                    }
+                    for item in _STANDARD_GUITAR_TUNING
+                ]
             }
         elif isinstance(tuning, list):
             part["guitar"] = {"tuning": tuning}
