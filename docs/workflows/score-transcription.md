@@ -2,12 +2,20 @@
 
 This workflow uses canonical Score IR as the only editable state and reaches a MuseScore-importable MusicXML artifact without introducing a wizard-specific song model.
 
-## 1. Create the score
+## 1. Start from a score with an explicit guitar part
+
+For the current end-to-end workflow, import an existing MusicXML or Guitar Pro skeleton so the canonical Score IR already contains the guitar part/instrument identity that later note and TAB authoring targets:
 
 ```bash
-guitarctl score init --title "Blue Thing" --output scores/blue-thing.score.json
+guitarctl score import inputs/blue-thing.musicxml \
+  --output scores/blue-thing.score.json
+
 guitarctl score edit scores/blue-thing.score.json
 ```
+
+A Guitar Pro source can be used instead; the bounded MuseScore conversion adapter still produces the same canonical Score IR.
+
+`score init` intentionally creates a minimal score with no parts. From-scratch part/instrument creation is a separate deterministic authoring capability and is not implied by this workflow.
 
 Inside the editor, changes remain in memory until `save`.
 
