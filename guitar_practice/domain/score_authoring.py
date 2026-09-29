@@ -501,3 +501,29 @@ def apply_note_technique(
         )
 
     return _validate_result(result)
+
+
+
+def add_part(
+    document: Mapping[str, Any],
+    *,
+    part: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Append one explicit canonical part without mutating the source score."""
+
+    result = _document(document)
+    if not isinstance(part, Mapping):
+        raise ScoreAuthoringError("part must be an object")
+    candidate = copy.deepcopy(dict(part))
+    if candidate.get("events") is None:
+        candidate["events"] = []
+    if candidate["events"] != []:
+        raise ScoreAuthoringError(
+            "new part authoring requires an empty events list; add notes separately"
+        )
+    candidate.setdefault(
+        "provenance",
+        {"kind": "user", "source": "score-authoring:part"},
+    )
+    result["parts"].append(candidate)
+    return _validate_result(result)
