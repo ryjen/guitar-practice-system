@@ -5,6 +5,7 @@ from typing import Any, Mapping
 
 from guitar_practice.application.score_authoring import (
     ScoreAuthoring,
+    normalize_part_input,
     parse_chord_grid,
     parse_form_spec,
 )
@@ -236,6 +237,64 @@ class ScoreAuthoringApplicationTests(unittest.TestCase):
                 output="written.json",
             )
         self.assertNotIn("written.json", store.values)
+
+    def test_part_input_normalizes_standard_tuning_and_preserves_midi_identity(self) -> None:
+        part = normalize_part_input(
+            {
+                "id": "guitar-1",
+                "name": "Guitar",
+                "role": "guitar",
+                "instrument": {
+                    "name": "Electric Guitar",
+                    "family": "guitar",
+                    "midi": {"program": 29, "channel": 1},
+                },
+                "guitar": {"tuning": "standard"},
+            }
+        )
+
+        self.assertEqual([], part["events"])
+        self.assertEqual([6, 5, 4, 3, 2, 1], [
+            item["string"] for item in part["guitar"]["tuning"]
+        ])
+        self.assertEqual(
+            {"program": 29, "channel": 1},
+            part["instrument"]["midi"],
+        )
+
+    def test_add_part_application_writes_new_document_only(self) -> None:
+        source = minimal_score()
+        input_document = {
+            "part": {
+                "id": "bass",
+                "name": "Bass",
+                "role": "bass",
+                "instrument": {
+                    "name": "Electric Bass",
+                    "family": "bass",
+                    "midi": {"program": 33, "channel": 2},
+                },
+            }
+        }
+        store = MemoryDocuments(
+            {
+                "source.json": source,
+                "part.json": input_document,
+            }
+        )
+        service = ScoreAuthoring(store, inputs=store)
+
+        result = service.add_part(
+            "source.json",
+            input_path="part.json",
+            output="written.json",
+        )
+
+        self.assertEqual(source, store.values["source.json"])
+        self.assertEqual(input_document, store.values["part.json"])
+        self.assertEqual("bass", result["parts"][0]["id"])
+        self.assertEqual([], result["parts"][0]["events"])
+        score.validate(result)
 
     def test_form_then_section_chords_writes_new_documents_without_mutating_sources(self) -> None:
         initial = minimal_score()
