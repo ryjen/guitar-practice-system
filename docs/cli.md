@@ -55,6 +55,8 @@ guitarctl score validate blue-thing-harmony.score.json
 guitarctl score show blue-thing-harmony.score.json
 guitarctl score import song.musicxml --output song.score.json
 guitarctl score tracks song.score.json
+guitarctl score render song.score.json --format midi --output generated/song.mid
+guitarctl score play song.score.json --section Verse
 
 guitarctl score notes song.score.json guitar-1 \
   --input notes.json \
@@ -118,6 +120,8 @@ The remaining compatibility-process commands are outside this generation subsyst
 - `score show <score>` — emit the canonical Score IR document.
 - `score tracks <score>` — inspect part/role/instrument metadata.
 - `score validate <score>` — validate through the canonical Score IR contract and emit a machine-readable report.
+- `score render <score> --format midi --output <path>` — render deterministic Type-1 MIDI plus a JSON provenance sidecar. Optional `--section` or `--bars START:END` uses immutable Score IR structural realizations.
+- `score play <score>` — persist the same MIDI artifact first, then audition it through the bounded FluidSynth player. `--section`, `--bars`, `--output`, and `--soundfont` are explicit; the flake-provided `GUITAR_SOUNDFONT` is the default SoundFont.
 
 All input/output paths are explicit and workspace-relative. Authoring transforms write a new target and leave the source unchanged. There is no implicit current score. `score render --format musicxml` is package-native; MIDI render/playback and `score edit` remain owned by #113 and #114.
 
@@ -218,3 +222,23 @@ Rhythm patches select the current note state and describe only the timing fields
 ```
 
 At least one of `location`, `duration`, or `voice` is required. Selectors are resolved before any patch is applied, so moving one note cannot change the identity used by another patch. The first deterministic slice rejects tied note segments; edit or replace the complete tie chain explicitly rather than silently breaking playback semantics.
+
+
+## MIDI audition and correction
+
+MIDI playback is a disposable realization, not score state:
+
+```text
+Score IR
+  -> optional section/bar realization
+  -> deterministic Type-1 MIDI
+  -> persisted .mid + provenance sidecar
+  -> bounded FluidSynth player
+  -> listen / correct Score IR / rerender
+```
+
+Binary MIDI is never emitted to terminal stdout. `score render --format midi` therefore requires an explicit `--output`. The sidecar records the source Score IR id/schema/version, structural selection, realization identity/provenance, part ids, and render path.
+
+`score play` chooses `generated/playback/<score-id>.mid` when no output is supplied, with deterministic section/bar suffixes for focused playback. Artifact generation completes before FluidSynth is invoked. A missing SoundFont, player executable, audio backend, non-zero player exit, or playback timeout returns an unavailable-player error while leaving the MIDI artifact and pre-playback sidecar available for inspection.
+
+The concrete adapter invokes FluidSynth with an argv list, `shell=False`, a 10-second version query, and a bounded playback timeout. Player/SoundFont provenance is added to the sidecar only after successful playback.
