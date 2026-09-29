@@ -4,7 +4,7 @@ import copy
 import unittest
 
 from guitar_practice.domain import score, score_authoring
-from tests.test_score_ir import minimal_score, timeline_score
+from tests.test_score_ir import minimal_score, standard_tuning, timeline_score
 
 
 class ScoreAuthoringDomainTests(unittest.TestCase):
@@ -384,6 +384,58 @@ class ScoreAuthoringDomainTests(unittest.TestCase):
                     {"selector": selector, "dynamics": "p"},
                     {"selector": selector, "articulations": ["accent"]},
                 ],
+            )
+
+    def test_add_part_is_immutable_and_uses_canonical_validation(self) -> None:
+        source = minimal_score()
+        original = copy.deepcopy(source)
+
+        result = score_authoring.add_part(
+            source,
+            part={
+                "id": "guitar-1",
+                "name": "Guitar",
+                "role": "guitar",
+                "instrument": {
+                    "name": "Electric Guitar",
+                    "family": "guitar",
+                    "midi": {"program": 29, "channel": 1},
+                },
+                "guitar": {"tuning": standard_tuning()},
+                "events": [],
+            },
+        )
+
+        self.assertEqual(original, source)
+        self.assertEqual("guitar-1", result["parts"][0]["id"])
+        self.assertEqual(
+            {"kind": "user", "source": "score-authoring:part"},
+            result["parts"][0]["provenance"],
+        )
+        score.validate(result)
+
+        with self.assertRaisesRegex(score_authoring.ScoreAuthoringError, "duplicate part id"):
+            score_authoring.add_part(result, part=result["parts"][0])
+
+    def test_add_part_rejects_prepopulated_events(self) -> None:
+        source = minimal_score()
+        with self.assertRaisesRegex(score_authoring.ScoreAuthoringError, "empty events"):
+            score_authoring.add_part(
+                source,
+                part={
+                    "id": "bass",
+                    "name": "Bass",
+                    "role": "bass",
+                    "instrument": {"name": "Bass", "family": "bass"},
+                    "events": [
+                        {
+                            "kind": "rest",
+                            "location": {"bar": 1, "beat": [1, 1]},
+                            "duration": [1, 4],
+                            "voice": 1,
+                        }
+                    ],
+                },
             )
 
     def test_replace_harmony_requires_exact_bar_count(self) -> None:
