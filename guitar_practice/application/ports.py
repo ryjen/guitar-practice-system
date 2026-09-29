@@ -123,3 +123,20 @@ class AudioRenderer(Protocol):
 
     def render(self, midi: bytes, profile: AudioRenderProfile) -> RenderedAudio:
         ...
+
+
+
+@dataclass(frozen=True)
+class PlayedMidi:
+    """Successful MIDI playback plus explicit player provenance."""
+
+    player: str
+    player_version: str | None
+    soundfont: str | None = None
+
+
+class MidiPlayer(Protocol):
+    """Play deterministic MIDI bytes through one bounded local adapter."""
+
+    def play(self, midi: bytes) -> PlayedMidi:
+        ...
