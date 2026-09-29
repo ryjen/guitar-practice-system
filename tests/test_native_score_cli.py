@@ -810,7 +810,18 @@ class NativeScoreCliTests(unittest.TestCase):
                 "bars": [{"number": 1}],
                 "meter_map": [{"bar": 1, "beats": 4, "beat_unit": 4}],
                 "tempo_map": [],
-                "parts": [],
+                "parts": [
+                    {
+                        "id": "guitar-1",
+                        "name": "Guitar",
+                        "role": "guitar",
+                        "instrument": {
+                            "name": "Electric Guitar",
+                            "family": "guitar",
+                        },
+                        "events": [],
+                    }
+                ],
             }
             (workspace / "draft.score.json").write_text(
                 score.dumps(source),
