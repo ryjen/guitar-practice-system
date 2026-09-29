@@ -32,6 +32,7 @@ _HELP = """Commands:
   validate
   form <name:bars ...>
   chords [--section <label>] <bar-separated chord grid>
+  part add <input.json>
   notes <part-id> <input.json>
   voicing <part-id> <input.json>
   rhythm <part-id> <input.json>
@@ -239,6 +240,17 @@ def score_edit(argv: Sequence[str], context: CliContext) -> int:
                     },
                     context,
                 )
+                continue
+
+            if command == "part":
+                if len(tokens) != 3 or tokens[1].casefold() != "add":
+                    raise ValueError("part requires: part add <input.json>")
+                input_path = workspace_relative(
+                    tokens[2],
+                    label="part input",
+                )
+                session.add_part(inputs.read(input_path))
+                _write_json(session.context(), context)
                 continue
 
             if command in {"notes", "voicing", "rhythm", "technique"}:
