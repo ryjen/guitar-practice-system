@@ -63,7 +63,6 @@ def _chord_args(tokens: list[str]) -> tuple[str | None, str]:
     return section, grid
 
 
-
 def _play_args(
     tokens: list[str],
 ) -> tuple[str | None, tuple[int, int] | None, str | None, str | None]:
@@ -194,7 +193,12 @@ def score_edit(argv: Sequence[str], context: CliContext) -> int:
                 continue
 
             if command == "play":
-                section, selected_bars, output_value, soundfont_value = _play_args(tokens)
+                (
+                    section,
+                    selected_bars,
+                    output_value,
+                    soundfont_value,
+                ) = _play_args(tokens)
                 output = (
                     workspace_relative(output_value, label="playback output")
                     if output_value is not None
