@@ -799,6 +799,100 @@ class NativeScoreCliTests(unittest.TestCase):
             )
             self.assertEqual("ff", saved["parts"][0]["events"][0]["dynamics"])
 
+    def test_edit_export_previews_unsaved_working_copy_without_saving(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = {
+                "schema": score.SCHEMA_ID,
+                "version": score.SCHEMA_VERSION,
+                "id": "draft",
+                "metadata": {"title": "Draft"},
+                "bars": [{"number": 1}],
+                "meter_map": [{"bar": 1, "beats": 4, "beat_unit": 4}],
+                "tempo_map": [],
+                "parts": [],
+            }
+            (workspace / "draft.score.json").write_text(
+                score.dumps(source),
+                encoding="utf-8",
+            )
+
+            script = io.StringIO(
+                "form intro:1 verse:1\n"
+                "chords Cmaj7 | G7\n"
+                "export generated/preview.musicxml\n"
+                "cancel\n"
+            )
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with mock.patch("sys.stdin", script):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    result = main(
+                        [
+                            "--workspace",
+                            str(workspace),
+                            "score",
+                            "edit",
+                            "draft.score.json",
+                        ]
+                    )
+
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+            exported = (workspace / "generated" / "preview.musicxml").read_text(
+                encoding="utf-8"
+            )
+            self.assertIn('<measure number="2"', exported)
+            self.assertIn("<root-step>G</root-step>", exported)
+            self.assertEqual(
+                source,
+                score.loads((workspace / "draft.score.json").read_text(encoding="utf-8")),
+            )
+
+    def test_edit_playback_failure_preserves_preview_midi_and_source(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = timeline_score()
+            source["parts"][0]["events"][0].pop("tie")
+            score.validate(source)
+            (workspace / "source.score.json").write_text(
+                score.dumps(source),
+                encoding="utf-8",
+            )
+
+            script = io.StringIO(
+                "play --output generated/preview.mid --soundfont missing.sf2\n"
+                "cancel\n"
+            )
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with mock.patch("sys.stdin", script):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    result = main(
+                        [
+                            "--workspace",
+                            str(workspace),
+                            "score",
+                            "edit",
+                            "source.score.json",
+                        ]
+                    )
+
+            self.assertEqual(0, result)
+            self.assertIn("SoundFont not found", stderr.getvalue())
+            self.assertIn("cancelled", stdout.getvalue())
+            artifact = workspace / "generated" / "preview.mid"
+            self.assertTrue(artifact.is_file())
+            sidecar = json.loads(
+                (workspace / "generated" / "preview.mid.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual("source.score.json", sidecar["score"])
+            self.assertNotIn("playback", sidecar)
+            self.assertEqual(
+                source,
+                score.loads((workspace / "source.score.json").read_text(encoding="utf-8")),
+            )
+
     def test_authoring_commands_require_explicit_output_and_form_rejects_nonempty_score(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             workspace = Path(directory)
