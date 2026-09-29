@@ -267,4 +267,19 @@ The structured stages reuse the same JSON input envelopes documented for their n
 
 The source file is not written during editing. `save` validates the working document, re-reads the source, and refuses to overwrite if the source changed after the session began. Persistence then uses the atomic `ScoreFileStore` replacement path. `cancel`, `quit`, or EOF discards the in-memory working copy.
 
-Playback/export commands are integrated in the next editor slice through their application boundaries rather than by invoking sibling `guitarctl` processes.
+`play` auditions the current unsaved working Score IR through the #113 application/player boundary, and `export <output.musicxml>` writes the current unsaved working Score IR through the #112 MusicXML exporter boundary. Neither command shells out to a sibling `guitarctl` process or saves the canonical source.
+
+
+### Editor preview commands
+
+The interactive editor can preview unsaved work before deciding whether to save:
+
+```text
+score-edit> play --section Verse
+score-edit> play --bars 17:24 --output generated/preview.mid
+score-edit> export generated/preview.musicxml
+```
+
+Playback persists a disposable MIDI artifact/provenance sidecar before invoking FluidSynth, so player failure still leaves inspectable output. Export writes deterministic MusicXML from the in-memory Score IR; it does not implicitly save the source score.
+
+Future inference layers should present transient `EditProposal` values with an action, value, optional confidence in `[0,1]`, alternatives, and source. Proposal metadata is not canonical Score IR. Accepting a proposal must dispatch through the same deterministic editor/authoring operations used for user-authored edits.
