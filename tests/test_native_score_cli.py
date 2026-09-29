@@ -6,6 +6,7 @@ import json
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from guitar_practice.domain import midi, score
@@ -31,6 +32,7 @@ class NativeScoreCliTests(unittest.TestCase):
             ["score", "render", "song.score.json", "--format", "musicxml"],
             ["score", "render", "song.score.json", "--format", "midi"],
             ["score", "play", "song.score.json"],
+            ["score", "edit", "song.score.json"],
             ["score", "show", "song.score.json"],
             ["score", "tracks", "song.score.json"],
             ["score", "validate", "song.score.json"],
@@ -660,6 +662,142 @@ class NativeScoreCliTests(unittest.TestCase):
                 )
             self.assertEqual(65, escaped)
             self.assertIn("workspace-relative", stderr.getvalue())
+
+    def test_edit_requires_explicit_target_and_cancel_leaves_source_unchanged(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = score.loads(score.dumps({
+                "schema": score.SCHEMA_ID,
+                "version": score.SCHEMA_VERSION,
+                "id": "draft",
+                "metadata": {"title": "Draft"},
+                "bars": [{"number": 1}],
+                "meter_map": [{"bar": 1, "beats": 4, "beat_unit": 4}],
+                "tempo_map": [],
+                "parts": [],
+            }))
+            (workspace / "draft.score.json").write_text(score.dumps(source), encoding="utf-8")
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with mock.patch("sys.stdin", io.StringIO("form intro:2\ncancel\n")):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    result = main(
+                        [
+                            "--workspace",
+                            str(workspace),
+                            "score",
+                            "edit",
+                            "draft.score.json",
+                        ]
+                    )
+
+            self.assertEqual(0, result)
+            self.assertIn("cancelled", stdout.getvalue())
+            self.assertEqual("", stderr.getvalue())
+            self.assertEqual(
+                source,
+                score.loads((workspace / "draft.score.json").read_text(encoding="utf-8")),
+            )
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                missing = main(["--workspace", str(workspace), "score", "edit"])
+            self.assertEqual(2, missing)
+
+    def test_edit_form_chords_validate_and_save_atomically(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = {
+                "schema": score.SCHEMA_ID,
+                "version": score.SCHEMA_VERSION,
+                "id": "draft",
+                "metadata": {"title": "Draft"},
+                "bars": [{"number": 1}],
+                "meter_map": [{"bar": 1, "beats": 4, "beat_unit": 4}],
+                "tempo_map": [],
+                "parts": [],
+            }
+            (workspace / "draft.score.json").write_text(score.dumps(source), encoding="utf-8")
+
+            script = io.StringIO(
+                "form intro:1 verse:1\n"
+                "chords Cmaj7 | G7\n"
+                "validate\n"
+                "save\n"
+            )
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with mock.patch("sys.stdin", script):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    result = main(
+                        [
+                            "--workspace",
+                            str(workspace),
+                            "score",
+                            "edit",
+                            "draft.score.json",
+                        ]
+                    )
+
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+            saved = score.loads(
+                (workspace / "draft.score.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(2, len(saved["bars"]))
+            self.assertEqual(["Cmaj7", "G7"], [item["symbol"] for item in saved["harmony"]])
+            self.assertIn('"valid": true', stdout.getvalue())
+            self.assertIn('"saved": "draft.score.json"', stdout.getvalue())
+            self.assertEqual([], list(workspace.glob(".draft.score.json.*.tmp")))
+
+    def test_edit_structured_action_uses_existing_input_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = timeline_score()
+            (workspace / "source.score.json").write_text(score.dumps(source), encoding="utf-8")
+            (workspace / "technique.json").write_text(
+                json.dumps(
+                    {
+                        "technique": [
+                            {
+                                "selector": {
+                                    "location": {"bar": 1, "beat": [1, 1]},
+                                    "voice": 1,
+                                    "pitch": {"step": "E", "alter": 0, "octave": 4},
+                                },
+                                "dynamics": "ff",
+                            }
+                        ]
+                    }
+                ) + "\n",
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with mock.patch(
+                "sys.stdin",
+                io.StringIO("technique guitar-1 technique.json\nsave\n"),
+            ):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    result = main(
+                        [
+                            "--workspace",
+                            str(workspace),
+                            "score",
+                            "edit",
+                            "source.score.json",
+                        ]
+                    )
+
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+            saved = score.loads(
+                (workspace / "source.score.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual("ff", saved["parts"][0]["events"][0]["dynamics"])
 
     def test_authoring_commands_require_explicit_output_and_form_rejects_nonempty_score(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
