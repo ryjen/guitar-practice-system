@@ -44,7 +44,10 @@ guitarctl midi validate \
 guitarctl midi generate-exercises
 
 guitarctl score init --title "Blue Thing" > blue-thing.score.json
-guitarctl score form blue-thing.score.json \
+guitarctl score part add blue-thing.score.json \
+  --input guitar-part.json \
+  --output blue-thing-guitar.score.json
+guitarctl score form blue-thing-guitar.score.json \
   "intro:4 verse:12 verse:12 solo:24 outro:4" \
   --output blue-thing-formed.score.json
 guitarctl score chords blue-thing-formed.score.json \
@@ -113,6 +116,7 @@ The remaining compatibility-process commands are outside this generation subsyst
 - `score import <source> --output <path>` — import MusicXML or supported Guitar Pro input through the bounded conversion/import adapters.
 - `score form <score> "intro:4 verse:12 ..." --output <path>` — replace section/bar structure while the score is still an empty draft; repeated section names receive deterministic numeric suffixes.
 - `score chords <score> "C | Dm7 G7 | ..." --output <path>` — replace harmony across the whole score, or add `--section <label>` for one explicit section. Chords inside a bar are spaced evenly using that bar's active meter; an empty bar cell adds no new harmony event.
+- `score part add <score> --input <part.json> --output <path>` — append one explicit empty part/instrument to a new validated Score IR document. The transient input may use `"guitar": {"tuning": "standard"}`; persisted Score IR always contains explicit string/pitch tuning.
 - `score notes <score> <part-id> --input <notes.json> --output <path>` — replace note events for one explicit part while preserving non-note events. The input document contains only a `notes` array of Score IR note fields; `kind: "note"` and user provenance are supplied when omitted.
 - `score voicing <score> <part-id> --input <voicing.json> --output <path>` — apply string/fret positions to existing notes. Each patch selects exactly one note by current location + voice + pitch; missing or ambiguous selectors fail closed, and Score IR validates the resulting position against declared guitar tuning.
 - `score rhythm <score> <part-id> --input <rhythm.json> --output <path>` — relocate, resize, or revoice exactly selected untied notes. All selectors resolve against the pre-edit score, duplicate targets fail closed, and the output is re-sorted and fully Score IR-validated.
@@ -283,3 +287,32 @@ score-edit> export generated/preview.musicxml
 Playback persists a disposable MIDI artifact/provenance sidecar before invoking FluidSynth, so player failure still leaves inspectable output. Export writes deterministic MusicXML from the in-memory Score IR; it does not implicitly save the source score.
 
 Future inference layers should present transient `EditProposal` values with an action, value, optional confidence in `[0,1]`, alternatives, and source. Proposal metadata is not canonical Score IR. Accepting a proposal must dispatch through the same deterministic editor/authoring operations used for user-authored edits.
+
+
+### Part authoring input
+
+A from-scratch score can add an explicit part without manually editing canonical JSON:
+
+```json
+{
+  "part": {
+    "id": "guitar-1",
+    "name": "Guitar",
+    "role": "guitar",
+    "instrument": {
+      "name": "Electric Guitar",
+      "family": "guitar",
+      "midi": {"program": 29, "channel": 1}
+    },
+    "guitar": {"tuning": "standard"}
+  }
+}
+```
+
+```bash
+guitarctl score part add draft.score.json \
+  --input guitar-part.json \
+  --output draft-with-guitar.score.json
+```
+
+New parts are deliberately empty; notes are authored separately through `score notes`. Duplicate part ids, invalid MIDI identity, and invalid explicit tunings fail through canonical Score IR validation. The interactive editor exposes the same operation as `part add <input.json>`.
