@@ -66,6 +66,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec(("score", "import"), "Import Guitar Pro or MusicXML into canonical Score IR", MigrationState.NATIVE, native_handler="score-import"),
     CommandSpec(("score", "form"), "Replace empty-draft form from an explicit section specification", MigrationState.NATIVE, native_handler="score-form"),
     CommandSpec(("score", "chords"), "Replace harmony in an explicit score or section range", MigrationState.NATIVE, native_handler="score-chords"),
+    CommandSpec(("score", "part", "add"), "Add one explicit empty part to canonical Score IR", MigrationState.NATIVE, native_handler="score-part-add"),
     CommandSpec(("score", "notes"), "Replace note events for one explicit score part", MigrationState.NATIVE, native_handler="score-notes"),
     CommandSpec(("score", "voicing"), "Apply guitar string/fret positions to exactly selected notes", MigrationState.NATIVE, native_handler="score-voicing"),
     CommandSpec(("score", "rhythm"), "Relocate or resize exactly selected untied notes", MigrationState.NATIVE, native_handler="score-rhythm"),
