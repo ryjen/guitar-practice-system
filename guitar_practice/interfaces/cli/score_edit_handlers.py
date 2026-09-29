@@ -4,15 +4,24 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shlex
 from collections.abc import Callable, Sequence
+from pathlib import Path
 
+from guitar_practice.adapters.binary_files import BinaryFileStore
 from guitar_practice.adapters.json_files import JsonDocumentError, JsonFileStore
+from guitar_practice.adapters.midi_playback import FluidSynthMidiPlayer, MidiPlaybackError
+from guitar_practice.adapters.musicxml_export import MusicXmlExportError, MusicXmlExporter
 from guitar_practice.adapters.score_files import ScoreDocumentError, ScoreFileStore
 from guitar_practice.application.score_editor import ScoreEditError, ScoreEditSession
 from guitar_practice.domain import score
 from guitar_practice.interfaces.cli import exit_codes
-from guitar_practice.interfaces.cli.practice_args import PracticePathError, workspace_relative
+from guitar_practice.interfaces.cli.practice_args import (
+    PracticePathError,
+    bar_range,
+    workspace_relative,
+)
 from guitar_practice.interfaces.cli.runtime import CliContext
 
 NativeHandler = Callable[[Sequence[str], CliContext], int]
@@ -27,6 +36,8 @@ _HELP = """Commands:
   voicing <part-id> <input.json>
   rhythm <part-id> <input.json>
   technique <part-id> <input.json>
+  play [--section <label> | --bars START:END] [--output <midi>] [--soundfont <sf2>]
+  export <output.musicxml>
   save
   cancel
   help
@@ -50,6 +61,43 @@ def _chord_args(tokens: list[str]) -> tuple[str | None, str]:
     if not grid:
         raise ValueError("chords requires a chord grid")
     return section, grid
+
+
+def _play_args(
+    tokens: list[str],
+) -> tuple[str | None, tuple[int, int] | None, str | None, str | None]:
+    section: str | None = None
+    bars: tuple[int, int] | None = None
+    output: str | None = None
+    soundfont: str | None = None
+    index = 1
+    while index < len(tokens):
+        option = tokens[index]
+        if option not in {"--section", "--bars", "--output", "--soundfont"}:
+            raise ValueError(f"unknown play option: {option}")
+        if index + 1 >= len(tokens):
+            raise ValueError(f"{option} requires a value")
+        value = tokens[index + 1]
+        if option == "--section":
+            section = value
+        elif option == "--bars":
+            bars = bar_range(value)
+        elif option == "--output":
+            output = value
+        else:
+            soundfont = value
+        index += 2
+    if section is not None and bars is not None:
+        raise ValueError("choose either --section or --bars, not both")
+    return section, bars, output, soundfont
+
+
+def _soundfont_path(value: str | None, context: CliContext) -> Path | None:
+    selected = value or os.environ.get("GUITAR_SOUNDFONT")
+    if selected is None:
+        return None
+    path = Path(selected)
+    return path if path.is_absolute() else context.workspace / path
 
 
 def score_edit(argv: Sequence[str], context: CliContext) -> int:
@@ -144,6 +192,55 @@ def score_edit(argv: Sequence[str], context: CliContext) -> int:
                 _write_json(session.context(), context)
                 continue
 
+            if command == "play":
+                (
+                    section,
+                    selected_bars,
+                    output_value,
+                    soundfont_value,
+                ) = _play_args(tokens)
+                output = (
+                    workspace_relative(output_value, label="playback output")
+                    if output_value is not None
+                    else None
+                )
+                artifacts = BinaryFileStore(context.workspace)
+                metadata = JsonFileStore(context.workspace)
+                payload = session.play(
+                    artifacts=artifacts,
+                    metadata=metadata,
+                    player=FluidSynthMidiPlayer(
+                        context.workspace,
+                        soundfont=_soundfont_path(soundfont_value, context),
+                    ),
+                    output=output,
+                    bar_range=selected_bars,
+                    section_name=section,
+                )
+                _write_json(payload, context)
+                continue
+
+            if command == "export":
+                if len(tokens) != 2:
+                    raise ValueError("export requires <output.musicxml>")
+                output = workspace_relative(tokens[1], label="export output")
+                result = session.export_musicxml(
+                    artifacts=BinaryFileStore(context.workspace),
+                    exporter=MusicXmlExporter(),
+                    output=output,
+                )
+                _write_json(
+                    {
+                        "output": output,
+                        "format": "musicxml",
+                        "diagnostics": [
+                            item.as_dict() for item in result.diagnostics
+                        ],
+                    },
+                    context,
+                )
+                continue
+
             if command in {"notes", "voicing", "rhythm", "technique"}:
                 if len(tokens) != 3:
                     raise ValueError(
@@ -168,6 +265,8 @@ def score_edit(argv: Sequence[str], context: CliContext) -> int:
             PracticePathError,
             ScoreDocumentError,
             JsonDocumentError,
+            MidiPlaybackError,
+            MusicXmlExportError,
             ScoreEditError,
             score.ScoreError,
             OSError,
