@@ -33,7 +33,8 @@ class _MemoryDocuments:
 
     def write(self, path: str, document: Mapping[str, Any]) -> None:
         value = copy.deepcopy(dict(document))
-        score.validate(value)
+        if path == "working":
+            score.validate(value)
         self.values[path] = value
 
 
