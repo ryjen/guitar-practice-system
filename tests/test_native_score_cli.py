@@ -883,9 +883,31 @@ class NativeScoreCliTests(unittest.TestCase):
                 "tempo_map": [],
                 "parts": [],
             }
-            (workspace / "draft.score.json").write_text(score.dumps(source), encoding="utf-8")
+            (workspace / "draft.score.json").write_text(
+                score.dumps(source),
+                encoding="utf-8",
+            )
+            (workspace / "part.json").write_text(
+                json.dumps(
+                    {
+                        "part": {
+                            "id": "guitar-1",
+                            "name": "Guitar",
+                            "role": "guitar",
+                            "instrument": {
+                                "name": "Electric Guitar",
+                                "family": "guitar",
+                            },
+                            "guitar": {"tuning": "standard"},
+                        }
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
 
             script = io.StringIO(
+                "part add part.json\n"
                 "form intro:1 verse:1\n"
                 "chords Cmaj7 | G7\n"
                 "validate\n"
@@ -911,7 +933,12 @@ class NativeScoreCliTests(unittest.TestCase):
                 (workspace / "draft.score.json").read_text(encoding="utf-8")
             )
             self.assertEqual(2, len(saved["bars"]))
-            self.assertEqual(["Cmaj7", "G7"], [item["symbol"] for item in saved["harmony"]])
+            self.assertEqual("guitar-1", saved["parts"][0]["id"])
+            self.assertEqual(6, len(saved["parts"][0]["guitar"]["tuning"]))
+            self.assertEqual(
+                ["Cmaj7", "G7"],
+                [item["symbol"] for item in saved["harmony"]],
+            )
             self.assertIn('"valid": true', stdout.getvalue())
             self.assertIn('"saved": "draft.score.json"', stdout.getvalue())
             self.assertEqual([], list(workspace.glob(".draft.score.json.*.tmp")))
