@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from collections.abc import Callable, Sequence
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 
 from guitar_practice.adapters.binary_files import BinaryFileStore
 from guitar_practice.adapters.json_files import JsonDocumentError, JsonFileStore
 from guitar_practice.adapters.musicxml_export import MusicXmlExportError, MusicXmlExporter
 from guitar_practice.adapters.musicxml_import import MusicXmlError, MusicXmlParser
+from guitar_practice.adapters.midi_playback import FluidSynthMidiPlayer, MidiPlaybackError
 from guitar_practice.adapters.score_conversion import (
     DirectMusicXmlConverter,
     MuseScoreConverter,
@@ -20,13 +22,17 @@ from guitar_practice.adapters.score_files import ScoreDocumentError, ScoreFileSt
 from guitar_practice.application.score_authoring import ScoreAuthoring
 from guitar_practice.application.score_documents import ScoreDocuments
 from guitar_practice.application.score_export import ExportScore
+from guitar_practice.application.score_playback import PlayScoreMidi, RenderScoreMidi
 from guitar_practice.application.score_import import (
     ImportScore,
     ScoreImportError,
     UnsupportedScoreFormat,
 )
 from guitar_practice.domain import score
+from guitar_practice.domain.score_midi import ScoreMidiError
+from guitar_practice.domain.score_realization import ScoreRealizationError
 from guitar_practice.interfaces.cli import exit_codes
+from guitar_practice.interfaces.cli.practice_args import bar_range
 from guitar_practice.interfaces.cli.runtime import CliContext
 
 NativeHandler = Callable[[Sequence[str], CliContext], int]
@@ -373,11 +379,21 @@ def score_technique(argv: Sequence[str], context: CliContext) -> int:
     return exit_codes.OK
 
 
+def _midi_renderer(context: CliContext) -> RenderScoreMidi:
+    return RenderScoreMidi(
+        documents=ScoreFileStore(context.workspace),
+        artifacts=BinaryFileStore(context.workspace),
+        metadata=JsonFileStore(context.workspace),
+    )
+
+
 def score_render(argv: Sequence[str], context: CliContext) -> int:
     parser = argparse.ArgumentParser(prog="guitarctl score render")
     parser.add_argument("score", help="Canonical Score IR JSON inside the workspace")
-    parser.add_argument("--format", required=True, choices=["musicxml"])
-    parser.add_argument("--output", help="Optional notation artifact output path")
+    parser.add_argument("--format", required=True, choices=["musicxml", "midi"])
+    parser.add_argument("--output", help="Explicit artifact output path")
+    parser.add_argument("--bars", help="1-based inclusive structural bar range, for example 17:24")
+    parser.add_argument("--section", help="Named score section")
     args = parser.parse_args(list(argv))
 
     try:
@@ -387,40 +403,125 @@ def score_render(argv: Sequence[str], context: CliContext) -> int:
             if args.output is not None
             else None
         )
-        service = ExportScore(
-            documents=ScoreFileStore(context.workspace),
-            artifacts=BinaryFileStore(context.workspace),
-            exporter=MusicXmlExporter(),
+        if args.bars is not None and args.section is not None:
+            raise ValueError("choose either --bars or --section, not both")
+
+        if args.format == "musicxml":
+            if args.bars is not None or args.section is not None:
+                raise ValueError("MusicXML render does not yet support --bars or --section")
+            service = ExportScore(
+                documents=ScoreFileStore(context.workspace),
+                artifacts=BinaryFileStore(context.workspace),
+                exporter=MusicXmlExporter(),
+            )
+            result = service.render(source) if output is None else service.render_to(source, output)
+            if output is None:
+                context.stdout.write(result.data.decode("utf-8"))
+                for diagnostic in result.diagnostics:
+                    print(
+                        f"guitarctl: {diagnostic.severity}: {diagnostic.code}: "
+                        f"{diagnostic.path}: {diagnostic.message}",
+                        file=context.stderr,
+                    )
+            else:
+                _write_json(
+                    {
+                        "output": output,
+                        "format": args.format,
+                        "diagnostics": [item.as_dict() for item in result.diagnostics],
+                    },
+                    context,
+                )
+            return exit_codes.OK
+
+        if output is None:
+            raise ValueError("MIDI render requires --output")
+        selected_bars = bar_range(args.bars) if args.bars is not None else None
+        payload = _midi_renderer(context).execute(
+            source,
+            output,
+            bar_range=selected_bars,
+            section_name=args.section,
         )
-        result = service.render(source) if output is None else service.render_to(source, output)
+        _write_json(payload, context)
+        return exit_codes.OK
     except (
         ScorePathError,
         ScoreDocumentError,
         MusicXmlExportError,
+        JsonDocumentError,
+        ScoreMidiError,
+        ScoreRealizationError,
         OSError,
         ValueError,
     ) as exc:
         print(f"guitarctl: {exc}", file=context.stderr)
         return exit_codes.DATA_ERROR
 
-    if output is None:
-        context.stdout.write(result.data.decode("utf-8"))
-        for diagnostic in result.diagnostics:
-            print(
-                f"guitarctl: {diagnostic.severity}: {diagnostic.code}: "
-                f"{diagnostic.path}: {diagnostic.message}",
-                file=context.stderr,
-            )
-    else:
-        _write_json(
-            {
-                "output": output,
-                "format": args.format,
-                "diagnostics": [item.as_dict() for item in result.diagnostics],
-            },
-            context,
+
+def _playback_soundfont(value: str | None, context: CliContext) -> Path | None:
+    selected = value or os.environ.get("GUITAR_SOUNDFONT")
+    if selected is None:
+        return None
+    path = Path(selected)
+    return path if path.is_absolute() else context.workspace / path
+
+
+def score_play(argv: Sequence[str], context: CliContext) -> int:
+    parser = argparse.ArgumentParser(prog="guitarctl score play")
+    parser.add_argument("score", help="Canonical Score IR JSON inside the workspace")
+    parser.add_argument("--output", help="Optional workspace-relative MIDI artifact path")
+    parser.add_argument("--bars", help="1-based inclusive structural bar range, for example 17:24")
+    parser.add_argument("--section", help="Named score section")
+    parser.add_argument("--soundfont", help="SoundFont path; defaults to GUITAR_SOUNDFONT")
+    args = parser.parse_args(list(argv))
+
+    try:
+        source = _workspace_relative(args.score, label="score document")
+        output = (
+            _workspace_relative(args.output, label="score output")
+            if args.output is not None
+            else None
         )
-    return exit_codes.OK
+        if args.bars is not None and args.section is not None:
+            raise ValueError("choose either --bars or --section, not both")
+        selected_bars = bar_range(args.bars) if args.bars is not None else None
+        artifacts = BinaryFileStore(context.workspace)
+        metadata = JsonFileStore(context.workspace)
+        payload = PlayScoreMidi(
+            renderer=RenderScoreMidi(
+                documents=ScoreFileStore(context.workspace),
+                artifacts=artifacts,
+                metadata=metadata,
+            ),
+            artifacts=artifacts,
+            metadata=metadata,
+            player=FluidSynthMidiPlayer(
+                context.workspace,
+                soundfont=_playback_soundfont(args.soundfont, context),
+            ),
+        ).execute(
+            source,
+            output,
+            bar_range=selected_bars,
+            section_name=args.section,
+        )
+        _write_json(payload, context)
+        return exit_codes.OK
+    except MidiPlaybackError as exc:
+        print(f"guitarctl: {exc}", file=context.stderr)
+        return exit_codes.UNAVAILABLE
+    except (
+        ScorePathError,
+        ScoreDocumentError,
+        JsonDocumentError,
+        ScoreMidiError,
+        ScoreRealizationError,
+        OSError,
+        ValueError,
+    ) as exc:
+        print(f"guitarctl: {exc}", file=context.stderr)
+        return exit_codes.DATA_ERROR
 
 
 def score_import(argv: Sequence[str], context: CliContext) -> int:
@@ -519,6 +620,7 @@ SCORE_HANDLERS: dict[str, NativeHandler] = {
     "score-rhythm": score_rhythm,
     "score-technique": score_technique,
     "score-render": score_render,
+    "score-play": score_play,
     "score-show": score_show,
     "score-tracks": score_tracks,
     "score-validate": score_validate,
