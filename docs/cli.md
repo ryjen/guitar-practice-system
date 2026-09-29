@@ -76,6 +76,16 @@ guitarctl score render song-with-expression.score.json \
   --format musicxml \
   --output song.musicxml
 
+guitarctl score render song-with-expression.score.json \
+  --format midi \
+  --section Chorus \
+  --tempo 75% \
+  --output generated/chorus.mid
+
+guitarctl score play song-with-expression.score.json \
+  --section Chorus \
+  --tempo 75%
+
 guitarctl drums export song.score.json \
   --tempo 75% \
   --target boss-rc3
@@ -115,11 +125,13 @@ The remaining compatibility-process commands are outside this generation subsyst
 - `score rhythm <score> <part-id> --input <rhythm.json> --output <path>` — relocate, resize, or revoice exactly selected untied notes. All selectors resolve against the pre-edit score, duplicate targets fail closed, and the output is re-sorted and fully Score IR-validated.
 - `score technique <score> <part-id> --input <technique.json> --output <path>` — patch `articulations`, structured `techniques`, and/or `dynamics` on exactly selected notes without changing pitch, position, or timing. Omitted fields are preserved; empty articulation/technique arrays and `dynamics: null` explicitly clear those optional fields. Duplicate note targets fail closed.
 - `score render <score> --format musicxml [--output <path>]` — export deterministic MusicXML 4.0. Without `--output`, MusicXML is written to stdout and mapping warnings go to stderr; with an explicit output path, the artifact is written and stdout returns a JSON diagnostics summary. Guitar parts with declared tuning emit standard notation plus an alternate TAB staff and string/fret technical notation where positions exist.
+- `score render <score> --format midi --output <path> [--tempo 75%] [--section <label> | --bars START:END]` — render a whole-score or explicit structural realization through the existing Score IR-to-MIDI domain. The retained MIDI gets a JSON sidecar containing the source score id/schema/hash, realization id, selection, tempo factor, selected parts, and stable render-path id.
+- `score play <score> [--tempo 75%] [--section <label> | --bars START:END] [--output <path>] [--soundfont <path>]` — render the same deterministic MIDI artifact first, then invoke bounded FluidSynth playback. If playback fails, the MIDI and provenance sidecar remain available for correction or manual audition. Without `--output`, the disposable artifact is written under `generated/playback/`.
 - `score show <score>` — emit the canonical Score IR document.
 - `score tracks <score>` — inspect part/role/instrument metadata.
 - `score validate <score>` — validate through the canonical Score IR contract and emit a machine-readable report.
 
-All input/output paths are explicit and workspace-relative. Authoring transforms write a new target and leave the source unchanged. There is no implicit current score. `score render --format musicxml` is package-native; MIDI render/playback and `score edit` remain owned by #113 and #114.
+All input/output paths are explicit and workspace-relative. Authoring transforms write a new target and leave the source unchanged. There is no implicit current score. MusicXML and MIDI rendering plus bounded playback are package-native; `score edit` remains the final Score Builder slice (#114).
 
 ## Musical generation boundaries
 

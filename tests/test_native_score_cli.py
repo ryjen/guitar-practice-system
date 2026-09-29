@@ -7,11 +7,15 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
-from guitar_practice.domain import score
+from guitar_practice.adapters.midi_playback import MidiPlaybackError
+from guitar_practice.application.ports import PlaybackResult
+from guitar_practice.domain import midi, score
 from guitar_practice.interfaces.cli.commands import MigrationState, find_command
 from guitar_practice.interfaces.cli.main import main
 from tests.test_score_ir import timeline_score
+from tests.test_score_realization import realization_score
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests" / "fixtures" / "musicxml" / "multitrack.musicxml"
@@ -29,6 +33,7 @@ class NativeScoreCliTests(unittest.TestCase):
             ["score", "rhythm", "song.score.json", "guitar-1"],
             ["score", "technique", "song.score.json", "guitar-1"],
             ["score", "render", "song.score.json", "--format", "musicxml"],
+            ["score", "play", "song.score.json"],
             ["score", "show", "song.score.json"],
             ["score", "tracks", "song.score.json"],
             ["score", "validate", "song.score.json"],
@@ -545,6 +550,156 @@ class NativeScoreCliTests(unittest.TestCase):
             exported = (workspace / "generated" / "source.musicxml").read_text(encoding="utf-8")
             self.assertTrue(exported.startswith('<?xml version="1.0" encoding="UTF-8"?>'))
             self.assertEqual(source, score.loads((workspace / "source.score.json").read_text()))
+
+    def test_render_midi_supports_section_tempo_and_sidecar_provenance(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = realization_score()
+            (workspace / "source.score.json").write_text(score.dumps(source), encoding="utf-8")
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace", str(workspace),
+                        "score", "render", "source.score.json",
+                        "--format", "midi",
+                        "--section", "Chorus",
+                        "--tempo", "75%",
+                        "--output", "generated/chorus.mid",
+                    ]
+                )
+
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+            metadata = json.loads(stdout.getvalue())
+            self.assertEqual("score-midi-v1", metadata["render_path"])
+            self.assertEqual([3, 4], metadata["bar_range"])
+            self.assertEqual("Chorus", metadata["section"])
+            self.assertEqual(0.75, metadata["tempo_factor"])
+            report = midi.inspect((workspace / "generated" / "chorus.mid").read_bytes())
+            self.assertGreaterEqual(report["tracks"], 1)
+            sidecar = json.loads((workspace / "generated" / "chorus.mid.json").read_text())
+            self.assertEqual(metadata, sidecar)
+            self.assertEqual(source, score.loads((workspace / "source.score.json").read_text()))
+
+    def test_render_midi_requires_output(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            (workspace / "source.score.json").write_text(
+                score.dumps(realization_score()), encoding="utf-8"
+            )
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace", str(workspace),
+                        "score", "render", "source.score.json",
+                        "--format", "midi",
+                    ]
+                )
+            self.assertEqual(65, result)
+            self.assertIn("requires --output", stderr.getvalue())
+
+    def test_play_uses_generated_artifact_and_player_provenance(self) -> None:
+        class FakePlayer:
+            def __init__(self, *args, **kwargs) -> None:
+                pass
+
+            def play(self, data: bytes) -> PlaybackResult:
+                self.data = data
+                return PlaybackResult("fake-player", "1.0", "fixture.sf2")
+
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            (workspace / "source.score.json").write_text(
+                score.dumps(realization_score()), encoding="utf-8"
+            )
+            soundfont = workspace / "fixture.sf2"
+            soundfont.write_bytes(b"sf2")
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with mock.patch(
+                "guitar_practice.interfaces.cli.score_handlers.FluidSynthMidiPlayer",
+                FakePlayer,
+            ), contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace", str(workspace),
+                        "score", "play", "source.score.json",
+                        "--section", "Chorus",
+                        "--soundfont", "fixture.sf2",
+                    ]
+                )
+
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+            payload = json.loads(stdout.getvalue())
+            self.assertEqual("fake-player", payload["playback"]["player"])
+            artifact = workspace / payload["artifact"]
+            self.assertTrue(artifact.is_file())
+            self.assertTrue(Path(str(artifact) + ".json").is_file())
+            self.assertEqual([3, 4], payload["bar_range"])
+
+    def test_play_without_soundfont_still_retains_generated_midi(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            (workspace / "source.score.json").write_text(
+                score.dumps(realization_score()), encoding="utf-8"
+            )
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with mock.patch.dict("os.environ", {}, clear=True), \
+                 contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace", str(workspace),
+                        "score", "play", "source.score.json",
+                        "--output", "generated/no-soundfont.mid",
+                    ]
+                )
+
+            self.assertEqual(69, result)
+            self.assertIn("SoundFont is required", stderr.getvalue())
+            self.assertIn("MIDI artifact retained", stderr.getvalue())
+            self.assertTrue((workspace / "generated" / "no-soundfont.mid").is_file())
+            self.assertTrue((workspace / "generated" / "no-soundfont.mid.json").is_file())
+
+    def test_playback_failure_retains_generated_midi(self) -> None:
+        class FailingPlayer:
+            def __init__(self, *args, **kwargs) -> None:
+                pass
+
+            def play(self, data: bytes) -> PlaybackResult:
+                raise MidiPlaybackError("audio device unavailable")
+
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            (workspace / "source.score.json").write_text(
+                score.dumps(realization_score()), encoding="utf-8"
+            )
+            (workspace / "fixture.sf2").write_bytes(b"sf2")
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with mock.patch(
+                "guitar_practice.interfaces.cli.score_handlers.FluidSynthMidiPlayer",
+                FailingPlayer,
+            ), contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace", str(workspace),
+                        "score", "play", "source.score.json",
+                        "--output", "generated/audition.mid",
+                        "--soundfont", "fixture.sf2",
+                    ]
+                )
+
+            self.assertEqual(69, result)
+            self.assertIn("audio device unavailable", stderr.getvalue())
+            self.assertTrue((workspace / "generated" / "audition.mid").is_file())
+            self.assertTrue((workspace / "generated" / "audition.mid.json").is_file())
 
     def test_render_requires_explicit_score_and_rejects_output_escape(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

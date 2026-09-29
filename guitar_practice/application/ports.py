@@ -123,3 +123,19 @@ class AudioRenderer(Protocol):
 
     def render(self, midi: bytes, profile: AudioRenderProfile) -> RenderedAudio:
         ...
+
+
+@dataclass(frozen=True)
+class PlaybackResult:
+    """Provenance for one bounded MIDI playback invocation."""
+
+    player: str
+    player_version: str | None = None
+    soundfont: str | None = None
+
+
+class MidiPlayer(Protocol):
+    """Play already-rendered MIDI bytes without owning score realization."""
+
+    def play(self, data: bytes) -> PlaybackResult:
+        ...
