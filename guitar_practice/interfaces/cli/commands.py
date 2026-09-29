@@ -72,6 +72,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec(("score", "technique"), "Patch articulation, technique, and dynamics on exactly selected notes", MigrationState.NATIVE, native_handler="score-technique"),
     CommandSpec(("score", "render"), "Render canonical Score IR to a deterministic notation or MIDI artifact", MigrationState.NATIVE, native_handler="score-render"),
     CommandSpec(("score", "play"), "Render and audition canonical Score IR through a bounded MIDI player", MigrationState.NATIVE, native_handler="score-play"),
+    CommandSpec(("score", "edit"), "Interactively edit one explicit canonical Score IR document", MigrationState.NATIVE, native_handler="score-edit"),
     CommandSpec(("score", "show"), "Show one canonical Score IR document", MigrationState.NATIVE, native_handler="score-show"),
     CommandSpec(("score", "tracks"), "Inspect canonical Score IR parts and roles", MigrationState.NATIVE, native_handler="score-tracks"),
     CommandSpec(("score", "validate"), "Validate one canonical Score IR document", MigrationState.NATIVE, native_handler="score-validate"),

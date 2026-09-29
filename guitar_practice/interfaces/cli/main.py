@@ -95,7 +95,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return exit_codes.USAGE
 
     forwarded = tokens[consumed:]
-    context = CliContext(Path(args.workspace), sys.stdout, sys.stderr)
+    context = CliContext(Path(args.workspace), sys.stdout, sys.stderr, sys.stdin)
 
     if command.native_handler:
         handler = NATIVE_HANDLERS.get(command.native_handler)
