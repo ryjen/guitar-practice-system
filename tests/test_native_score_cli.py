@@ -25,6 +25,7 @@ class NativeScoreCliTests(unittest.TestCase):
             ["score", "import", "song.musicxml"],
             ["score", "form", "song.score.json", "verse:12"],
             ["score", "chords", "song.score.json", "C | F | G | C"],
+            ["score", "part", "add", "song.score.json"],
             ["score", "notes", "song.score.json", "guitar-1"],
             ["score", "voicing", "song.score.json", "guitar-1"],
             ["score", "rhythm", "song.score.json", "guitar-1"],
@@ -225,6 +226,169 @@ class NativeScoreCliTests(unittest.TestCase):
             )
             self.assertEqual([2, 3, 3], [item["location"]["bar"] for item in harmonized["harmony"]])
             self.assertNotIn("harmony", formed)
+
+    def test_init_part_add_notes_and_voicing_form_a_from_scratch_path(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "init",
+                        "--title",
+                        "From Scratch",
+                        "--output",
+                        "draft.score.json",
+                    ]
+                )
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+
+            (workspace / "part.json").write_text(
+                json.dumps(
+                    {
+                        "part": {
+                            "id": "guitar-1",
+                            "name": "Guitar",
+                            "role": "guitar",
+                            "instrument": {
+                                "name": "Electric Guitar",
+                                "family": "guitar",
+                                "midi": {"program": 29, "channel": 1},
+                            },
+                            "guitar": {"tuning": "standard"},
+                        }
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "part",
+                        "add",
+                        "draft.score.json",
+                        "--input",
+                        "part.json",
+                        "--output",
+                        "with-part.score.json",
+                    ]
+                )
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+            self.assertEqual(
+                {
+                    "id": "from-scratch",
+                    "output": "with-part.score.json",
+                    "part": "guitar-1",
+                    "parts": 1,
+                },
+                json.loads(stdout.getvalue()),
+            )
+
+            (workspace / "notes.json").write_text(
+                json.dumps(
+                    {
+                        "notes": [
+                            {
+                                "location": {"bar": 1, "beat": [1, 1]},
+                                "duration": [1, 4],
+                                "voice": 1,
+                                "pitch": {"step": "E", "alter": 0, "octave": 4},
+                            }
+                        ]
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "notes",
+                        "with-part.score.json",
+                        "guitar-1",
+                        "--input",
+                        "notes.json",
+                        "--output",
+                        "with-note.score.json",
+                    ]
+                )
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+
+            (workspace / "voicing.json").write_text(
+                json.dumps(
+                    {
+                        "positions": [
+                            {
+                                "selector": {
+                                    "location": {"bar": 1, "beat": [1, 1]},
+                                    "voice": 1,
+                                    "pitch": {"step": "E", "alter": 0, "octave": 4},
+                                },
+                                "position": {"string": 2, "fret": 5},
+                            }
+                        ]
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "voicing",
+                        "with-note.score.json",
+                        "guitar-1",
+                        "--input",
+                        "voicing.json",
+                        "--output",
+                        "voiced.score.json",
+                    ]
+                )
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+
+            voiced = score.loads(
+                (workspace / "voiced.score.json").read_text(encoding="utf-8")
+            )
+            part = voiced["parts"][0]
+            self.assertEqual("guitar-1", part["id"])
+            self.assertEqual(
+                {"program": 29, "channel": 1},
+                part["instrument"]["midi"],
+            )
+            self.assertEqual(6, len(part["guitar"]["tuning"]))
+            self.assertEqual(
+                {"string": 2, "fret": 5},
+                part["events"][0]["position"],
+            )
+            self.assertEqual([], score.loads(
+                (workspace / "draft.score.json").read_text(encoding="utf-8")
+            )["parts"])
 
     def test_notes_command_uses_explicit_input_part_and_output(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
