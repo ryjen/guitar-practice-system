@@ -262,6 +262,53 @@ class ScoreAuthoringApplicationTests(unittest.TestCase):
             part["instrument"]["midi"],
         )
 
+    def test_explicit_tuning_is_preserved_and_invalid_tuning_fails_canonical_validation(self) -> None:
+        explicit = [
+            {"string": 6, "pitch": {"step": "D", "alter": 0, "octave": 2}},
+            {"string": 5, "pitch": {"step": "A", "alter": 0, "octave": 2}},
+            {"string": 4, "pitch": {"step": "D", "alter": 0, "octave": 3}},
+            {"string": 3, "pitch": {"step": "G", "alter": 0, "octave": 3}},
+            {"string": 2, "pitch": {"step": "B", "alter": 0, "octave": 3}},
+            {"string": 1, "pitch": {"step": "E", "alter": 0, "octave": 4}},
+        ]
+        part = normalize_part_input(
+            {
+                "id": "drop-d",
+                "name": "Drop D Guitar",
+                "role": "guitar",
+                "instrument": {"name": "Guitar", "family": "guitar"},
+                "guitar": {"tuning": explicit},
+            }
+        )
+        self.assertEqual(explicit, part["guitar"]["tuning"])
+
+        store = MemoryDocuments(
+            {
+                "source.json": minimal_score(),
+                "part.json": {
+                    "part": {
+                        "id": "bad-guitar",
+                        "name": "Bad Guitar",
+                        "role": "guitar",
+                        "instrument": {"name": "Guitar", "family": "guitar"},
+                        "guitar": {
+                            "tuning": [
+                                {"string": 1, "pitch": {"step": "E", "alter": 0, "octave": 4}},
+                                {"string": 1, "pitch": {"step": "D", "alter": 0, "octave": 4}},
+                            ]
+                        },
+                    }
+                },
+            }
+        )
+        with self.assertRaisesRegex(ValueError, "duplicate string"):
+            ScoreAuthoring(store, inputs=store).add_part(
+                "source.json",
+                input_path="part.json",
+                output="written.json",
+            )
+        self.assertNotIn("written.json", store.values)
+
     def test_add_part_application_writes_new_document_only(self) -> None:
         source = minimal_score()
         input_document = {
