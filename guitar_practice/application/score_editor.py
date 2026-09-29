@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import copy
-from dataclasses import dataclass
 import math
+from dataclasses import dataclass
 from typing import Any, Mapping
 
 from guitar_practice.application.ports import (
