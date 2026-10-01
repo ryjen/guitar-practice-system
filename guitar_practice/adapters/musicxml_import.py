@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import copy
 import re
 import xml.etree.ElementTree as ET
 from collections.abc import Iterable
@@ -10,6 +9,7 @@ from dataclasses import replace
 from typing import TypeVar
 
 from guitar_practice.application.imported_score import (
+    ImportedBar,
     ImportedMeterPoint,
     ImportedNoteEvent,
     ImportedScore,
@@ -426,161 +426,137 @@ _NAVIGATION_SOUND_ATTRIBUTES = frozenset({
 })
 
 
-def _repeat_play_order(measures: list[ET.Element]) -> list[int]:
-    active_start: int | None = None
-    order: list[int] = []
-    for index, measure in enumerate(measures):
-        if any(True for _ in _descendants(measure, "ending")):
-            raise MusicXmlError("MusicXML ending playback is not yet supported")
+def _ending_numbers(element: ET.Element) -> tuple[int, ...]:
+    raw = element.attrib.get("number", "").strip()
+    values: set[int] = set()
+    for token in re.split(r"[,\s]+", raw):
+        if not token:
+            continue
+        try:
+            value = int(token)
+        except ValueError as exc:
+            raise MusicXmlError("ending numbers must be integers") from exc
+        if value not in {1, 2}:
+            raise MusicXmlError("only first and second endings are supported")
+        values.add(value)
+    if not values:
+        raise MusicXmlError("ending number is required")
+    return tuple(sorted(values))
+
+
+def _ending_memberships(measures: list[ET.Element]) -> tuple[tuple[int, ...], ...]:
+    active: tuple[int, ...] = ()
+    memberships: list[tuple[int, ...]] = []
+    for measure in measures:
+        endings = list(_descendants(measure, "ending"))
+        starts = [item for item in endings if item.attrib.get("type") == "start"]
+        closes = [
+            item for item in endings
+            if item.attrib.get("type") in {"stop", "discontinue"}
+        ]
+        if any(
+            item.attrib.get("type") not in {"start", "stop", "discontinue"}
+            for item in endings
+        ):
+            raise MusicXmlError("unsupported MusicXML ending type")
+        if len(starts) > 1 or len(closes) > 1:
+            raise MusicXmlError("multiple ending boundaries in one measure are not supported")
+        if starts:
+            if active:
+                raise MusicXmlError("overlapping endings are not supported")
+            active = _ending_numbers(starts[0])
+        memberships.append(active)
+        if closes:
+            numbers = _ending_numbers(closes[0])
+            if not active or numbers != active:
+                raise MusicXmlError("ending start/stop numbers must match")
+            active = ()
+    if active:
+        raise MusicXmlError("unterminated MusicXML ending")
+    return tuple(memberships)
+
+
+def _form_for_measures(measures: list[ET.Element]) -> tuple[ImportedBar, ...]:
+    memberships = _ending_memberships(measures)
+    result: list[ImportedBar] = []
+    active_repeat_start: int | None = None
+    for index, (measure, ending_numbers) in enumerate(
+        zip(measures, memberships, strict=True)
+    ):
         repeats = list(_descendants(measure, "repeat"))
         forwards = [item for item in repeats if item.attrib.get("direction") == "forward"]
         backwards = [item for item in repeats if item.attrib.get("direction") == "backward"]
         if len(forwards) > 1 or len(backwards) > 1:
             raise MusicXmlError("multiple repeat marks in one measure are not supported")
         if forwards:
-            if active_start is not None:
+            if active_repeat_start is not None:
                 raise MusicXmlError("nested forward repeats are not supported")
-            active_start = index
-
-        order.append(index)
+            active_repeat_start = index
+        repeat_end: int | None = None
         if backwards:
-            repeat = backwards[0]
-            raw_times = repeat.attrib.get("times")
+            raw_times = backwards[0].attrib.get("times")
             try:
-                plays = int(raw_times) if raw_times is not None else 2
+                repeat_end = int(raw_times) if raw_times is not None else 2
             except ValueError as exc:
                 raise MusicXmlError("repeat times must be an integer") from exc
-            if not 1 <= plays <= 32:
-                raise MusicXmlError("repeat times must be between 1 and 32")
-            start = active_start if active_start is not None else 0
-            section = list(range(start, index + 1))
-            for _ in range(plays - 1):
-                order.extend(section)
-            active_start = None
-        if len(order) > 10_000:
-            raise MusicXmlError("expanded repeat form is too large")
-    return order
-
-
-def _measure_start_states(
-    measures: list[ET.Element],
-) -> list[tuple[int, int, int]]:
-    divisions = 1
-    numerator = 4
-    denominator = 4
-    states: list[tuple[int, int, int]] = []
-    for measure in measures:
-        attributes = _first(measure, "attributes")
-        divisions = _divisions(attributes, divisions)
-        if attributes is not None:
-            time = _first(attributes, "time")
-            if time is not None:
-                beats = _int_text(_first(time, "beats"), "time beats")
-                beat_type = _int_text(_first(time, "beat-type"), "time beat-type")
-                if beats is None or beat_type is None:
-                    raise MusicXmlError("time signature requires beats and beat-type")
-                numerator, denominator = beats, beat_type
-        states.append((divisions, numerator, denominator))
-    return states
-
-
-def _tempo_start_states(measures: list[ET.Element]) -> list[float]:
-    tempo = 120.0
-    divisions = 1
-    states: list[float] = []
-    for measure in measures:
-        attributes = _first(measure, "attributes")
-        divisions = _divisions(attributes, divisions)
-        states.append(tempo)
-        events: list[tuple[float, float]] = []
-        for direction in _children(measure, "direction"):
-            offset_element = _first(direction, "offset")
-            parsed_offset = (
-                _float_value(_text(offset_element), "direction offset")
-                if offset_element is not None
-                else 0.0
+            if not 2 <= repeat_end <= 32:
+                raise MusicXmlError("repeat times must be between 2 and 32")
+            active_repeat_start = None
+        result.append(
+            ImportedBar(
+                repeat_start=bool(forwards),
+                repeat_end=repeat_end,
+                ending_numbers=ending_numbers,
             )
-            offset = (parsed_offset or 0.0) / divisions
-            for sound in _descendants(direction, "sound"):
-                bpm = _float_value(sound.attrib.get("tempo"), "sound tempo")
-                if bpm is not None:
-                    events.append((offset, bpm))
-        for _, bpm in sorted(events):
-            tempo = bpm
-    return states
+        )
+
+    if active_repeat_start is not None:
+        raise MusicXmlError("unterminated forward repeat")
+
+    ending_values = {
+        value
+        for bar in result
+        for value in bar.ending_numbers
+    }
+    if ending_values:
+        if ending_values != {1, 2}:
+            raise MusicXmlError("ordinary ending form must contain first and second endings")
+        repeat_ends = [bar for bar in result if bar.repeat_end is not None]
+        if len(repeat_ends) != 1:
+            raise MusicXmlError("first/second endings require one backward repeat")
+        if repeat_ends[0].repeat_end != 2 or 1 not in repeat_ends[0].ending_numbers:
+            raise MusicXmlError(
+                "first/second endings require a two-pass repeat ending in the first ending"
+            )
+    return tuple(result)
 
 
-def _inject_repeat_start_state(
-    measure: ET.Element,
-    *,
-    divisions: int,
-    numerator: int,
-    denominator: int,
-    tempo: float | None,
-) -> None:
-    attributes = ET.Element("attributes")
-    ET.SubElement(attributes, "divisions").text = str(divisions)
-    time = ET.SubElement(attributes, "time")
-    ET.SubElement(time, "beats").text = str(numerator)
-    ET.SubElement(time, "beat-type").text = str(denominator)
-    measure.insert(0, attributes)
-    if tempo is not None:
-        direction = ET.Element("direction")
-        direction_type = ET.SubElement(direction, "direction-type")
-        ET.SubElement(direction_type, "words").text = "repeat-state"
-        ET.SubElement(direction, "sound", {"tempo": f"{tempo:g}"})
-        measure.insert(1, direction)
-
-
-def _expand_simple_repeats(root: ET.Element) -> ET.Element:
+def _parse_form(root: ET.Element) -> tuple[ImportedBar, ...]:
     for sound in _descendants(root, "sound"):
         if _NAVIGATION_SOUND_ATTRIBUTES & set(sound.attrib):
             raise MusicXmlError("MusicXML jump navigation is not yet supported")
 
-    if any(True for _ in _descendants(root, "ending")):
-        raise MusicXmlError("MusicXML ending playback is not yet supported")
-
     parts = list(_children(root, "part"))
     if not parts:
-        return root
+        return ()
     measure_sets = [list(_children(part, "measure")) for part in parts]
-    repeat_flags = [
-        any(any(True for _ in _descendants(measure, "repeat")) for measure in measures)
-        for measures in measure_sets
+    forms = [_form_for_measures(measures) for measures in measure_sets]
+    marked = [
+        any(bar.repeat_start or bar.repeat_end is not None or bar.ending_numbers for bar in form)
+        for form in forms
     ]
-    if not any(repeat_flags):
-        return root
+    if any(marked):
+        reference_index = marked.index(True)
+        expected = len(forms[reference_index])
+        if any(len(form) != expected for form in forms):
+            raise MusicXmlError("parts must have aligned measure counts for repeat/endings")
+        reference = forms[reference_index]
+        for has_marks, form in zip(marked, forms, strict=True):
+            if has_marks and form != reference:
+                raise MusicXmlError("parts must use consistent repeat and ending marks")
+        return reference
+    return forms[0]
 
-    reference_index = repeat_flags.index(True)
-    expected_count = len(measure_sets[reference_index])
-    if any(len(measures) != expected_count for measures in measure_sets):
-        raise MusicXmlError("parts must have aligned measure counts for repeat expansion")
-    order = _repeat_play_order(measure_sets[reference_index])
-    for has_repeats, measures in zip(repeat_flags, measure_sets, strict=True):
-        if has_repeats and _repeat_play_order(measures) != order:
-            raise MusicXmlError("parts must use consistent repeat marks")
-
-    state_sets = [_measure_start_states(measures) for measures in measure_sets]
-    tempo_states = _tempo_start_states(measure_sets[0])
-    expanded = copy.deepcopy(root)
-    for part_index, part in enumerate(_children(expanded, "part")):
-        measures = list(_children(part, "measure"))
-        for measure in measures:
-            part.remove(measure)
-        for occurrence, index in enumerate(order):
-            measure = copy.deepcopy(measures[index])
-            is_jump = occurrence > 0 and index != order[occurrence - 1] + 1
-            if is_jump:
-                divisions, numerator, denominator = state_sets[part_index][index]
-                _inject_repeat_start_state(
-                    measure,
-                    divisions=divisions,
-                    numerator=numerator,
-                    denominator=denominator,
-                    tempo=tempo_states[index] if part_index == 0 else None,
-                )
-            part.append(measure)
-    return expanded
 
 
 def parse_musicxml(data: bytes, *, source_id: str) -> ImportedScore:
@@ -595,7 +571,7 @@ def parse_musicxml(data: bytes, *, source_id: str) -> ImportedScore:
         raise MusicXmlError("MusicXML root must be score-partwise")
 
     try:
-        root = _expand_simple_repeats(root)
+        bars = _parse_form(root)
         tracks = _parse_track_notes(root, _parse_tracks(root))
         tempo_map, meter_map = _parse_maps(root)
         return ImportedScore(
@@ -606,6 +582,7 @@ def parse_musicxml(data: bytes, *, source_id: str) -> ImportedScore:
             meter_map=meter_map,
             duration_quarters=_structural_duration_quarters(root),
             bar_boundaries=_bar_boundaries(root),
+            bars=bars,
             sections=_sections(root),
         )
     except MusicXmlError:

@@ -28,7 +28,7 @@ guitarctl score import songs/example.musicxml \
   --output generated/example.score.json
 ```
 
-The source file remains an input artifact. The JSON output is canonical Score IR.
+The source file remains an input artifact. The JSON output is canonical Score IR. Simple forward/backward repeats and ordinary first/second endings remain written-form bar metadata in Score IR rather than being flattened during import. D.C./D.S./coda navigation is still unsupported and fails closed.
 
 Inspect imported parts and their role/provenance before generating practice artifacts:
 
@@ -49,7 +49,7 @@ guitarctl backing render generated/example.score.json \
   --output generated/practice/example-backing-75.mid
 ```
 
-The canonical score is not modified. A sidecar at
+The canonical score is not modified. For a full-song render, bounded canonical repeat/ending notation is first expanded into a generated linear playback realization; tempo, meter, events, and other bar-local content are remapped deterministically before MIDI rendering. A sidecar at
 `generated/practice/example-backing-75.mid.json` records the source score, generated realization, selected/excluded part IDs, tempo factor, and optional structural selection.
 
 Explicit overrides remain available:
@@ -76,7 +76,7 @@ guitarctl backing render generated/example.score.json \
   --output generated/practice/example-chorus-70.mid
 ```
 
-Structural slicing fails closed when canonical repeat/ending notation would make the requested slice ambiguous; expand or resolve playback form before slicing.
+Structural `--bars` / `--section` slicing continues to fail closed when canonical repeat/ending notation inside the requested range would make the slice ambiguous. Full-song rendering performs the bounded playback expansion automatically; focused slicing never guesses across unresolved form boundaries.
 
 ## Export drums for the BOSS RC-3
 

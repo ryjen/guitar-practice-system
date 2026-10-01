@@ -110,6 +110,24 @@ class Rc3ExportApplicationTests(unittest.TestCase):
         self.assertEqual("boss-rc3", metadata["target"])
         self.assertEqual(metadata, documents.writes["renders/fixture.wav.json"])
 
+    def test_full_song_expands_repeat_form_before_audio_duration(self) -> None:
+        document = _document()
+        document["bars"][0]["repeat_start"] = True
+        document["bars"][1]["repeat_end"] = 2
+        score.validate(document)
+        documents = MemoryDocuments({"scores/fixture.json": document})
+        artifacts = MemoryArtifacts()
+
+        metadata = ExportBossRc3Drums(documents, artifacts, FakeRenderer()).execute(
+            "scores/fixture.json",
+            "renders/repeated.wav",
+            tempo_factor=1.0,
+        )
+
+        self.assertEqual(8.0, metadata["duration_seconds"])
+        with wave.open(BytesIO(artifacts.writes["renders/repeated.wav"]), "rb") as audio:
+            self.assertEqual(352_800, audio.getnframes())
+
     def test_named_section_uses_safe_default_filename(self) -> None:
         documents = MemoryDocuments({"scores/fixture.json": _document()})
         artifacts = MemoryArtifacts()

@@ -384,3 +384,276 @@ def slice_section(
         int(section["start_bar"]),
         int(section["end_bar"]),
     )
+
+
+_FORM_FIELDS = frozenset({"repeat_start", "repeat_end", "ending_numbers"})
+
+
+def _playback_order(bars: list[dict[str, Any]]) -> list[int]:
+    """Resolve the bounded simple-repeat / first-second-ending subset."""
+
+    if not any(set(bar) & _FORM_FIELDS for bar in bars):
+        return list(range(len(bars)))
+
+    active_start: int | None = None
+    repeat_active = False
+    pass_number = 1
+    order: list[int] = []
+    index = 0
+    steps = 0
+
+    while index < len(bars):
+        bar = bars[index]
+        endings = tuple(int(value) for value in bar.get("ending_numbers", []))
+        if any(value not in {1, 2} for value in endings):
+            raise ScoreRealizationError("only first and second endings are supported")
+
+        if bar.get("repeat_start"):
+            if repeat_active:
+                if active_start != index:
+                    raise ScoreRealizationError("nested repeats are not supported")
+            else:
+                active_start = index
+                repeat_active = True
+                pass_number = 1
+
+        if endings and not repeat_active:
+            # A first ending with an implicit repeat start means repeat from bar 1.
+            if 1 in endings and any(
+                candidate.get("repeat_end") is not None
+                for candidate in bars[index:]
+            ):
+                active_start = 0
+                repeat_active = True
+                pass_number = 1
+            else:
+                raise ScoreRealizationError("ending appears outside an active repeat")
+
+        should_play = not endings or pass_number in endings
+        if should_play:
+            order.append(index)
+
+        repeat_end = bar.get("repeat_end")
+        if repeat_end is not None and should_play:
+            plays = int(repeat_end)
+            if endings and plays != 2:
+                raise ScoreRealizationError(
+                    "first/second endings require a two-pass repeat"
+                )
+            start = active_start if active_start is not None else 0
+            if pass_number < plays:
+                pass_number += 1
+                active_start = start
+                repeat_active = True
+                index = start
+                steps += 1
+                if len(order) > 10_000 or steps > 20_000:
+                    raise ScoreRealizationError("expanded playback form is too large")
+                continue
+            active_start = None
+            repeat_active = False
+            pass_number = 1
+
+        if should_play and endings and pass_number > 1:
+            next_endings = (
+                tuple(int(value) for value in bars[index + 1].get("ending_numbers", []))
+                if index + 1 < len(bars)
+                else ()
+            )
+            if pass_number not in next_endings:
+                active_start = None
+                repeat_active = False
+                pass_number = 1
+
+        index += 1
+        steps += 1
+        if len(order) > 10_000 or steps > 20_000:
+            raise ScoreRealizationError("expanded playback form is too large")
+
+    if repeat_active:
+        raise ScoreRealizationError("unterminated repeat form")
+    return order
+
+
+def _state_signature(entry: Mapping[str, Any], *, ignore: set[str]) -> tuple:
+    return tuple(
+        (key, repr(value))
+        for key, value in sorted(entry.items())
+        if key not in ignore
+    )
+
+
+def _linear_bar_state_map(
+    entries: list[dict[str, Any]],
+    order: list[int],
+) -> list[dict[str, Any]]:
+    by_bar = {int(entry["bar"]): entry for entry in entries}
+    result: list[dict[str, Any]] = []
+    current: tuple | None = None
+
+    def effective(source_bar: int) -> dict[str, Any] | None:
+        candidate: dict[str, Any] | None = None
+        for entry in entries:
+            if int(entry["bar"]) > source_bar:
+                break
+            candidate = entry
+        return candidate
+
+    previous_source: int | None = None
+    for output_bar, source_index in enumerate(order, start=1):
+        source_bar = source_index + 1
+        backward = previous_source is not None and source_bar <= previous_source
+        explicit = by_bar.get(source_bar)
+        candidate = (
+            effective(source_bar)
+            if output_bar == 1 or backward
+            else explicit
+        )
+        if candidate is not None:
+            signature = _state_signature(candidate, ignore={"bar", "provenance"})
+            if signature != current:
+                mapped = copy.deepcopy(candidate)
+                mapped["bar"] = output_bar
+                if (output_bar == 1 or backward) and explicit is None:
+                    mapped["provenance"] = {
+                        "kind": "generated",
+                        "source": "score-realization:playback-state",
+                    }
+                result.append(mapped)
+                current = signature
+        previous_source = source_bar
+    return result
+
+
+def _linear_tempo_map(
+    entries: list[dict[str, Any]],
+    order: list[int],
+) -> list[dict[str, Any]]:
+    if not entries:
+        return []
+
+    by_bar: dict[int, list[dict[str, Any]]] = {}
+    for entry in entries:
+        bar, _ = _location_key(entry["location"])
+        by_bar.setdefault(bar, []).append(entry)
+
+    def active_at_start(source_bar: int) -> dict[str, Any] | None:
+        candidate: dict[str, Any] | None = None
+        start = (source_bar, Fraction(1, 1))
+        for entry in entries:
+            if _location_key(entry["location"]) > start:
+                break
+            candidate = entry
+        return candidate
+
+    result: list[dict[str, Any]] = []
+    current: tuple | None = None
+    previous_source: int | None = None
+    for output_bar, source_index in enumerate(order, start=1):
+        source_bar = source_index + 1
+        backward = previous_source is not None and source_bar <= previous_source
+        source_entries = by_bar.get(source_bar, [])
+
+        if output_bar == 1 or backward:
+            inherited = active_at_start(source_bar)
+            if inherited is not None:
+                signature = _state_signature(
+                    inherited,
+                    ignore={"location", "provenance"},
+                )
+                if signature != current:
+                    mapped = copy.deepcopy(inherited)
+                    mapped["location"] = {"bar": output_bar, "beat": [1, 1]}
+                    if _location_key(inherited["location"]) != (
+                        source_bar,
+                        Fraction(1, 1),
+                    ):
+                        mapped["provenance"] = {
+                            "kind": "generated",
+                            "source": "score-realization:playback-tempo",
+                        }
+                    result.append(mapped)
+                    current = signature
+
+        for entry in source_entries:
+            _, beat = _location_key(entry["location"])
+            signature = _state_signature(entry, ignore={"location", "provenance"})
+            if beat == 1 and (output_bar == 1 or backward):
+                current = signature
+                continue
+            if beat == 1 and signature == current:
+                continue
+            mapped = copy.deepcopy(entry)
+            mapped["location"]["bar"] = output_bar
+            result.append(mapped)
+            current = signature
+
+        previous_source = source_bar
+    return result
+
+
+def _linear_location_items(
+    entries: list[dict[str, Any]],
+    order: list[int],
+) -> list[dict[str, Any]]:
+    by_bar: dict[int, list[dict[str, Any]]] = {}
+    for entry in entries:
+        bar, _ = _location_key(entry["location"])
+        by_bar.setdefault(bar, []).append(entry)
+
+    result: list[dict[str, Any]] = []
+    for output_bar, source_index in enumerate(order, start=1):
+        source_bar = source_index + 1
+        for entry in by_bar.get(source_bar, []):
+            mapped = copy.deepcopy(entry)
+            mapped["location"]["bar"] = output_bar
+            result.append(mapped)
+    return result
+
+
+def expand_playback_form(document: Mapping[str, Any]) -> dict[str, Any]:
+    """Linearize bounded canonical repeats/endings without mutating source Score IR."""
+
+    result = _document(document)
+    order = _playback_order(result["bars"])
+    if order == list(range(len(result["bars"]))) and not any(
+        set(bar) & _FORM_FIELDS for bar in result["bars"]
+    ):
+        return result
+
+    source_bars = result["bars"]
+    linear_bars: list[dict[str, Any]] = []
+    for output_bar, source_index in enumerate(order, start=1):
+        original = source_bars[source_index]
+        bar: dict[str, Any] = {"number": output_bar}
+        if "provenance" in original:
+            bar["provenance"] = copy.deepcopy(original["provenance"])
+        linear_bars.append(bar)
+    result["bars"] = linear_bars
+
+    result["meter_map"] = _linear_bar_state_map(result["meter_map"], order)
+    if "key_map" in result:
+        result["key_map"] = _linear_bar_state_map(result["key_map"], order)
+    result["tempo_map"] = _linear_tempo_map(result["tempo_map"], order)
+
+    for part in result["parts"]:
+        part["events"] = _linear_location_items(part["events"], order)
+
+    if "harmony" in result:
+        result["harmony"] = _linear_location_items(result["harmony"], order)
+    if "rehearsal_marks" in result:
+        result["rehearsal_marks"] = _linear_location_items(
+            result["rehearsal_marks"],
+            order,
+        )
+    # Canonical sections describe the written form; repeated occurrences are
+    # intentionally not recast as canonical sections in a generated linear form.
+    result.pop("sections", None)
+
+    _mark_generated(
+        result,
+        suffix="playback",
+        operation="expand-playback-form",
+    )
+    score.validate(result)
+    return result
