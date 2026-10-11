@@ -70,6 +70,7 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec(("score", "notes"), "Replace note events for one explicit score part", MigrationState.NATIVE, native_handler="score-notes"),
     CommandSpec(("score", "voicing"), "Apply guitar string/fret positions to exactly selected notes", MigrationState.NATIVE, native_handler="score-voicing"),
     CommandSpec(("score", "rhythm"), "Relocate or resize exactly selected untied notes", MigrationState.NATIVE, native_handler="score-rhythm"),
+    CommandSpec(("score", "rhythm", "guide"), "Show a Groove Engine rhythm guide for one score bar", MigrationState.NATIVE, native_handler="score-rhythm-guide"),
     CommandSpec(("score", "technique"), "Patch articulation, technique, and dynamics on exactly selected notes", MigrationState.NATIVE, native_handler="score-technique"),
     CommandSpec(("score", "render"), "Render canonical Score IR to a deterministic notation or MIDI artifact", MigrationState.NATIVE, native_handler="score-render"),
     CommandSpec(("score", "play"), "Render and audition canonical Score IR through a bounded MIDI player", MigrationState.NATIVE, native_handler="score-play"),
