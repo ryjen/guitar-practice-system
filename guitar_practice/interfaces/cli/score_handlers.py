@@ -20,9 +20,11 @@ from guitar_practice.adapters.score_conversion import (
 )
 from guitar_practice.adapters.score_files import ScoreDocumentError, ScoreFileStore
 from guitar_practice.application.score_authoring import ScoreAuthoring
+from guitar_practice.application.groove import DEFAULT_CATALOG, GrooveCatalog
 from guitar_practice.application.score_documents import ScoreDocuments
 from guitar_practice.application.score_export import ExportScore
 from guitar_practice.application.score_playback import PlayScoreMidi, RenderScoreMidi
+from guitar_practice.application.score_rhythm_guide import ScoreRhythmGuide
 from guitar_practice.application.score_import import (
     ImportScore,
     ScoreImportError,
@@ -30,6 +32,7 @@ from guitar_practice.application.score_import import (
 )
 from guitar_practice.domain import score
 from guitar_practice.domain.score_midi import ScoreMidiError
+from guitar_practice.domain.score_groove import ScoreGrooveError
 from guitar_practice.domain.score_realization import ScoreRealizationError
 from guitar_practice.interfaces.cli import exit_codes
 from guitar_practice.interfaces.cli.practice_args import bar_range
@@ -322,6 +325,42 @@ def score_voicing(argv: Sequence[str], context: CliContext) -> int:
         context,
     )
     return exit_codes.OK
+
+
+def score_rhythm_guide(argv: Sequence[str], context: CliContext) -> int:
+    parser = argparse.ArgumentParser(prog="guitarctl score rhythm guide")
+    parser.add_argument("score", help="Canonical Score IR JSON inside the workspace")
+    parser.add_argument("preset", help="Groove catalog preset id")
+    parser.add_argument("--bar", type=int, default=1, help="1-based score bar to guide")
+    parser.add_argument(
+        "--catalog",
+        default=DEFAULT_CATALOG,
+        help="Workspace-relative groove catalog JSON",
+    )
+    args = parser.parse_args(list(argv))
+
+    try:
+        source = _workspace_relative(args.score, label="score document")
+        catalog = _workspace_relative(args.catalog, label="groove catalog")
+        document = ScoreFileStore(context.workspace).read(source)
+        service = ScoreRhythmGuide(
+            GrooveCatalog(JsonFileStore(context.workspace), catalog)
+        )
+        _write_json(
+            service.build(document, args.preset, bar=args.bar),
+            context,
+        )
+        return exit_codes.OK
+    except (
+        ScorePathError,
+        ScoreDocumentError,
+        JsonDocumentError,
+        ScoreGrooveError,
+        OSError,
+        ValueError,
+    ) as exc:
+        print(f"guitarctl: {exc}", file=context.stderr)
+        return exit_codes.DATA_ERROR
 
 
 def score_rhythm(argv: Sequence[str], context: CliContext) -> int:
@@ -658,6 +697,7 @@ SCORE_HANDLERS: dict[str, NativeHandler] = {
     "score-notes": score_notes,
     "score-voicing": score_voicing,
     "score-rhythm": score_rhythm,
+    "score-rhythm-guide": score_rhythm_guide,
     "score-technique": score_technique,
     "score-render": score_render,
     "score-play": score_play,
