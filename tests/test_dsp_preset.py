@@ -162,6 +162,11 @@ class DspPresetContractTests(unittest.TestCase):
             with self.assertRaisesRegex(dsp_preset.DspPresetError, "preset"):
                 dsp_preset.validate(document)
 
+    def test_raw_document_size_is_bounded(self) -> None:
+        oversized = EXPECTED + (" " * dsp_preset.MAX_DOCUMENT_CHARS)
+        with self.assertRaisesRegex(dsp_preset.DspPresetError, "at most"):
+            dsp_preset.loads(oversized)
+
     def test_duplicate_keys_and_nonfinite_json_fail_closed(self) -> None:
         duplicate = EXPECTED.replace(
             '"version":1}',
