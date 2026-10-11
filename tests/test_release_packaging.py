@@ -89,7 +89,7 @@ class ReleasePackagerTests(unittest.TestCase):
                 previous_tag="v0.0.9",
                 changed_paths_path=str(changes),
             )
-            second_result = builder.prepare(
+            builder.prepare(
                 str(second),
                 tag=TAG,
                 source_sha=SOURCE_SHA,
