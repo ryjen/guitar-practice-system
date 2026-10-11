@@ -1,17 +1,8 @@
 from __future__ import annotations
 
-import importlib.util
-import sys
 import unittest
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-MODULE_PATH = ROOT / "scripts" / "adaptive_session.py"
-SPEC = importlib.util.spec_from_file_location("adaptive_session", MODULE_PATH)
-assert SPEC is not None and SPEC.loader is not None
-session = importlib.util.module_from_spec(SPEC)
-sys.modules[SPEC.name] = session
-SPEC.loader.exec_module(session)
+from guitar_practice.domain import adaptive_session as session
 
 
 class AdaptiveSessionTests(unittest.TestCase):
