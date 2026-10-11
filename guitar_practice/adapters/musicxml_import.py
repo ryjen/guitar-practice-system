@@ -513,18 +513,34 @@ def _form_for_measures(measures: list[ET.Element]) -> tuple[ImportedBar, ...]:
     if active_repeat_start is not None:
         raise MusicXmlError("unterminated forward repeat")
 
-    ending_values = {
-        value
-        for bar in result
-        for value in bar.ending_numbers
-    }
-    if ending_values:
+    ending_groups: list[list[ImportedBar]] = []
+    current_group: list[ImportedBar] = []
+    for bar in result:
+        if bar.ending_numbers:
+            current_group.append(bar)
+        elif current_group:
+            ending_groups.append(current_group)
+            current_group = []
+    if current_group:
+        ending_groups.append(current_group)
+
+    for group in ending_groups:
+        ending_values = {
+            value
+            for bar in group
+            for value in bar.ending_numbers
+        }
         if ending_values != {1, 2}:
-            raise MusicXmlError("ordinary ending form must contain first and second endings")
-        repeat_ends = [bar for bar in result if bar.repeat_end is not None]
+            raise MusicXmlError(
+                "ordinary ending form must contain first and second endings"
+            )
+        repeat_ends = [bar for bar in group if bar.repeat_end is not None]
         if len(repeat_ends) != 1:
-            raise MusicXmlError("first/second endings require one backward repeat")
-        if repeat_ends[0].repeat_end != 2 or 1 not in repeat_ends[0].ending_numbers:
+            raise MusicXmlError(
+                "each first/second ending group requires one backward repeat"
+            )
+        repeat_end = repeat_ends[0]
+        if repeat_end.repeat_end != 2 or 1 not in repeat_end.ending_numbers:
             raise MusicXmlError(
                 "first/second endings require a two-pass repeat ending in the first ending"
             )

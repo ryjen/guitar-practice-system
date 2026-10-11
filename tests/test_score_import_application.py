@@ -170,6 +170,48 @@ class ScoreImportApplicationTests(unittest.TestCase):
         self.assertTrue(any(item.attrib.get("number") == "1" for item in endings))
         self.assertTrue(any(item.attrib.get("number") == "2" for item in endings))
 
+    def test_import_accepts_multiple_independent_first_second_ending_groups(self) -> None:
+        musicxml = b"""<score-partwise><part-list>
+        <score-part id='P1'><part-name>Guitar</part-name></score-part>
+        </part-list><part id='P1'>
+        <measure number='1'><attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes>
+          <barline location='left'><repeat direction='forward'/></barline><note><rest/><duration>4</duration></note></measure>
+        <measure number='2'><barline location='left'><ending number='1' type='start'/></barline>
+          <note><rest/><duration>4</duration></note><barline location='right'><ending number='1' type='stop'/><repeat direction='backward' times='2'/></barline></measure>
+        <measure number='3'><barline location='left'><ending number='2' type='start'/></barline>
+          <note><rest/><duration>4</duration></note><barline location='right'><ending number='2' type='discontinue'/></barline></measure>
+        <measure number='4'><note><rest/><duration>4</duration></note></measure>
+        <measure number='5'><barline location='left'><repeat direction='forward'/></barline><note><rest/><duration>4</duration></note></measure>
+        <measure number='6'><barline location='left'><ending number='1' type='start'/></barline>
+          <note><rest/><duration>4</duration></note><barline location='right'><ending number='1' type='stop'/><repeat direction='backward' times='2'/></barline></measure>
+        <measure number='7'><barline location='left'><ending number='2' type='start'/></barline>
+          <note><rest/><duration>4</duration></note><barline location='right'><ending number='2' type='discontinue'/></barline></measure>
+        </part></score-partwise>"""
+        document = ImportScore(
+            converter=FakeConverter(musicxml),
+            parser=MusicXmlParser(),
+            documents=MemoryStore(),
+        ).execute("two-endings.musicxml", "two-endings.score.json")
+
+        self.assertEqual(7, len(document["bars"]))
+        self.assertEqual(
+            [1, 5],
+            [bar["number"] for bar in document["bars"] if bar.get("repeat_start")],
+        )
+        self.assertEqual(
+            [2, 6],
+            [bar["number"] for bar in document["bars"] if bar.get("repeat_end") == 2],
+        )
+        self.assertEqual(
+            [(2, [1]), (3, [2]), (6, [1]), (7, [2])],
+            [
+                (bar["number"], bar["ending_numbers"])
+                for bar in document["bars"]
+                if "ending_numbers" in bar
+            ],
+        )
+        score.validate(document)
+
     def test_import_rejects_unsupported_ending_and_jump_navigation(self) -> None:
         third_ending = b"""<score-partwise><part-list>
         <score-part id='P1'><part-name>Guitar</part-name></score-part>
