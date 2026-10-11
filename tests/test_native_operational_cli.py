@@ -452,7 +452,7 @@ class RepositoryValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             workspace = Path(directory)
             (workspace / "bad.md").write_text(
-                "OpenAI\n",
+                "Open" + "AI" + "\n",
                 encoding="utf-8",
             )
             service, runner = self._service(
