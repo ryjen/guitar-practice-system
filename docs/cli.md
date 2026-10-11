@@ -316,3 +316,40 @@ guitarctl score part add draft.score.json \
 ```
 
 New parts are deliberately empty; notes are authored separately through `score notes`. Duplicate part ids, invalid MIDI identity, and invalid explicit tunings fail through canonical Score IR validation. The interactive editor exposes the same operation as `part add <input.json>`.
+
+
+## Groove-guided score rhythm
+
+The Groove Engine can guide Score IR rhythm authoring without becoming a second canonical rhythm model:
+
+```bash
+guitarctl score rhythm guide scores/blue-thing.score.json jazz-swing --bar 5
+```
+
+The guide resolves the existing validated groove preset against the **active Score IR meter at the selected bar**. A meter mismatch fails closed.
+
+The output separates written notation from performance feel:
+
+- `grid.locations[].beat` contains exact reduced rational beat positions suitable for Score IR selectors/authoring.
+- `grid.subdivision` and `steps_per_bar` come from the Groove Engine contract.
+- `grid.locations[].swung` identifies off-grid performance-feel steps, but does not alter the written beat rational.
+- `feel.swing`, `humanize_ms`, `velocity_variance`, `seed`, and `count_in` remain transient playback/practice guidance.
+- parsed drum instrument steps, accents, variations, and bar-cycle metadata are surfaced as context from the existing Groove Engine preset.
+
+The command is read-only: it does not mutate or annotate Score IR. Apply any resulting rhythmic decision through the normal `score rhythm` exact-selector patches.
+
+Inside `score edit`, the same application service is available without shelling out:
+
+```text
+score-edit> groove jazz-swing --bar 5
+score-edit> rhythm guitar-1 inputs/rhythm.json
+```
+
+This keeps the boundary explicit:
+
+```text
+Score IR + GrooveCatalog
+        -> transient rhythm guide
+        -> human / future proposal decision
+        -> existing deterministic score rhythm authoring
+```
