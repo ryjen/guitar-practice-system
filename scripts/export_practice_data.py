@@ -31,7 +31,7 @@ def _service() -> PracticeDataExport:
 
 
 def load_catalog() -> dict:
-    return _service()._catalog()
+    return _service().catalog()
 
 
 def export(output: Path) -> None:
