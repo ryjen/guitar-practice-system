@@ -11,10 +11,10 @@ from guitar_practice.domain import dsp_preset
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "contracts" / "dsp" / "fixtures" / "jazz-blues-preset-v1.json"
 EXPECTED = (
-    '{"parameters":{"delay.feedback_milli":320,"delay.free_ms":375,'
-    '"delay.mix_milli":500,"delay.subdivision":"dotted-eighth"},'
-    '"preset":"jazz-blues","schema":"guitar-dsp.preset",'
-    '"tempo_bpm":92,"version":1}\n'
+    '{"schema":"guitar-dsp.preset","version":1,"preset":"jazz-blues",'
+    '"tempo_bpm":92,"parameters":{"delay.feedback_milli":320,'
+    '"delay.free_ms":375,"delay.mix_milli":500,'
+    '"delay.subdivision":"dotted-eighth"}}'
 )
 
 
@@ -155,12 +155,24 @@ class DspPresetContractTests(unittest.TestCase):
             "jazz_blues",
             "jazz-blues-",
             "",
-            "a" * 65,
+            "a" * 33,
         ):
             document = preset()
             document["preset"] = value
             with self.assertRaisesRegex(dsp_preset.DspPresetError, "preset"):
                 dsp_preset.validate(document)
+
+    def test_maximum_valid_wire_document_fits_consumer_bound(self) -> None:
+        document = preset()
+        document["preset"] = "a" * dsp_preset.MAX_PRESET_LENGTH
+        document["tempo_bpm"] = 300
+        document["parameters"]["delay.feedback_milli"] = 950
+        document["parameters"]["delay.free_ms"] = 2000
+        document["parameters"]["delay.mix_milli"] = 1000
+        document["parameters"]["delay.subdivision"] = "eighth-triplet"
+        encoded = dsp_preset.dumps(document)
+        self.assertLessEqual(len(encoded), dsp_preset.MAX_CANONICAL_CHARS)
+        self.assertFalse(encoded.endswith("\n"))
 
     def test_raw_document_size_is_bounded(self) -> None:
         oversized = EXPECTED + (" " * dsp_preset.MAX_DOCUMENT_CHARS)
@@ -169,8 +181,8 @@ class DspPresetContractTests(unittest.TestCase):
 
     def test_duplicate_keys_and_nonfinite_json_fail_closed(self) -> None:
         duplicate = EXPECTED.replace(
-            '"version":1}',
-            '"version":1,"version":1}',
+            '"version":1,',
+            '"version":1,"version":1,',
         )
         with self.assertRaisesRegex(dsp_preset.DspPresetError, "duplicate"):
             dsp_preset.loads(duplicate)
@@ -202,6 +214,10 @@ class DspPresetContractTests(unittest.TestCase):
             frozenset(
                 parameter_schema["properties"]["delay.subdivision"]["enum"]
             ),
+        )
+        self.assertEqual(
+            dsp_preset.MAX_PRESET_LENGTH,
+            schema["properties"]["preset"]["maxLength"],
         )
 
     def test_validation_does_not_mutate_input(self) -> None:
