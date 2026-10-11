@@ -8,6 +8,7 @@ from guitar_practice.interfaces.cli.advisory_handlers import ADVISORY_HANDLERS
 from guitar_practice.interfaces.cli.backing_handlers import BACKING_HANDLERS
 from guitar_practice.interfaces.cli.generation_handlers import GENERATION_HANDLERS
 from guitar_practice.interfaces.cli.groove_handlers import GROOVE_HANDLERS
+from guitar_practice.interfaces.cli.dsp_handlers import DSP_HANDLERS
 from guitar_practice.interfaces.cli.handlers import NATIVE_HANDLERS as CORE_HANDLERS
 from guitar_practice.interfaces.cli.score_handlers import SCORE_HANDLERS
 from guitar_practice.interfaces.cli.score_edit_handlers import SCORE_EDIT_HANDLERS
@@ -28,6 +29,7 @@ NATIVE_HANDLERS = _merge(
     CORE_HANDLERS,
     ADVISORY_HANDLERS,
     GROOVE_HANDLERS,
+    DSP_HANDLERS,
     BACKING_HANDLERS,
     GENERATION_HANDLERS,
     SCORE_HANDLERS,
