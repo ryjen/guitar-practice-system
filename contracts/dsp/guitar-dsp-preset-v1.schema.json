@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ryjen:guitar-dsp:preset:v1",
+  "title": "Guitar DSP Preset v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "preset",
+    "tempo_bpm",
+    "parameters"
+  ],
+  "properties": {
+    "schema": {
+      "const": "guitar-dsp.preset"
+    },
+    "version": {
+      "const": 1
+    },
+    "preset": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "tempo_bpm": {
+      "type": "integer",
+      "minimum": 20,
+      "maximum": 300
+    },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "delay.feedback_milli",
+        "delay.free_ms",
+        "delay.mix_milli",
+        "delay.subdivision"
+      ],
+      "properties": {
+        "delay.feedback_milli": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 950
+        },
+        "delay.free_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2000
+        },
+        "delay.mix_milli": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "delay.subdivision": {
+          "type": "string",
+          "enum": [
+            "free",
+            "quarter",
+            "dotted-eighth",
+            "eighth",
+            "eighth-triplet",
+            "sixteenth"
+          ]
+        }
+      }
+    }
+  }
+}
