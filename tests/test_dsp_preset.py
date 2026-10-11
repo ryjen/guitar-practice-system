@@ -163,6 +163,31 @@ class DspPresetContractTests(unittest.TestCase):
         with self.assertRaisesRegex(dsp_preset.DspPresetError, "non-finite"):
             dsp_preset.loads(nonfinite)
 
+    def test_portable_schema_matches_domain_contract(self) -> None:
+        schema = json.loads(
+            (
+                ROOT
+                / "contracts"
+                / "dsp"
+                / "guitar-dsp-preset-v1.schema.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(
+            dsp_preset.TOP_LEVEL_FIELDS,
+            frozenset(schema["required"]),
+        )
+        parameter_schema = schema["properties"]["parameters"]
+        self.assertEqual(
+            dsp_preset.PARAMETER_IDS,
+            frozenset(parameter_schema["required"]),
+        )
+        self.assertEqual(
+            dsp_preset.DELAY_SUBDIVISIONS,
+            frozenset(
+                parameter_schema["properties"]["delay.subdivision"]["enum"]
+            ),
+        )
+
     def test_validation_does_not_mutate_input(self) -> None:
         document = preset()
         original = copy.deepcopy(document)
