@@ -10,6 +10,7 @@ SCHEMA_ID = "guitar-dsp.preset"
 SCHEMA_VERSION = 1
 PRESET_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 MAX_PRESET_LENGTH = 64
+MAX_DOCUMENT_CHARS = 4096
 
 TOP_LEVEL_FIELDS = frozenset(
     {"schema", "version", "preset", "tempo_bpm", "parameters"}
@@ -188,6 +189,10 @@ def loads(text: str) -> dict[str, Any]:
 
     if not isinstance(text, str):
         raise DspPresetError("DSP preset input must be text")
+    if len(text) > MAX_DOCUMENT_CHARS:
+        raise DspPresetError(
+            f"DSP preset input must be at most {MAX_DOCUMENT_CHARS} characters"
+        )
     try:
         value = json.loads(
             text,
@@ -196,7 +201,7 @@ def loads(text: str) -> dict[str, Any]:
         )
     except DspPresetError:
         raise
-    except (json.JSONDecodeError, UnicodeError) as exc:
+    except (json.JSONDecodeError, UnicodeError, ValueError) as exc:
         raise DspPresetError(f"invalid DSP preset JSON: {exc}") from exc
     if not isinstance(value, dict):
         raise DspPresetError("DSP preset must be a JSON object")
