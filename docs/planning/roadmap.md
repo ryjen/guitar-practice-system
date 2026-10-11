@@ -14,7 +14,7 @@ The roadmap covers only independently useful public capabilities. Private produc
 
 M1 practice/progression contracts, M2 evidence/assessment contracts, and the initial M4 deterministic catalog workflow have working versioned implementations with deterministic tests and CI coverage. They should receive bounded fixes when evidence finds a defect, not remain permanent "stabilization" projects.
 
-The previous engineering dependencies are complete: **#83/#89** established modal and common validation foundations; **#94/#97/#100** completed the stable package-native `guitarctl` migration; and **#109–#115** established the canonical Score IR-derived import, notation, playback, and editing workflows. The deprecated scheduling v1 compatibility path remains deliberately isolated.
+The previous engineering dependencies are complete: **#83/#89** established modal and common validation foundations; **#94/#97/#100** completed the stable package-native `guitarctl` migration; and **#108/#110–#114** established the canonical Score IR-derived import, notation, playback, and editing workflows; the older #109 draft was closed without remaining as a pending dependency. The deprecated scheduling v1 compatibility path remains deliberately isolated.
 
 The bounded **M5 music-artifact software baseline** now includes score-backed MIDI/RC-3 workflows, the independently conformed guitar-DSP preset v1 contract (**#152/#158**), and deterministic versioned release packaging (**#67**, PR #163). The release machinery is implemented, **but no versioned GitHub Release has been published**. Neither software completion nor reproducible MIDI establishes actual musical usefulness; M3 remains the controlling practice milestone.
 
@@ -155,8 +155,7 @@ Ordinary CI remains read-only and ephemeral. Generated binaries are not canonica
 
 The public core may remain a combination of:
 
-- Markdown/YAML/JSON plus the packaged `guitarctl` CLI (historical scripts are compatibility shims);
-- CLI plus local files;
+- Markdown/YAML/JSON with the packaged `guitarctl` CLI and explicit local files (historical scripts are compatibility shims);
 - SQLite-backed local tooling where persistent local state becomes justified;
 - static web documentation and practice surfaces.
 
