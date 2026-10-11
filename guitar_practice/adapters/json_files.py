@@ -45,3 +45,12 @@ class JsonFileStore:
             json.dumps(document, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
+
+class BoundedJsonFileStore(JsonFileStore):
+    """Persist JSON only when the fully resolved path remains in the workspace."""
+
+    def resolve(self, path: str | Path) -> Path:
+        resolved = super().resolve(path)
+        if not resolved.is_relative_to(self.workspace):
+            raise JsonDocumentError("JSON path must remain inside workspace")
+        return resolved

@@ -632,6 +632,45 @@ class NativeScoreCliTests(unittest.TestCase):
                 score.loads((workspace / "source.score.json").read_text(encoding="utf-8")),
             )
 
+    def test_rhythm_guide_rejects_catalog_symlink_escape(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            workspace = root / "workspace"
+            workspace.mkdir()
+            source = timeline_score()
+            (workspace / "source.score.json").write_text(
+                score.dumps(source),
+                encoding="utf-8",
+            )
+            outside = root / "outside-catalog.json"
+            shutil.copyfile(GROOVE_CATALOG, outside)
+            catalog = workspace / "catalogs" / "grooves" / "catalog.json"
+            catalog.parent.mkdir(parents=True, exist_ok=True)
+            catalog.symlink_to(outside)
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "rhythm",
+                        "guide",
+                        "source.score.json",
+                        "jazz-swing",
+                        "--bar",
+                        "1",
+                        "--catalog",
+                        "catalogs/grooves/catalog.json",
+                    ]
+                )
+
+            self.assertEqual(65, result)
+            self.assertEqual("", stdout.getvalue())
+            self.assertIn("inside workspace", stderr.getvalue())
+
     def test_rhythm_guide_fails_closed_on_meter_mismatch(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             workspace = Path(directory)
@@ -703,6 +742,45 @@ class NativeScoreCliTests(unittest.TestCase):
                 source,
                 score.loads((workspace / "source.score.json").read_text(encoding="utf-8")),
             )
+
+    def test_edit_groove_guide_rejects_catalog_symlink_escape(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            workspace = root / "workspace"
+            workspace.mkdir()
+            source = timeline_score()
+            score_path = workspace / "source.score.json"
+            score_path.write_text(score.dumps(source), encoding="utf-8")
+            original = score_path.read_bytes()
+            outside = root / "outside-catalog.json"
+            shutil.copyfile(GROOVE_CATALOG, outside)
+            catalog = workspace / "catalogs" / "grooves" / "catalog.json"
+            catalog.parent.mkdir(parents=True, exist_ok=True)
+            catalog.symlink_to(outside)
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            script = io.StringIO(
+                "groove jazz-swing --bar 1 --catalog catalogs/grooves/catalog.json\n"
+                "cancel\n"
+            )
+            with mock.patch("sys.stdin", script):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    result = main(
+                        [
+                            "--workspace",
+                            str(workspace),
+                            "score",
+                            "edit",
+                            "source.score.json",
+                        ]
+                    )
+
+            self.assertEqual(0, result)
+            self.assertIn("inside workspace", stderr.getvalue())
+            self.assertNotIn('"steps_per_bar": 8', stdout.getvalue())
+            self.assertIn("cancelled", stdout.getvalue())
+            self.assertEqual(original, score_path.read_bytes())
 
     def test_technique_command_uses_explicit_selector_input_and_output(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -10,7 +10,11 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from guitar_practice.adapters.binary_files import BinaryFileStore
-from guitar_practice.adapters.json_files import JsonDocumentError, JsonFileStore
+from guitar_practice.adapters.json_files import (
+    BoundedJsonFileStore,
+    JsonDocumentError,
+    JsonFileStore,
+)
 from guitar_practice.adapters.midi_playback import FluidSynthMidiPlayer, MidiPlaybackError
 from guitar_practice.adapters.musicxml_export import MusicXmlExportError, MusicXmlExporter
 from guitar_practice.adapters.score_files import ScoreDocumentError, ScoreFileStore
@@ -230,7 +234,7 @@ def score_edit(argv: Sequence[str], context: CliContext) -> int:
                 )
                 service = ScoreRhythmGuide(
                     GrooveCatalog(
-                        JsonFileStore(context.workspace),
+                        BoundedJsonFileStore(context.workspace),
                         catalog,
                     )
                 )
