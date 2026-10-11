@@ -16,6 +16,20 @@ class Clock(Protocol):
         ...
 
 
+class CommandRunner(Protocol):
+    """Execute one explicit command in the configured workspace."""
+
+    def run(self, command: Sequence[str]) -> int:
+        ...
+
+
+class ModuleProbe(Protocol):
+    """Report whether a Python module dependency is available."""
+
+    def available(self, module: str) -> bool:
+        ...
+
+
 class WorkspaceTree(Protocol):
     """Bounded repository/workspace tree operations for deterministic tooling."""
 
