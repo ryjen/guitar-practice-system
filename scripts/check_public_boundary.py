@@ -9,10 +9,10 @@ from pathlib import Path
 from guitar_practice.adapters.workspace_tree import WorkspaceFileTree
 from guitar_practice.application.public_boundary import PublicBoundaryValidation
 from guitar_practice.domain.public_boundary import (
-    ALLOWLIST,
-    EXCLUDED_DIRS,
-    MARKERS,
-    TEXT_SUFFIXES,
+    ALLOWLIST as ALLOWLIST,
+    EXCLUDED_DIRS as EXCLUDED_DIRS,
+    MARKERS as MARKERS,
+    TEXT_SUFFIXES as TEXT_SUFFIXES,
     should_scan,
 )
 
