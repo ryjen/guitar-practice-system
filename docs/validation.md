@@ -1,9 +1,9 @@
 # Repository validation
 
-The repository has one canonical fast validation command for source changes:
+The repository has one canonical package-native fast validation command for source changes:
 
 ```bash
-python scripts/validate_repo.py
+guitarctl validate repo
 ```
 
 Install the pinned development dependency before the first run:
@@ -32,3 +32,18 @@ Repository-owned validation workflows should:
 - pin third-party GitHub Actions by full commit SHA;
 - enforce the public repository boundary when checked-out repository content is being validated;
 - avoid ordinary GitHub Actions artifact storage for generated practice outputs.
+
+
+## Process contract
+
+All stable `guitarctl` operational commands follow the same process contract:
+
+- `0` — success;
+- `2` — CLI usage/argument error from argument parsing;
+- `65` — invalid data or a validation failure;
+- `69` — a required external/development dependency is unavailable;
+- `70` — an unexpected internal/process error.
+
+Machine-readable result data is written to stdout. Diagnostics and validation failures are written to stderr.
+
+The historical scripts under `scripts/` are compatibility shims only. They may preserve historical direct-script exit behavior for old callers, but CI and documentation use `guitarctl`.
