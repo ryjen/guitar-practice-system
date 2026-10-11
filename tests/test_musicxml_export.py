@@ -14,7 +14,7 @@ from guitar_practice.adapters.musicxml_import import MusicXmlParser
 from guitar_practice.adapters.score_files import ScoreFileStore
 from guitar_practice.application.score_editor import ScoreEditSession
 from guitar_practice.domain import score
-from tests.test_score_ir import minimal_score, standard_tuning, structured_score, timeline_score
+from tests.test_score_ir import minimal_score, structured_score, timeline_score
 
 
 def _texts(root: ET.Element, path: str) -> list[str]:
@@ -25,21 +25,22 @@ def _guided_editor_musicxml(workspace: Path) -> tuple[bytes, dict]:
     document = minimal_score()
     document["id"] = "guided-musescore"
     document["metadata"]["title"] = "Guided MuseScore"
-    document["parts"] = [
-        {
-            "id": "guitar-1",
-            "name": "Guitar",
-            "role": "guitar",
-            "instrument": {"name": "Electric Guitar", "family": "guitar"},
-            "guitar": {"tuning": standard_tuning()},
-            "events": [],
-        }
-    ]
     score.validate(document)
 
     documents = ScoreFileStore(workspace)
     documents.write("guided.score.json", document)
     session = ScoreEditSession("guided.score.json", documents)
+    session.add_part(
+        {
+            "part": {
+                "id": "guitar-1",
+                "name": "Guitar",
+                "role": "guitar",
+                "instrument": {"name": "Electric Guitar", "family": "guitar"},
+                "guitar": {"tuning": "standard"},
+            }
+        }
+    )
     session.replace_form("intro:2")
     session.replace_chords("C | G")
     session.apply_structured(
