@@ -56,7 +56,7 @@ jobs:
       - uses: cachix/install-nix-action@8aa03977d8d733052d78f4e008a241fd1dbf36b3 # v31.10.6
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
-      # Reuse this existing trusted Nix bootstrap to qualify the new
+      # Reuse this existing Nix bootstrap to qualify the new
       # flake-owned repository gate without changing current required checks.
       - name: Validate canonical repository gate via pinned flake
         run: nix build --no-write-lock-file --no-link --print-build-logs .#checks.x86_64-linux.repository-validation
