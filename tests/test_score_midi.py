@@ -209,6 +209,15 @@ class ScoreMidiTests(unittest.TestCase):
         with self.assertRaisesRegex(ScoreMidiError, "unterminated tie"):
             render_score_midi(document)
 
+    def test_unexpanded_repeat_form_fails_closed(self) -> None:
+        document = midi_score()
+        document["bars"][0]["repeat_start"] = True
+        document["bars"][1]["repeat_end"] = 2
+        score.validate(document)
+
+        with self.assertRaisesRegex(ScoreMidiError, "playback form"):
+            render_score_midi(document)
+
     def test_unrepresentable_tick_fraction_fails_closed(self) -> None:
         document = midi_score()
         document["parts"] = [copy.deepcopy(document["parts"][0])]

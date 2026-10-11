@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import copy
 import re
 from dataclasses import dataclass
 from pathlib import PurePosixPath
@@ -22,6 +21,7 @@ from guitar_practice.domain.audio_profiles import (
 )
 from guitar_practice.domain.score_midi import render_score_midi
 from guitar_practice.domain.score_realization import (
+    expand_playback_form,
     resolve_section,
     scale_tempo,
     select_drum_parts,
@@ -67,7 +67,7 @@ class ExportBossRc3Drums:
         focused = (
             slice_bars(source, *selected_range)
             if selected_range is not None
-            else copy.deepcopy(source)
+            else expand_playback_form(source)
         )
         realized = scale_tempo(focused, tempo_factor)
         selected = select_drum_parts(

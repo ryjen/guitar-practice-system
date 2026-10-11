@@ -331,6 +331,13 @@ def render_score_midi(document: Mapping[str, Any]) -> bytes:
         score.validate(canonical)
     except score.ScoreError as exc:
         raise ScoreMidiError(str(exc)) from exc
+    if any(
+        set(bar) & {"repeat_start", "repeat_end", "ending_numbers"}
+        for bar in canonical["bars"]
+    ):
+        raise ScoreMidiError(
+            "canonical playback form must be expanded before MIDI rendering"
+        )
 
     starts = _bar_starts_quarters(canonical)
     chunks = [_conductor(canonical, starts)]

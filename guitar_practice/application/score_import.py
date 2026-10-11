@@ -11,6 +11,7 @@ from typing import Any, Mapping
 
 from guitar_practice.application.imported_score import (
     ClassificationSource,
+    ImportedBar,
     ImportedMeterPoint,
     ImportedNoteEvent,
     ImportedScore,
@@ -312,6 +313,24 @@ def imported_to_score_ir(
             }
         )
 
+    bars: list[dict[str, Any]] = []
+    imported_bars = imported.bars or tuple(
+        ImportedBar() for _ in range(len(boundaries) - 1)
+    )
+    if len(imported_bars) != len(boundaries) - 1:
+        raise ScoreImportError("imported form bars must match structural bar count")
+    for number, imported_bar in enumerate(imported_bars, start=1):
+        bar: dict[str, Any] = {"number": number}
+        if imported_bar.repeat_start:
+            bar["repeat_start"] = True
+        if imported_bar.repeat_end is not None:
+            bar["repeat_end"] = imported_bar.repeat_end
+        if imported_bar.ending_numbers:
+            bar["ending_numbers"] = list(imported_bar.ending_numbers)
+        if len(bar) > 1:
+            bar["provenance"] = {"kind": "imported", "source": "musicxml:barline"}
+        bars.append(bar)
+
     document: dict[str, Any] = {
         "schema": score.SCHEMA_ID,
         "version": score.SCHEMA_VERSION,
@@ -321,7 +340,7 @@ def imported_to_score_ir(
             "source": {"kind": "imported", "id": score_id},
             "provenance": {"kind": "imported", "source": source_label},
         },
-        "bars": [{"number": number} for number in range(1, len(boundaries))],
+        "bars": bars,
         "meter_map": meters,
         "tempo_map": tempo_map,
         "parts": parts,
