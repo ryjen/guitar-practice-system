@@ -23,7 +23,11 @@ from guitar_practice.application.repository_validation import (
     ValidationUnavailable,
 )
 from guitar_practice.application.ports import CommandResult
-from guitar_practice.interfaces.cli.commands import MigrationState, find_command
+from guitar_practice.interfaces.cli.commands import (
+    COMPATIBILITY_SHIMS,
+    MigrationState,
+    find_command,
+)
 from guitar_practice.interfaces.cli.main import main
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -97,6 +101,36 @@ class NativeOperationalCliTests(unittest.TestCase):
                 self.assertEqual(MigrationState.NATIVE, command.migration)
                 self.assertIsNotNone(command.native_handler)
                 self.assertIsNone(command.legacy)
+
+    def test_operational_shims_are_compatibility_only(self) -> None:
+        self.assertTrue(
+            {
+                "scripts/build_practice_artifacts.py",
+                "scripts/export_practice_data.py",
+                "scripts/check_public_boundary.py",
+                "scripts/validate_repo.py",
+            }
+            <= COMPATIBILITY_SHIMS
+        )
+
+    def test_docs_and_workflows_do_not_execute_operational_shims(self) -> None:
+        forbidden = (
+            "python scripts/build_practice_artifacts.py",
+            "python3 scripts/build_practice_artifacts.py",
+            "python scripts/export_practice_data.py",
+            "python3 scripts/export_practice_data.py",
+            "python scripts/check_public_boundary.py",
+            "python scripts/validate_repo.py",
+        )
+        paths = [
+            *sorted((ROOT / "docs").rglob("*.md")),
+            *sorted((ROOT / ".github" / "workflows").glob("*.yml")),
+        ]
+        for path in paths:
+            content = path.read_text(encoding="utf-8")
+            for command in forbidden:
+                with self.subTest(path=path, command=command):
+                    self.assertNotIn(command, content)
 
     def test_practice_data_export_matches_compatibility_output_byte_for_byte(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
