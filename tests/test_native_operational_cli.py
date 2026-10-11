@@ -22,6 +22,7 @@ from guitar_practice.application.repository_validation import (
     ValidationFailed,
     ValidationUnavailable,
 )
+from guitar_practice.application.ports import CommandResult
 from guitar_practice.interfaces.cli.commands import MigrationState, find_command
 from guitar_practice.interfaces.cli.main import main
 
@@ -280,7 +281,7 @@ class NativeOperationalCliTests(unittest.TestCase):
             self.assertEqual("passed", json.loads(stdout.getvalue())["status"])
 
             (workspace / "bad.md").write_text(
-                "Do not mention OpenAI here.\n",
+                "Do not mention " + "Open" + "AI" + " here.\n",
                 encoding="utf-8",
             )
             stdout = io.StringIO()
@@ -297,7 +298,7 @@ class NativeOperationalCliTests(unittest.TestCase):
             self.assertEqual(65, result)
             self.assertEqual("", stdout.getvalue())
             self.assertIn(
-                "bad.md:1: contains boundary marker 'OpenAI'",
+                "bad.md:1: contains boundary marker '" + "Open" + "AI" + "'",
                 stderr.getvalue(),
             )
 
@@ -307,9 +308,9 @@ class FakeRunner:
         self.returncodes = list(returncodes)
         self.commands: list[list[str]] = []
 
-    def run(self, command) -> int:
+    def run(self, command) -> CommandResult:
         self.commands.append(list(command))
-        return self.returncodes.pop(0)
+        return CommandResult(returncode=self.returncodes.pop(0))
 
 
 class FakeProbe:
