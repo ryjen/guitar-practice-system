@@ -9,8 +9,9 @@ from typing import Any
 SCHEMA_ID = "guitar-dsp.preset"
 SCHEMA_VERSION = 1
 PRESET_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-MAX_PRESET_LENGTH = 64
+MAX_PRESET_LENGTH = 32
 MAX_DOCUMENT_CHARS = 4096
+MAX_CANONICAL_CHARS = 256
 
 TOP_LEVEL_FIELDS = frozenset(
     {"schema", "version", "preset", "tempo_bpm", "parameters"}
@@ -157,16 +158,30 @@ def validate(document: Any) -> None:
 
 
 def dumps(document: dict[str, Any]) -> str:
-    """Validate and encode one byte-stable canonical JSON document."""
+    """Validate and encode the frozen v1 wire representation."""
 
     validate(document)
-    return json.dumps(
-        document,
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-        allow_nan=False,
-    ) + "\n"
+    parameters = document["parameters"]
+    encoded = (
+        '{"schema":"guitar-dsp.preset","version":1,"preset":"'
+        + document["preset"]
+        + '","tempo_bpm":'
+        + str(document["tempo_bpm"])
+        + ',"parameters":{"delay.feedback_milli":'
+        + str(parameters["delay.feedback_milli"])
+        + ',"delay.free_ms":'
+        + str(parameters["delay.free_ms"])
+        + ',"delay.mix_milli":'
+        + str(parameters["delay.mix_milli"])
+        + ',"delay.subdivision":"'
+        + parameters["delay.subdivision"]
+        + '"}}'
+    )
+    if len(encoded) > MAX_CANONICAL_CHARS:
+        raise DspPresetError(
+            f"canonical DSP preset must be at most {MAX_CANONICAL_CHARS} characters"
+        )
+    return encoded
 
 
 def _reject_constant(value: str) -> Any:

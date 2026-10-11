@@ -121,7 +121,7 @@ class NativeDspPresetCliTests(unittest.TestCase):
     def test_invalid_utf8_is_data_error(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             workspace = Path(directory)
-            (workspace / "preset.json").write_bytes(b"\\xff\\xfe")
+            (workspace / "preset.json").write_bytes(b"\xff\xfe")
             stdout = io.StringIO()
             stderr = io.StringIO()
             with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
