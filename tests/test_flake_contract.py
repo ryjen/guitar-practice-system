@@ -31,6 +31,21 @@ class FlakePythonEnvironmentTests(unittest.TestCase):
         text = Path("flake.nix").read_text()
         self.assertIn("ps.ruff", text)
 
+    def test_repository_validation_uses_canonical_package_command(self) -> None:
+        text = Path("flake.nix").read_text()
+        self.assertIn("checks.${system}.repository-validation", text)
+        self.assertIn("guitarctl validate repo", text)
+        self.assertIn("cp -R ${self} source", text)
+        self.assertIn('export PYTHONPATH="$PWD"', text)
+
+    def test_existing_nix_workflow_proves_flake_check(self) -> None:
+        workflow = Path(".github/workflows/validate-score-musicxml.yml").read_text()
+        self.assertIn(
+            "nix build --no-write-lock-file --no-link --print-build-logs "
+            ".#checks.x86_64-linux.repository-validation",
+            workflow,
+        )
+
     def test_dev_shell_exposes_package_native_guitarctl(self) -> None:
         text = Path("flake.nix").read_text()
         self.assertIn("writeShellApplication", text)
