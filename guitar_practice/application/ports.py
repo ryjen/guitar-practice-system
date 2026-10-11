@@ -16,6 +16,13 @@ class Clock(Protocol):
         ...
 
 
+class JsonValueReader(Protocol):
+    """Read arbitrary JSON values through an explicit application port."""
+
+    def read(self, path: str) -> Any:
+        ...
+
+
 class JsonDocumentStore(Protocol):
     """Bounded structured-document storage used by application services."""
 

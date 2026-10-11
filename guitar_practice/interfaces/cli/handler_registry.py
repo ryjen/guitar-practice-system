@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
+from guitar_practice.interfaces.cli.advisory_handlers import ADVISORY_HANDLERS
 from guitar_practice.interfaces.cli.backing_handlers import BACKING_HANDLERS
 from guitar_practice.interfaces.cli.generation_handlers import GENERATION_HANDLERS
 from guitar_practice.interfaces.cli.groove_handlers import GROOVE_HANDLERS
@@ -25,6 +26,7 @@ def _merge(*registries: Mapping[str, object]) -> dict[str, object]:
 
 NATIVE_HANDLERS = _merge(
     CORE_HANDLERS,
+    ADVISORY_HANDLERS,
     GROOVE_HANDLERS,
     BACKING_HANDLERS,
     GENERATION_HANDLERS,

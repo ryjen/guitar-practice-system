@@ -45,8 +45,8 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec(("schedule", "legacy", "propose"), "Compatibility access to the v1 scheduling proposal", MigrationState.DEPRECATED, legacy=LegacyTarget("scripts/scheduling.py", ("propose",))),
     CommandSpec(("schedule", "legacy", "check-approval"), "Compatibility access to v1 schedule approval checks", MigrationState.DEPRECATED, legacy=LegacyTarget("scripts/scheduling.py", ("check-approval",))),
     CommandSpec(("assess", "evaluate"), "Evaluate evidence against deterministic assessment gates", MigrationState.NATIVE, native_handler="assess-evaluate"),
-    CommandSpec(("session", "adapt"), "Build a deterministic adaptive-session recommendation", MigrationState.LEGACY, legacy=LegacyTarget("scripts/adaptive_session.py")),
-    CommandSpec(("evidence", "feedback"), "Derive deterministic feedback from evidence records", MigrationState.LEGACY, legacy=LegacyTarget("scripts/evidence_feedback.py")),
+    CommandSpec(("session", "adapt"), "Build a deterministic adaptive-session recommendation", MigrationState.NATIVE, native_handler="session-adapt"),
+    CommandSpec(("evidence", "feedback"), "Derive deterministic feedback from evidence records", MigrationState.NATIVE, native_handler="evidence-feedback"),
     CommandSpec(("groove", "validate"), "Validate the groove catalog", MigrationState.NATIVE, native_handler="groove-validate"),
     CommandSpec(("groove", "list"), "List groove presets", MigrationState.NATIVE, native_handler="groove-list"),
     CommandSpec(("groove", "show"), "Show one groove preset", MigrationState.NATIVE, native_handler="groove-show"),
@@ -92,6 +92,8 @@ INTERNAL_LIBRARY_SCRIPTS = frozenset()
 COMPATIBILITY_SHIMS = frozenset(
     {
         "scripts/discovery_catalog.py",
+        "scripts/adaptive_session.py",
+        "scripts/evidence_feedback.py",
         "scripts/scheduling_v2.py",
         "scripts/assessment_core.py",
         "scripts/progression_catalog.py",
