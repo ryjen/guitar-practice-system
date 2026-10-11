@@ -16,6 +16,7 @@ from tests.test_score_ir import timeline_score
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests" / "fixtures" / "musicxml" / "multitrack.musicxml"
+GROOVE_CATALOG = ROOT / "catalogs" / "grooves" / "catalog.json"
 
 
 class NativeScoreCliTests(unittest.TestCase):
@@ -29,6 +30,7 @@ class NativeScoreCliTests(unittest.TestCase):
             ["score", "notes", "song.score.json", "guitar-1"],
             ["score", "voicing", "song.score.json", "guitar-1"],
             ["score", "rhythm", "song.score.json", "guitar-1"],
+            ["score", "rhythm", "guide", "song.score.json", "jazz-swing"],
             ["score", "technique", "song.score.json", "guitar-1"],
             ["score", "render", "song.score.json", "--format", "musicxml"],
             ["score", "render", "song.score.json", "--format", "midi"],
@@ -587,6 +589,120 @@ class NativeScoreCliTests(unittest.TestCase):
             self.assertEqual({"bar": 2, "beat": [2, 1]}, moved["location"])
             self.assertEqual([1, 8], moved["duration"])
             self.assertEqual(source, score.loads((workspace / "source.score.json").read_text()))
+
+    def test_rhythm_guide_reuses_groove_catalog_without_mutating_score(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = timeline_score()
+            (workspace / "source.score.json").write_text(
+                score.dumps(source),
+                encoding="utf-8",
+            )
+            catalog = workspace / "catalogs" / "grooves" / "catalog.json"
+            catalog.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(GROOVE_CATALOG, catalog)
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "rhythm",
+                        "guide",
+                        "source.score.json",
+                        "jazz-swing",
+                        "--bar",
+                        "1",
+                    ]
+                )
+
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+            guide = json.loads(stdout.getvalue())
+            self.assertEqual("jazz-swing", guide["preset"]["id"])
+            self.assertEqual([4, 4], guide["meter"])
+            self.assertEqual(8, guide["grid"]["steps_per_bar"])
+            self.assertEqual([3, 2], guide["grid"]["locations"][1]["beat"])
+            self.assertTrue(guide["grid"]["locations"][1]["swung"])
+            self.assertEqual(
+                source,
+                score.loads((workspace / "source.score.json").read_text(encoding="utf-8")),
+            )
+
+    def test_rhythm_guide_fails_closed_on_meter_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = timeline_score()
+            source["meter_map"] = [{"bar": 1, "beats": 7, "beat_unit": 8}]
+            score.validate(source)
+            (workspace / "source.score.json").write_text(
+                score.dumps(source),
+                encoding="utf-8",
+            )
+            catalog = workspace / "catalogs" / "grooves" / "catalog.json"
+            catalog.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(GROOVE_CATALOG, catalog)
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "score",
+                        "rhythm",
+                        "guide",
+                        "source.score.json",
+                        "jazz-swing",
+                    ]
+                )
+
+            self.assertEqual(65, result)
+            self.assertIn("does not match", stderr.getvalue())
+            self.assertEqual("", stdout.getvalue())
+
+    def test_edit_groove_guide_reads_unsaved_score_without_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = timeline_score()
+            (workspace / "source.score.json").write_text(
+                score.dumps(source),
+                encoding="utf-8",
+            )
+            catalog = workspace / "catalogs" / "grooves" / "catalog.json"
+            catalog.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(GROOVE_CATALOG, catalog)
+
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with mock.patch(
+                "sys.stdin",
+                io.StringIO("groove jazz-swing --bar 1\ncancel\n"),
+            ):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    result = main(
+                        [
+                            "--workspace",
+                            str(workspace),
+                            "score",
+                            "edit",
+                            "source.score.json",
+                        ]
+                    )
+
+            self.assertEqual(0, result)
+            self.assertEqual("", stderr.getvalue())
+            self.assertIn('"steps_per_bar": 8', stdout.getvalue())
+            self.assertIn('"swing": 0.333', stdout.getvalue())
+            self.assertIn("cancelled", stdout.getvalue())
+            self.assertEqual(
+                source,
+                score.loads((workspace / "source.score.json").read_text(encoding="utf-8")),
+            )
 
     def test_technique_command_uses_explicit_selector_input_and_output(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
