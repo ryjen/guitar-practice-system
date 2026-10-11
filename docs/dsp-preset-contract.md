@@ -79,6 +79,7 @@ Canonical serialization is UTF-8 JSON with:
 - one trailing newline;
 - duplicate object keys rejected while decoding;
 - non-finite numeric tokens rejected;
+- raw input capped at 4096 characters before JSON decoding;
 - exact schema/version validation before emission.
 
 The canonical jazz-blues fixture is therefore exactly:
