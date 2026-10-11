@@ -16,10 +16,17 @@ class Clock(Protocol):
         ...
 
 
+@dataclass(frozen=True)
+class CommandResult:
+    returncode: int
+    stdout: str = ""
+    stderr: str = ""
+
+
 class CommandRunner(Protocol):
     """Execute one explicit command in the configured workspace."""
 
-    def run(self, command: Sequence[str]) -> int:
+    def run(self, command: Sequence[str]) -> CommandResult:
         ...
 
 
