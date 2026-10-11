@@ -16,6 +16,34 @@ class Clock(Protocol):
         ...
 
 
+class WorkspaceTree(Protocol):
+    """Bounded repository/workspace tree operations for deterministic tooling."""
+
+    def exists(self, path: str) -> bool:
+        ...
+
+    def read_text(self, path: str) -> str:
+        ...
+
+    def write_text(self, path: str, content: str) -> None:
+        ...
+
+    def read_bytes(self, path: str) -> bytes:
+        ...
+
+    def list_files(self, path: str = ".") -> Sequence[str]:
+        ...
+
+    def copy_tree(self, source: str, destination: str) -> None:
+        ...
+
+    def remove_tree(self, path: str) -> None:
+        ...
+
+    def make_directory(self, path: str) -> None:
+        ...
+
+
 class JsonValueReader(Protocol):
     """Read arbitrary JSON values through an explicit application port."""
 
