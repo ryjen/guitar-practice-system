@@ -10,8 +10,8 @@ from pathlib import Path
 
 from guitar_practice.adapters.workspace_tree import WorkspaceFileTree
 from guitar_practice.application.practice_bundle import (
-    GENERATOR_INPUTS,
-    PUBLIC_SOURCE_DIRS,
+    GENERATOR_INPUTS as GENERATOR_INPUTS,
+    PUBLIC_SOURCE_DIRS as PUBLIC_SOURCE_DIRS,
     PracticeBundleBuilder,
 )
 
