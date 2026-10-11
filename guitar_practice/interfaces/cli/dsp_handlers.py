@@ -31,7 +31,12 @@ def dsp_preset_validate(argv: Sequence[str], context: CliContext) -> int:
         document = DspPresetDocuments(
             WorkspaceFileTree(context.workspace)
         ).validate(path)
-    except (PracticePathError, dsp_preset.DspPresetError, OSError) as exc:
+    except (
+        PracticePathError,
+        dsp_preset.DspPresetError,
+        OSError,
+        UnicodeError,
+    ) as exc:
         print(f"guitarctl: {exc}", file=context.stderr)
         return exit_codes.DATA_ERROR
 
