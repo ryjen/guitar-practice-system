@@ -27,24 +27,29 @@ The domain must not import CLI, filesystem, network, process, or presentation co
 
 Commands are grouped by capability rather than implementation file:
 
-```text
+~~~text
 guitarctl
 ├── discover search
 ├── schedule propose | check-approval
+├── schedule legacy propose | check-approval              [deprecated]
 ├── assess evaluate
 ├── session adapt
 ├── evidence feedback
 ├── groove validate | list | show
 ├── progression validate | list | show | resolve | fourths | generate
-├── backing resolve | generate
+├── backing resolve | generate | render
 ├── midi generate | validate | generate-exercises
-├── score init | import | form | chords | notes | voicing | rhythm | technique | render | show | tracks | validate
+├── score init | import | form | chords | part add | notes | voicing | rhythm
+│         rhythm guide | technique | render | play | edit | show | tracks | validate
+├── drums export
+├── dsp preset validate | canonicalize
 ├── artifact build
 ├── export practice-data
+├── release prepare | verify
 └── validate repo | public-boundary
-```
+~~~
 
-Legacy scheduling v1 remains available only through an explicitly marked compatibility namespace until its consumers are migrated.
+All stable command paths above are package-native use cases. Legacy scheduling v1 is intentionally available only under `schedule legacy` and remains process-backed and deprecated. Direct `scripts/*.py` and `tools/*.py` entrypoints that remain in the tree are compatibility shims, not recommended public interfaces. See `docs/cli.md` for command arguments and examples.
 
 ## Stable process contract
 
@@ -61,11 +66,15 @@ The command surface follows these rules:
 
 These rules intentionally make the public core straightforward to call from shells, CI, desktop tools, services, or other external orchestration without coupling those callers to Python module topology.
 
-The canonical score namespace follows the same contract. `score init` emits canonical Score IR to stdout unless an explicit `--output` path is supplied; `score show`, `score tracks`, and `score validate` always require an explicit input document. Authoring transforms such as `score form`, `score chords`, `score notes`, `score voicing`, `score rhythm`, and `score technique` require both an explicit source and `--output` target, producing a new validated Score IR document rather than mutating ambient state. No command infers a current score from the workspace. MusicXML rendering is available through `score render --format musicxml`; MIDI rendering/playback and interactive editing remain separate bounded slices (#113 and #114).
+The canonical score namespace follows the same contract. `score init` emits canonical Score IR to stdout unless an explicit `--output` is supplied; `score show`, `score tracks`, and `score validate` require an explicit input document. Authoring transforms such as `score part add`, `score form`, `score chords`, `score notes`, `score voicing`, `score rhythm`, and `score technique` read an explicit source and write to an explicit output. No command infers a current score from ambient workspace state.
+
+The implemented rendering path supports MusicXML and MIDI; `score play` auditions a bounded MIDI realization, and `score edit` is the guided interactive workflow. `backing render` and `drums export --target boss-rc3` use score-derived realizations rather than copying a second score model. `dsp preset` operations author/validate the narrow versioned external control contract; they do **not** send controls to hardware or expose realtime effects as practice-domain logic.
+
+`release prepare` and `release verify` package/validate deterministic practice bundles. The GitHub tag-triggered publisher is implemented, but no public GitHub Release had been published at the 2026-10-11 status review; publishing remains an explicit release decision.
 
 ## Migration boundary
 
-The initial migration uses a registered legacy-process adapter for entrypoints that have not yet been extracted. This is a **strangler boundary**, not the desired final architecture.
+The stable-command extraction is complete through #94/#97/#100. The registered legacy-process adapter remains only for explicitly deprecated scheduling v1 commands. It is a contained compatibility boundary, not the normal application architecture.
 
 A registered legacy command contains:
 
@@ -77,9 +86,9 @@ A registered legacy command contains:
 
 The adapter executes only registered repository-relative Python files and never invokes a shell. Package-native commands bypass this adapter entirely.
 
-## Extraction sequence
+## Completed extraction approach
 
-For each cohesive subsystem:
+For each cohesive subsystem, the migration applied this sequence:
 
 1. identify deterministic computation and state invariants;
 2. move that computation into `domain`;
@@ -91,7 +100,7 @@ For each cohesive subsystem:
 8. migrate CI and docs to `guitarctl`;
 9. delete the shim only after parity evidence exists.
 
-Extraction is by subsystem rather than by file so closely coupled code moves together. The intended order is:
+Extraction was by subsystem rather than by file so closely coupled code moved together. The completed order was:
 
 1. discovery;
 2. scheduling + assessment;
@@ -107,6 +116,6 @@ Extraction is by subsystem rather than by file so closely coupled code moves tog
 - **Command pattern**: one registry maps stable command identities to handlers.
 - **Strangler pattern**: legacy scripts remain usable while behavior moves behind stable interfaces.
 - **Dependency inversion**: filesystem, clock, process, and artifact dependencies point outward.
-- **Anti-corruption layer**: the legacy adapter translates the stable command surface to temporary old script conventions.
+- **Anti-corruption layer**: the residual legacy adapter translates explicitly deprecated scheduling v1 commands to historical script conventions.
 
 The goal is a boring, reproducible public core with a stable machine-facing surface and no requirement that callers understand repository internals.
