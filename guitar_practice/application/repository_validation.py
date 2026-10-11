@@ -61,10 +61,15 @@ class RepositoryValidation:
 
         report: list[dict[str, object]] = []
         for label, command in checks:
-            returncode = self.runner.run(command)
-            report.append({"label": label, "returncode": returncode})
-            if returncode != 0:
-                raise ValidationFailed(label, returncode)
+            result = self.runner.run(command)
+            report.append({"label": label, "returncode": result.returncode})
+            if result.returncode != 0:
+                details = [
+                    line
+                    for line in (result.stderr + "\n" + result.stdout).splitlines()
+                    if line.strip()
+                ]
+                raise ValidationFailed(label, result.returncode, details)
 
         findings = self.public_boundary.validate()
         report.append(
@@ -82,7 +87,7 @@ class RepositoryValidation:
             )
 
         label = "Run unit tests"
-        returncode = self.runner.run(
+        result = self.runner.run(
             [
                 self.python_executable,
                 "-m",
@@ -93,7 +98,12 @@ class RepositoryValidation:
                 "-v",
             ]
         )
-        report.append({"label": label, "returncode": returncode})
-        if returncode != 0:
-            raise ValidationFailed(label, returncode)
+        report.append({"label": label, "returncode": result.returncode})
+        if result.returncode != 0:
+            details = [
+                line
+                for line in (result.stderr + "\n" + result.stdout).splitlines()
+                if line.strip()
+            ]
+            raise ValidationFailed(label, result.returncode, details)
         return report
