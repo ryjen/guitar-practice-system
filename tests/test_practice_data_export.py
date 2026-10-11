@@ -1,20 +1,22 @@
 import copy
-import importlib.util
 import json
 import unittest
 from pathlib import Path
 
+from guitar_practice.adapters.json_values import JsonValueFileReader
+from guitar_practice.adapters.workspace_tree import WorkspaceFileTree
+from guitar_practice.application.practice_data_export import PracticeDataExport
+from guitar_practice.domain.practice_data import CatalogError, validate_catalog
+
 ROOT = Path(__file__).resolve().parents[1]
-MODULE_PATH = ROOT / "scripts" / "export_practice_data.py"
-spec = importlib.util.spec_from_file_location("export_practice_data", MODULE_PATH)
-module = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
-spec.loader.exec_module(module)
 
 
 class PracticeDataExportTests(unittest.TestCase):
     def setUp(self):
-        self.catalog = module.load_catalog()
+        self.catalog = PracticeDataExport(
+            values=JsonValueFileReader(ROOT),
+            tree=WorkspaceFileTree(ROOT),
+        ).catalog()
 
     def test_generated_export_matches_canonical_catalog(self):
         output = ROOT / "docs" / "data" / "practice-data.json"
@@ -35,14 +37,14 @@ class PracticeDataExportTests(unittest.TestCase):
     def test_duplicate_ids_are_rejected(self):
         invalid = copy.deepcopy(self.catalog)
         invalid["sessions"][1]["id"] = invalid["sessions"][0]["id"]
-        with self.assertRaises(module.CatalogError):
-            module.validate_catalog(invalid)
+        with self.assertRaises(CatalogError):
+            validate_catalog(invalid)
 
     def test_invalid_tempo_progression_is_rejected(self):
         invalid = copy.deepcopy(self.catalog)
         invalid["sessions"][0]["tempo"]["medium"] = invalid["sessions"][0]["tempo"]["slow"]
-        with self.assertRaises(module.CatalogError):
-            module.validate_catalog(invalid)
+        with self.assertRaises(CatalogError):
+            validate_catalog(invalid)
 
 
 if __name__ == "__main__":
