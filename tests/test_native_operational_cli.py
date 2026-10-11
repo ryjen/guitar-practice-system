@@ -10,6 +10,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from guitar_practice.adapters.workspace_tree import WorkspaceFileTree
 from guitar_practice.application.practice_bundle import (
@@ -268,6 +269,56 @@ class NativeOperationalCliTests(unittest.TestCase):
             )
             self.assertTrue((workspace / "bundle" / "SHA256SUMS").is_file())
             self.assertFalse((workspace / "scripts").is_dir())
+
+    def test_validate_repo_maps_missing_dependency_to_unavailable(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with mock.patch(
+                "guitar_practice.interfaces.cli.operational_handlers.RepositoryValidation.execute",
+                side_effect=ValidationUnavailable("ruff unavailable"),
+            ):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(
+                    stderr
+                ):
+                    result = main(
+                        [
+                            "--workspace",
+                            directory,
+                            "validate",
+                            "repo",
+                        ]
+                    )
+            self.assertEqual(69, result)
+            self.assertEqual("", stdout.getvalue())
+            self.assertIn("ruff unavailable", stderr.getvalue())
+
+    def test_validate_repo_maps_failed_check_to_data_error(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with mock.patch(
+                "guitar_practice.interfaces.cli.operational_handlers.RepositoryValidation.execute",
+                side_effect=ValidationFailed(
+                    "Run Ruff static analysis",
+                    3,
+                    ["ruff diagnostic"],
+                ),
+            ):
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(
+                    stderr
+                ):
+                    result = main(
+                        [
+                            "--workspace",
+                            directory,
+                            "validate",
+                            "repo",
+                        ]
+                    )
+            self.assertEqual(65, result)
+            self.assertEqual("", stdout.getvalue())
+            self.assertIn("ruff diagnostic", stderr.getvalue())
 
     def test_operational_output_paths_cannot_escape_workspace(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
