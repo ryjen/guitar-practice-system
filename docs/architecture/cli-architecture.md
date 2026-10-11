@@ -88,7 +88,7 @@ The adapter executes only registered repository-relative Python files and never 
 
 ## Completed extraction approach
 
-For each cohesive subsystem, the migration applied this sequence:
+For each cohesive subsystem, the migration applied this sequence through the package-native cutover; the final compatibility-removal step remains conditional:
 
 1. identify deterministic computation and state invariants;
 2. move that computation into `domain`;
@@ -98,9 +98,9 @@ For each cohesive subsystem, the migration applied this sequence:
 6. reduce the old script to a compatibility shim that imports package code;
 7. migrate tests from `sys.path`/script imports to package imports;
 8. migrate CI and docs to `guitarctl`;
-9. delete the shim only after parity evidence exists.
+9. optionally delete a shim only after parity evidence exists and no supported consumer still uses it.
 
-Extraction was by subsystem rather than by file so closely coupled code moved together. The completed order was:
+Extraction was by subsystem rather than by file so closely coupled code moved together. The completed package-native extraction order was:
 
 1. discovery;
 2. scheduling + assessment;
