@@ -15,8 +15,8 @@ from guitar_practice.application.practice_data_export import (
 )
 from guitar_practice.domain.practice_data import (
     CatalogError,
-    render_catalog,
-    validate_catalog,
+    render_catalog as render_catalog,
+    validate_catalog as validate_catalog,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
