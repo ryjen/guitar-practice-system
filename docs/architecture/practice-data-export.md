@@ -31,13 +31,13 @@ Consumers must reject unsupported schema versions rather than silently guessing 
 From the repository root:
 
 ```sh
-python scripts/export_practice_data.py
+guitarctl export practice-data
 ```
 
 CI verifies the checked-in export is semantically identical to the canonical catalog:
 
 ```sh
-python scripts/export_practice_data.py --check
+guitarctl export practice-data --check
 ```
 
 The exporter also validates unique IDs, required fields, duration totals, repository-relative source references, and strictly increasing slow/medium/fast tempo ladders.
