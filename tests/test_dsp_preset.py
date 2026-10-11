@@ -132,6 +132,17 @@ class DspPresetContractTests(unittest.TestCase):
                 ):
                     dsp_preset.validate(document)
 
+    def test_non_string_mapping_keys_fail_closed(self) -> None:
+        top_level = preset()
+        top_level[1] = "invalid"
+        with self.assertRaisesRegex(dsp_preset.DspPresetError, "keys"):
+            dsp_preset.validate(top_level)
+
+        parameter = preset()
+        parameter["parameters"][1] = 10
+        with self.assertRaisesRegex(dsp_preset.DspPresetError, "parameter IDs"):
+            dsp_preset.validate(parameter)
+
     def test_schema_version_and_preset_identity_are_strict(self) -> None:
         for value in (2, 0, True, "1"):
             document = preset()
