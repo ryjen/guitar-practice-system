@@ -7,17 +7,26 @@ import subprocess
 from collections.abc import Sequence
 from pathlib import Path
 
+from guitar_practice.application.ports import CommandResult
+
 
 class SubprocessCommandRunner:
     def __init__(self, workspace: Path) -> None:
         self.workspace = workspace.resolve()
 
-    def run(self, command: Sequence[str]) -> int:
-        return subprocess.run(
+    def run(self, command: Sequence[str]) -> CommandResult:
+        completed = subprocess.run(
             list(command),
             cwd=self.workspace,
             check=False,
-        ).returncode
+            capture_output=True,
+            text=True,
+        )
+        return CommandResult(
+            returncode=completed.returncode,
+            stdout=completed.stdout,
+            stderr=completed.stderr,
+        )
 
 
 class PythonModuleProbe:
