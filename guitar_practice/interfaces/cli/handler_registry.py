@@ -6,6 +6,7 @@ from collections.abc import Mapping
 
 from guitar_practice.interfaces.cli.advisory_handlers import ADVISORY_HANDLERS
 from guitar_practice.interfaces.cli.backing_handlers import BACKING_HANDLERS
+from guitar_practice.interfaces.cli.dsp_handlers import DSP_HANDLERS
 from guitar_practice.interfaces.cli.generation_handlers import GENERATION_HANDLERS
 from guitar_practice.interfaces.cli.groove_handlers import GROOVE_HANDLERS
 from guitar_practice.interfaces.cli.operational_handlers import OPERATIONAL_HANDLERS
@@ -31,6 +32,7 @@ NATIVE_HANDLERS = _merge(
     GROOVE_HANDLERS,
     OPERATIONAL_HANDLERS,
     BACKING_HANDLERS,
+    DSP_HANDLERS,
     GENERATION_HANDLERS,
     SCORE_HANDLERS,
     SCORE_EDIT_HANDLERS,
