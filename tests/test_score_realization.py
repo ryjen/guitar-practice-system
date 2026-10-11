@@ -322,6 +322,51 @@ class ScoreRealizationTests(unittest.TestCase):
         )
         score.validate(realized)
 
+    def test_playback_form_composes_simple_repeat_then_ending_group(self) -> None:
+        document = realization_score()
+        document["bars"] = [
+            {"number": 1, "repeat_start": True},
+            {"number": 2, "repeat_end": 2},
+            {"number": 3},
+            {"number": 4, "repeat_start": True},
+            {"number": 5, "repeat_end": 2, "ending_numbers": [1]},
+            {"number": 6, "ending_numbers": [2]},
+        ]
+        document["meter_map"] = [{"bar": 1, "beats": 4, "beat_unit": 4}]
+        document["tempo_map"] = []
+        document.pop("key_map", None)
+        document.pop("sections", None)
+        document.pop("rehearsal_marks", None)
+        document.pop("harmony", None)
+        for part in document["parts"]:
+            part["events"] = []
+        document["parts"][2]["events"] = [
+            {
+                "kind": "note",
+                "location": {"bar": bar, "beat": [1, 1]},
+                "duration": [1, 4],
+                "voice": 1,
+                "pitch": {"step": step, "alter": 0, "octave": 3},
+            }
+            for bar, step in (
+                (1, "C"),
+                (2, "D"),
+                (3, "E"),
+                (4, "F"),
+                (5, "G"),
+                (6, "A"),
+            )
+        ]
+        score.validate(document)
+
+        realized = expand_playback_form(document)
+
+        self.assertEqual(
+            ["C", "D", "C", "D", "E", "F", "G", "F", "A"],
+            [event["pitch"]["step"] for event in realized["parts"][2]["events"]],
+        )
+        score.validate(realized)
+
     def test_playback_form_preserves_simple_repeat_play_count(self) -> None:
         document = realization_score()
         document["bars"] = [
