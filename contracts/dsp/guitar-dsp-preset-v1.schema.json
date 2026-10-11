@@ -57,10 +57,11 @@
         "delay.subdivision": {
           "type": "string",
           "enum": [
+            "free",
             "quarter",
-            "dotted-quarter",
-            "eighth",
             "dotted-eighth",
+            "eighth",
+            "eighth-triplet",
             "sixteenth"
           ]
         }
