@@ -72,6 +72,8 @@ def validate(document: Any) -> None:
     if not isinstance(document, dict):
         raise DspPresetError("DSP preset must be a JSON object")
 
+    if any(not isinstance(key, str) for key in document):
+        raise DspPresetError("DSP preset object keys must be strings")
     fields = set(document)
     missing = TOP_LEVEL_FIELDS - fields
     unknown = fields - TOP_LEVEL_FIELDS
@@ -107,6 +109,8 @@ def validate(document: Any) -> None:
     if not isinstance(parameters, dict):
         raise DspPresetError("parameters must be an object")
 
+    if any(not isinstance(key, str) for key in parameters):
+        raise DspPresetError("parameter IDs must be strings")
     parameter_ids = set(parameters)
     missing_parameters = PARAMETER_IDS - parameter_ids
     unknown_parameters = parameter_ids - PARAMETER_IDS
