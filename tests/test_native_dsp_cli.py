@@ -118,6 +118,28 @@ class NativeDspPresetCliTests(unittest.TestCase):
             self.assertEqual("", stdout.getvalue())
             self.assertIn("delay.feedback_milli", stderr.getvalue())
 
+    def test_invalid_utf8_is_data_error(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            (workspace / "preset.json").write_bytes(b"\\xff\\xfe")
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                result = main(
+                    [
+                        "--workspace",
+                        str(workspace),
+                        "dsp",
+                        "preset",
+                        "validate",
+                        "preset.json",
+                    ]
+                )
+
+            self.assertEqual(65, result)
+            self.assertEqual("", stdout.getvalue())
+            self.assertTrue(stderr.getvalue().startswith("guitarctl: "))
+
     def test_document_path_cannot_escape_workspace(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             stdout = io.StringIO()
