@@ -163,6 +163,12 @@ def dumps(document: dict[str, Any]) -> str:
     ) + "\n"
 
 
+def _reject_constant(value: str) -> Any:
+    raise DspPresetError(
+        f"non-finite JSON number is unsupported: {value}"
+    )
+
+
 def _pairs_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     value: dict[str, Any] = {}
     for key, item in pairs:
@@ -181,11 +187,7 @@ def loads(text: str) -> dict[str, Any]:
         value = json.loads(
             text,
             object_pairs_hook=_pairs_object,
-            parse_constant=lambda value: (_ for _ in ()).throw(
-                DspPresetError(
-                    f"non-finite JSON number is unsupported: {value}"
-                )
-            ),
+            parse_constant=_reject_constant,
         )
     except DspPresetError:
         raise
