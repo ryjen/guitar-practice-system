@@ -353,3 +353,21 @@ Score IR + GrooveCatalog
         -> human / future proposal decision
         -> existing deterministic score rhythm authoring
 ```
+
+
+## Advisory evidence and adaptive sessions
+
+Evidence interpretation and adaptive practice-session recommendations are package-native:
+
+```bash
+guitarctl evidence feedback examples/evidence/slide-feedback.json \
+  --as-of 2026-08-06
+
+guitarctl session adapt examples/discovery/adaptive-session-request.json
+```
+
+Both commands are deterministic and advisory. They emit machine-readable JSON on stdout and diagnostics on stderr. Invalid input returns the stable data-error code `65`; neither command mutates progress, mastery, maintenance state, active-work state, schedules, or evidence records.
+
+The evidence input may be either a JSON object containing `records` or a raw top-level records array, preserving the historical input contract. Native commands require inputs to remain workspace-relative.
+
+`scripts/evidence_feedback.py` and `scripts/adaptive_session.py` remain only as compatibility shims. Their decision rules live in `guitar_practice.domain`, and CI compares shim output with `guitarctl` output on representative fixtures.
