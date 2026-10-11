@@ -33,7 +33,8 @@ class FlakePythonEnvironmentTests(unittest.TestCase):
 
     def test_repository_validation_uses_canonical_package_command(self) -> None:
         text = Path("flake.nix").read_text()
-        self.assertIn("checks.${system}.repository-validation", text)
+        self.assertIn("checks.${system} = {", text)
+        self.assertIn("repository-validation = pkgs.runCommand", text)
         self.assertIn("guitarctl validate repo", text)
         self.assertIn("cp -R ${self} source", text)
         self.assertIn('export PYTHONPATH="$PWD"', text)
