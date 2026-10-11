@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import PurePosixPath
-from typing import Any, Mapping, Sequence
+from typing import Any, Mapping
 
 
 class CatalogError(ValueError):
