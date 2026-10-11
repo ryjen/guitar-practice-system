@@ -122,7 +122,7 @@ CI assembles generated MIDI with the ordinary public source metadata required to
 inspect and reproduce it. Reproduce the same bundle locally from a clean checkout:
 
 ```bash
-python3 scripts/build_practice_artifacts.py \
+guitarctl artifact build \
   --source-sha "$(git rev-parse HEAD)" \
   --output-dir generated/practice-bundle
 ```

@@ -79,10 +79,10 @@ COMMANDS: tuple[CommandSpec, ...] = (
     CommandSpec(("score", "tracks"), "Inspect canonical Score IR parts and roles", MigrationState.NATIVE, native_handler="score-tracks"),
     CommandSpec(("score", "validate"), "Validate one canonical Score IR document", MigrationState.NATIVE, native_handler="score-validate"),
     CommandSpec(("drums", "export"), "Export a score-derived drum loop for a supported looper target", MigrationState.NATIVE, native_handler="drums-export"),
-    CommandSpec(("artifact", "build"), "Build deterministic practice artifacts", MigrationState.LEGACY, legacy=LegacyTarget("scripts/build_practice_artifacts.py")),
-    CommandSpec(("export", "practice-data"), "Export portable practice data", MigrationState.LEGACY, legacy=LegacyTarget("scripts/export_practice_data.py")),
-    CommandSpec(("validate", "repo"), "Run repository validation", MigrationState.LEGACY, legacy=LegacyTarget("scripts/validate_repo.py")),
-    CommandSpec(("validate", "public-boundary"), "Validate the public/private repository boundary", MigrationState.LEGACY, legacy=LegacyTarget("scripts/check_public_boundary.py")),
+    CommandSpec(("artifact", "build"), "Build deterministic practice artifacts", MigrationState.NATIVE, native_handler="artifact-build"),
+    CommandSpec(("export", "practice-data"), "Export portable practice data", MigrationState.NATIVE, native_handler="export-practice-data"),
+    CommandSpec(("validate", "repo"), "Run repository validation", MigrationState.NATIVE, native_handler="validate-repo"),
+    CommandSpec(("validate", "public-boundary"), "Validate the public/private repository boundary", MigrationState.NATIVE, native_handler="validate-public-boundary"),
 )
 
 # These files are implementation libraries, not process entrypoints.
@@ -92,6 +92,10 @@ INTERNAL_LIBRARY_SCRIPTS = frozenset()
 COMPATIBILITY_SHIMS = frozenset(
     {
         "scripts/discovery_catalog.py",
+        "scripts/check_public_boundary.py",
+        "scripts/validate_repo.py",
+        "scripts/export_practice_data.py",
+        "scripts/build_practice_artifacts.py",
         "scripts/adaptive_session.py",
         "scripts/evidence_feedback.py",
         "scripts/scheduling_v2.py",

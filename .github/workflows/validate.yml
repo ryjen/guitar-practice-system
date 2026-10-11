@@ -64,4 +64,4 @@ jobs:
             catalogs/discovery/repository.json > /tmp/discovery.json
           python -m json.tool /tmp/discovery.json >/dev/null
       - name: Run canonical repository validation
-        run: python scripts/validate_repo.py
+        run: guitarctl validate repo > /tmp/repository-validation.json

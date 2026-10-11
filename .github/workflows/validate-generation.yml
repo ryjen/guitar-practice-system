@@ -65,7 +65,7 @@ jobs:
       - name: Install package
         run: python -m pip install --disable-pip-version-check --no-deps -e .
       - name: Enforce public boundary
-        run: python scripts/check_public_boundary.py
+        run: guitarctl validate public-boundary > /tmp/public-boundary.json
       - name: Run generation tests
         run: |
           python -m unittest tests.test_generate_backing_tracks -v
