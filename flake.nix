@@ -3,7 +3,7 @@
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-  outputs = { nixpkgs, ... }:
+  outputs = { self, nixpkgs, ... }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs { inherit system; };
@@ -37,6 +37,24 @@
           export PYTHONPATH="$PWD''${PYTHONPATH:+:$PYTHONPATH}"
         '';
       };
+
+      # Run the same package-native trust gate in a pinned Nix environment.
+      # Copy the flake source into writable storage: compileall and unittest
+      # need to create temporary files without modifying the Nix store.
+      checks.${system}.repository-validation = pkgs.runCommand
+        "guitar-practice-repository-validation"
+        { nativeBuildInputs = [ python guitarctl ]; }
+        ''
+          cp -R ${self} source
+          chmod -R u+w source
+          cd source
+          export HOME="$TMPDIR"
+          export PYTHONPATH="$PWD"
+          export GUITAR_SOUNDFONT="${soundfont}"
+          guitarctl validate repo > "$TMPDIR/repository-validation.json"
+          mkdir -p "$out"
+          cp "$TMPDIR/repository-validation.json" "$out/report.json"
+        '';
 
       checks.${system}.toolchain = pkgs.runCommand "guitar-practice-toolchain-check" {
         nativeBuildInputs = toolchain;
