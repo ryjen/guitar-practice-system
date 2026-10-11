@@ -31,15 +31,6 @@ GENERATOR_INPUTS = (
     "guitar_practice/domain/groove.py",
     "guitar_practice/domain/midi.py",
     "guitar_practice/domain/practice_data.py",
-    "scripts/backing_track_engine.py",
-    "scripts/bass_engine.py",
-    "scripts/build_practice_artifacts.py",
-    "scripts/export_practice_data.py",
-    "scripts/generate_backing_tracks.py",
-    "scripts/groove_catalog.py",
-    "scripts/groove_engine.py",
-    "scripts/midi_workflow.py",
-    "scripts/progression_catalog.py",
 )
 
 
