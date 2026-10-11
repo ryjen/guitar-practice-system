@@ -125,7 +125,7 @@ jobs:
       - name: Install package
         run: python -m pip install --disable-pip-version-check --no-deps -e .
       - name: Enforce public boundary
-        run: python scripts/check_public_boundary.py
+        run: guitarctl validate public-boundary > /tmp/public-boundary.json
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
       - name: Validate groove catalog
@@ -266,12 +266,12 @@ jobs:
           PY
       - name: Build deterministic practice bundle
         run: |
-          python scripts/build_practice_artifacts.py \
+          guitarctl artifact build \
             --source-sha "${{ github.sha }}" \
             --output-dir generated/practice-bundle
       - name: Verify reproducible bundle
         run: |
-          python scripts/build_practice_artifacts.py \
+          guitarctl artifact build \
             --source-sha "${{ github.sha }}" \
             --output-dir generated/practice-bundle-replay
           diff -qr generated/practice-bundle generated/practice-bundle-replay
