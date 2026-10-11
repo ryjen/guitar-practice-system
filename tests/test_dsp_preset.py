@@ -93,7 +93,7 @@ class DspPresetContractTests(unittest.TestCase):
             dsp_preset.validate(document)
 
         document = preset()
-        document["parameters"]["delay.subdivision"] = "triplet-eighth"
+        document["parameters"]["delay.subdivision"] = "dotted-quarter"
         with self.assertRaisesRegex(
             dsp_preset.DspPresetError,
             "delay.subdivision",
