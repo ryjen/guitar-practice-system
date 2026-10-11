@@ -12,6 +12,23 @@ Install the pinned development dependency before the first run:
 python -m pip install -r requirements-dev.txt
 ```
 
+## Reproducible Nix validation
+
+The same package-native fast gate is also a first-class flake check. On a system with Nix installed:
+
+```bash
+# Narrow, repeatable fast repository gate:
+nix build --no-write-lock-file --no-link --print-build-logs \
+  .#checks.x86_64-linux.repository-validation
+
+# Full flake validation, including the existing toolchain smoke check:
+nix flake check --no-write-lock-file --print-build-logs
+```
+
+The check runs the existing `guitarctl validate repo` implementation from a writable copy of the pinned flake source. It uses the flake-defined Python 3.12/Ruff environment and exports only a JSON validation report into its Nix output. It does **not** add a second Python test runner or replace the separate domain- and tool-integration checks.
+
+During the additive qualification phase, the existing MusicXML CI workflow also invokes this flake check using its already-pinned Nix bootstrap. The existing `Validate Repository` and domain CI check identities, filters, trust boundaries and GitHub-hosted runner assignments are unchanged. This is not yet workflow consolidation or evidence of lower CI cost; those changes require the separate mapping and comparison recorded in #165.
+
 The canonical command runs, in order:
 
 1. Python bytecode compilation for `scripts/`, `tests/`, and `tools/`;
