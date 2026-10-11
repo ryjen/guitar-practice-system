@@ -80,7 +80,15 @@ score-edit> notes guitar-1 inputs/notes.json
 
 ## 4. Add guitar position, rhythm, and technique
 
-Voicing, rhythm, and technique reuse the exact-selector contracts from the deterministic commands:
+Before committing a rhythm patch, an existing Groove Engine preset can provide a meter-checked subdivision/feel guide for the current bar:
+
+```text
+score-edit> groove jazz-swing --bar 1
+```
+
+The returned written grid uses exact Score IR beat rationals. Swing, humanization, velocity variance, and drum-pattern detail remain transient performance context; they are not silently written into canonical note timing.
+
+Voicing, rhythm, and technique then reuse the exact-selector contracts from the deterministic commands:
 
 ```text
 score-edit> voicing guitar-1 inputs/voicing.json
