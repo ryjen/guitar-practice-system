@@ -39,6 +39,10 @@ class PracticeBundleTests(unittest.TestCase):
 
             provenance = json.loads((first / "provenance.json").read_text())
             self.assertEqual(provenance["sourceGitSha"], source_sha)
+            self.assertEqual("0.1.0", provenance["projectVersion"])
+            self.assertEqual(1, provenance["versionedContracts"]["practice-data"])
+            self.assertEqual(1, provenance["versionedContracts"]["guitar-dsp.preset"])
+            self.assertIn("pyproject.toml", provenance["generatorInputs"])
             self.assertIn(
                 "guitar_practice/application/practice_bundle.py",
                 provenance["generatorInputs"],
@@ -83,6 +87,7 @@ class PracticeBundleTests(unittest.TestCase):
                 "generated/backing-tracks/jazz-blues-12-c-110.mid",
                 provenance["artifacts"],
             )
+            self.assertTrue((first / "contracts/dsp/guitar-dsp-preset-v1.schema.json").exists())
             self.assertTrue((first / "exports/practice-data.json").exists())
             self.assertTrue((first / "SHA256SUMS").exists())
 
