@@ -9,7 +9,11 @@ from collections.abc import Callable, Sequence
 from pathlib import Path, PurePosixPath
 
 from guitar_practice.adapters.binary_files import BinaryFileStore
-from guitar_practice.adapters.json_files import JsonDocumentError, JsonFileStore
+from guitar_practice.adapters.json_files import (
+    BoundedJsonFileStore,
+    JsonDocumentError,
+    JsonFileStore,
+)
 from guitar_practice.adapters.musicxml_export import MusicXmlExportError, MusicXmlExporter
 from guitar_practice.adapters.musicxml_import import MusicXmlError, MusicXmlParser
 from guitar_practice.adapters.midi_playback import FluidSynthMidiPlayer, MidiPlaybackError
@@ -344,7 +348,7 @@ def score_rhythm_guide(argv: Sequence[str], context: CliContext) -> int:
         catalog = _workspace_relative(args.catalog, label="groove catalog")
         document = ScoreFileStore(context.workspace).read(source)
         service = ScoreRhythmGuide(
-            GrooveCatalog(JsonFileStore(context.workspace), catalog)
+            GrooveCatalog(BoundedJsonFileStore(context.workspace), catalog)
         )
         _write_json(
             service.build(document, args.preset, bar=args.bar),
