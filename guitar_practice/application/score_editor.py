@@ -163,6 +163,14 @@ class ScoreEditSession:
             section=section,
         )
 
+    def add_part(self, input_document: Mapping[str, Any]) -> dict[str, Any]:
+        self._memory.write(_INPUT_KEY, input_document)
+        return self._authoring.add_part(
+            self.source_path,
+            input_path=_INPUT_KEY,
+            output=self.source_path,
+        )
+
     def apply_structured(
         self,
         action: str,

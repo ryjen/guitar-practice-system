@@ -5,6 +5,7 @@ from typing import Any, Mapping
 
 from guitar_practice.application.score_authoring import (
     ScoreAuthoring,
+    normalize_part_input,
     parse_chord_grid,
     parse_form_spec,
 )
@@ -236,6 +237,175 @@ class ScoreAuthoringApplicationTests(unittest.TestCase):
                 output="written.json",
             )
         self.assertNotIn("written.json", store.values)
+
+    def test_part_input_normalizes_standard_tuning_and_preserves_midi_identity(self) -> None:
+        part = normalize_part_input(
+            {
+                "id": "guitar-1",
+                "name": "Guitar",
+                "role": "guitar",
+                "instrument": {
+                    "name": "Electric Guitar",
+                    "family": "guitar",
+                    "midi": {"program": 29, "channel": 1},
+                },
+                "guitar": {"tuning": "standard"},
+            }
+        )
+
+        self.assertEqual([], part["events"])
+        self.assertEqual([6, 5, 4, 3, 2, 1], [
+            item["string"] for item in part["guitar"]["tuning"]
+        ])
+        self.assertEqual(
+            {"program": 29, "channel": 1},
+            part["instrument"]["midi"],
+        )
+
+    def test_explicit_tuning_is_preserved_and_invalid_tuning_fails_canonical_validation(self) -> None:
+        explicit = [
+            {"string": 6, "pitch": {"step": "D", "alter": 0, "octave": 2}},
+            {"string": 5, "pitch": {"step": "A", "alter": 0, "octave": 2}},
+            {"string": 4, "pitch": {"step": "D", "alter": 0, "octave": 3}},
+            {"string": 3, "pitch": {"step": "G", "alter": 0, "octave": 3}},
+            {"string": 2, "pitch": {"step": "B", "alter": 0, "octave": 3}},
+            {"string": 1, "pitch": {"step": "E", "alter": 0, "octave": 4}},
+        ]
+        part = normalize_part_input(
+            {
+                "id": "drop-d",
+                "name": "Drop D Guitar",
+                "role": "guitar",
+                "instrument": {"name": "Guitar", "family": "guitar"},
+                "guitar": {"tuning": explicit},
+            }
+        )
+        self.assertEqual(explicit, part["guitar"]["tuning"])
+
+        store = MemoryDocuments(
+            {
+                "source.json": minimal_score(),
+                "part.json": {
+                    "part": {
+                        "id": "bad-guitar",
+                        "name": "Bad Guitar",
+                        "role": "guitar",
+                        "instrument": {"name": "Guitar", "family": "guitar"},
+                        "guitar": {
+                            "tuning": [
+                                {"string": 1, "pitch": {"step": "E", "alter": 0, "octave": 4}},
+                                {"string": 1, "pitch": {"step": "D", "alter": 0, "octave": 4}},
+                            ]
+                        },
+                    }
+                },
+            }
+        )
+        with self.assertRaisesRegex(ValueError, "duplicate string"):
+            ScoreAuthoring(store, inputs=store).add_part(
+                "source.json",
+                input_path="part.json",
+                output="written.json",
+            )
+        self.assertNotIn("written.json", store.values)
+
+    def test_part_input_preserves_explicit_tuning_and_rejects_invalid_shortcuts(self) -> None:
+        explicit = [
+            {"string": 6, "pitch": {"step": "D", "alter": 0, "octave": 2}},
+            {"string": 5, "pitch": {"step": "A", "alter": 0, "octave": 2}},
+            {"string": 4, "pitch": {"step": "D", "alter": 0, "octave": 3}},
+            {"string": 3, "pitch": {"step": "G", "alter": 0, "octave": 3}},
+            {"string": 2, "pitch": {"step": "B", "alter": 0, "octave": 3}},
+            {"string": 1, "pitch": {"step": "E", "alter": 0, "octave": 4}},
+        ]
+        part = normalize_part_input(
+            {
+                "id": "drop-d",
+                "name": "Drop D Guitar",
+                "role": "guitar",
+                "instrument": {"name": "Guitar", "family": "guitar"},
+                "guitar": {"tuning": explicit},
+            }
+        )
+        self.assertEqual(explicit, part["guitar"]["tuning"])
+
+        with self.assertRaisesRegex(ValueError, "tuning"):
+            normalize_part_input(
+                {
+                    "id": "bad",
+                    "name": "Bad Guitar",
+                    "role": "guitar",
+                    "instrument": {"name": "Guitar", "family": "guitar"},
+                    "guitar": {"tuning": "drop-d"},
+                }
+            )
+
+    def test_add_part_application_rejects_invalid_explicit_tuning(self) -> None:
+        source = minimal_score()
+        store = MemoryDocuments(
+            {
+                "source.json": source,
+                "part.json": {
+                    "part": {
+                        "id": "bad-guitar",
+                        "name": "Bad Guitar",
+                        "role": "guitar",
+                        "instrument": {"name": "Guitar", "family": "guitar"},
+                        "guitar": {
+                            "tuning": [
+                                {
+                                    "string": 1,
+                                    "pitch": {"step": "H", "alter": 0, "octave": 4},
+                                }
+                            ]
+                        },
+                    }
+                },
+            }
+        )
+        service = ScoreAuthoring(store, inputs=store)
+
+        with self.assertRaisesRegex(ValueError, "step"):
+            service.add_part(
+                "source.json",
+                input_path="part.json",
+                output="written.json",
+            )
+        self.assertNotIn("written.json", store.values)
+
+    def test_add_part_application_writes_new_document_only(self) -> None:
+        source = minimal_score()
+        input_document = {
+            "part": {
+                "id": "bass",
+                "name": "Bass",
+                "role": "bass",
+                "instrument": {
+                    "name": "Electric Bass",
+                    "family": "bass",
+                    "midi": {"program": 33, "channel": 2},
+                },
+            }
+        }
+        store = MemoryDocuments(
+            {
+                "source.json": source,
+                "part.json": input_document,
+            }
+        )
+        service = ScoreAuthoring(store, inputs=store)
+
+        result = service.add_part(
+            "source.json",
+            input_path="part.json",
+            output="written.json",
+        )
+
+        self.assertEqual(source, store.values["source.json"])
+        self.assertEqual(input_document, store.values["part.json"])
+        self.assertEqual("bass", result["parts"][0]["id"])
+        self.assertEqual([], result["parts"][0]["events"])
+        score.validate(result)
 
     def test_form_then_section_chords_writes_new_documents_without_mutating_sources(self) -> None:
         initial = minimal_score()

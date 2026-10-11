@@ -192,6 +192,45 @@ def score_chords(argv: Sequence[str], context: CliContext) -> int:
     return exit_codes.OK
 
 
+def score_part_add(argv: Sequence[str], context: CliContext) -> int:
+    parser = argparse.ArgumentParser(prog="guitarctl score part add")
+    parser.add_argument("score", help="Canonical Score IR JSON inside the workspace")
+    parser.add_argument("--input", required=True, help="JSON input document containing one part")
+    parser.add_argument("--output", required=True, help="New canonical Score IR JSON output")
+    args = parser.parse_args(list(argv))
+
+    try:
+        source = _workspace_relative(args.score, label="score document")
+        input_path = _workspace_relative(args.input, label="part input")
+        output = _workspace_relative(args.output, label="score output")
+        document = _authoring(context).add_part(
+            source,
+            input_path=input_path,
+            output=output,
+        )
+    except (
+        ScorePathError,
+        ScoreDocumentError,
+        JsonDocumentError,
+        OSError,
+        ValueError,
+    ) as exc:
+        print(f"guitarctl: {exc}", file=context.stderr)
+        return exit_codes.DATA_ERROR
+
+    added = document["parts"][-1]
+    _write_json(
+        {
+            "output": output,
+            "id": document["id"],
+            "part": added["id"],
+            "parts": len(document["parts"]),
+        },
+        context,
+    )
+    return exit_codes.OK
+
+
 def score_notes(argv: Sequence[str], context: CliContext) -> int:
     parser = argparse.ArgumentParser(prog="guitarctl score notes")
     parser.add_argument("score", help="Canonical Score IR JSON inside the workspace")
@@ -615,6 +654,7 @@ SCORE_HANDLERS: dict[str, NativeHandler] = {
     "score-import": score_import,
     "score-form": score_form,
     "score-chords": score_chords,
+    "score-part-add": score_part_add,
     "score-notes": score_notes,
     "score-voicing": score_voicing,
     "score-rhythm": score_rhythm,

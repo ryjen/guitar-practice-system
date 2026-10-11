@@ -91,6 +91,32 @@ class ScoreEditSessionTests(unittest.TestCase):
         self.assertEqual("Changed elsewhere", store.values["score.json"]["metadata"]["title"])
         self.assertEqual([], store.writes)
 
+    def test_part_authoring_reuses_application_operation_in_memory(self) -> None:
+        source = minimal_score()
+        store = MemoryDocuments({"score.json": source})
+        session = ScoreEditSession("score.json", store)
+
+        result = session.add_part(
+            {
+                "part": {
+                    "id": "guitar-1",
+                    "name": "Guitar",
+                    "role": "guitar",
+                    "instrument": {
+                        "name": "Electric Guitar",
+                        "family": "guitar",
+                    },
+                    "guitar": {"tuning": "standard"},
+                }
+            }
+        )
+
+        self.assertEqual(source, store.values["score.json"])
+        self.assertEqual([], store.writes)
+        self.assertEqual("guitar-1", result["parts"][0]["id"])
+        self.assertEqual(6, len(result["parts"][0]["guitar"]["tuning"]))
+        score.validate(result)
+
     def test_structured_actions_delegate_to_existing_authoring_contracts(self) -> None:
         base = timeline_score()
 
