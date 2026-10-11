@@ -371,3 +371,20 @@ Both commands are deterministic and advisory. They emit machine-readable JSON on
 The evidence input may be either a JSON object containing `records` or a raw top-level records array, preserving the historical input contract. Native commands require inputs to remain workspace-relative.
 
 `scripts/evidence_feedback.py` and `scripts/adaptive_session.py` remain only as compatibility shims. Their decision rules live in `guitar_practice.domain`, and CI compares shim output with `guitarctl` output on representative fixtures.
+
+
+## Operational tooling
+
+Repository operations are package-native:
+
+```bash
+guitarctl export practice-data
+guitarctl export practice-data --check
+guitarctl artifact build --source-sha "$(git rev-parse HEAD)"
+guitarctl validate public-boundary
+guitarctl validate repo
+```
+
+Inputs and outputs that name files must remain inside the explicit workspace. Operational commands follow the shared exit-code/stdout/stderr policy documented in `docs/validation.md`.
+
+Legacy scripts for these commands are compatibility shims; they are not the preferred interface and contain no canonical decision/orchestration logic.
