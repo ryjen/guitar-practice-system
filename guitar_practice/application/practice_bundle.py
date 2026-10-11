@@ -28,11 +28,13 @@ GENERATOR_INPUTS = (
     "guitar_practice/application/generation.py",
     "guitar_practice/application/practice_bundle.py",
     "guitar_practice/application/practice_data_export.py",
+    "guitar_practice/application/release.py",
     "guitar_practice/domain/backing.py",
     "guitar_practice/domain/bass.py",
     "guitar_practice/domain/groove.py",
     "guitar_practice/domain/midi.py",
     "guitar_practice/domain/practice_data.py",
+    "guitar_practice/domain/release.py",
 )
 
 
