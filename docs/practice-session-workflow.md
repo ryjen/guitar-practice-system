@@ -24,6 +24,8 @@ The workflow is deliberately deterministic and observation-driven. Missing infor
 
 Use [`../templates/practice-session.md`](../templates/practice-session.md) to capture the concrete session realization.
 
+For the current M3 real-session validation slice, ready-to-play pre-session plans are in [`../examples/real-sessions/`](../examples/real-sessions/README.md). They intentionally leave observations, takes, gate outcomes, and evidence blank until the guitar session is actually played.
+
 ## 1. Select one primary target
 
 Choose one primary objective and, when useful, one secondary constraint.
