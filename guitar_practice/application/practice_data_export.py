@@ -19,7 +19,7 @@ class PracticeDataExport:
     tree: WorkspaceTree
     source: str = DEFAULT_SOURCE
 
-    def _catalog(self) -> dict[str, Any]:
+    def catalog(self) -> dict[str, Any]:
         value = self.values.read(self.source)
         if not isinstance(value, Mapping):
             raise practice_data.CatalogError("practice-data catalog must be an object")
@@ -32,12 +32,12 @@ class PracticeDataExport:
         return catalog
 
     def export(self, output: str = DEFAULT_OUTPUT) -> str:
-        rendered = practice_data.render_catalog(self._catalog())
+        rendered = practice_data.render_catalog(self.catalog())
         self.tree.write_text(output, rendered)
         return output
 
     def check(self, output: str = DEFAULT_OUTPUT) -> str:
-        expected = self._catalog()
+        expected = self.catalog()
         if not self.tree.exists(output):
             raise practice_data.CatalogError(f"generated export is missing: {output}")
         actual = self.values.read(output)
