@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ryanjennin.gs/contracts/guitar-dsp-preset-v1.schema.json",
+  "$id": "urn:ryjen:guitar-dsp:preset:v1",
   "title": "Guitar DSP Preset v1",
   "type": "object",
   "additionalProperties": false,
