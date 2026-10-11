@@ -24,10 +24,11 @@ PARAMETER_IDS = frozenset(
 )
 DELAY_SUBDIVISIONS = frozenset(
     {
+        "free",
         "quarter",
-        "dotted-quarter",
-        "eighth",
         "dotted-eighth",
+        "eighth",
+        "eighth-triplet",
         "sixteenth",
     }
 )
