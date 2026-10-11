@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sys
+import tomllib
 from dataclasses import dataclass
 from typing import Any
 
@@ -18,8 +19,10 @@ PUBLIC_SOURCE_DIRS = (
     "catalogs/progressions",
     "contracts/backing-tracks",
     "contracts/progressions",
+    "contracts/dsp",
 )
 GENERATOR_INPUTS = (
+    "pyproject.toml",
     "guitar_practice/adapters/binary_files.py",
     "guitar_practice/adapters/json_files.py",
     "guitar_practice/adapters/workspace_tree.py",
@@ -49,6 +52,61 @@ class PracticeBundleBuilder:
             if path not in {"provenance.json", "SHA256SUMS"}
         }
 
+    def _project_version(self) -> str:
+        payload = tomllib.loads(self.tree.read_text("pyproject.toml"))
+        version = payload.get("project", {}).get("version")
+        if not isinstance(version, str) or not version:
+            raise ValueError("pyproject.toml project.version must be non-empty")
+        return version
+
+    def _contract_versions(self) -> dict[str, int]:
+        def version(path: str, *keys: str) -> int:
+            value: Any = self.tree.read(path)
+            for key in keys:
+                if not isinstance(value, dict) or key not in value:
+                    raise ValueError(
+                        f"cannot resolve contract version from {path}: {'.'.join(keys)}"
+                    )
+                value = value[key]
+            if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+                raise ValueError(
+                    f"contract version in {path} must be a positive integer"
+                )
+            return value
+
+        return {
+            "practice-data": version(
+                "catalogs/practice-data.json",
+                "schemaVersion",
+            ),
+            "groove-catalog": version(
+                "catalogs/grooves/catalog.json",
+                "version",
+            ),
+            "progression-catalog": version(
+                "catalogs/progressions/catalog.json",
+                "version",
+            ),
+            "backing-track-request": version(
+                "contracts/backing-tracks/backing-track-request.schema.json",
+                "properties",
+                "version",
+                "const",
+            ),
+            "practice-progression": version(
+                "contracts/backing-tracks/practice-progression.schema.json",
+                "properties",
+                "version",
+                "const",
+            ),
+            "guitar-dsp.preset": version(
+                "contracts/dsp/guitar-dsp-preset-v1.schema.json",
+                "properties",
+                "version",
+                "const",
+            ),
+        }
+
     def _generator_hashes(self) -> dict[str, str]:
         hashes: dict[str, str] = {}
         for path in GENERATOR_INPUTS:
@@ -57,9 +115,18 @@ class PracticeBundleBuilder:
             hashes[path] = _sha256(self.tree.read_bytes(path))
         return hashes
 
-    def build(self, output: str, *, source_sha: str) -> str:
+    def build(
+        self,
+        output: str,
+        *,
+        source_sha: str,
+        source_tag: str | None = None,
+        release_readme: str | None = None,
+    ) -> str:
         if not source_sha.strip():
             raise ValueError("source SHA must be non-empty")
+        if source_tag is not None and not source_tag.strip():
+            raise ValueError("source tag must be non-empty when provided")
 
         self.tree.remove_tree(output)
         self.tree.make_directory(output)
@@ -83,9 +150,14 @@ class PracticeBundleBuilder:
             artifacts=bundle,
         ).execute()
 
+        if release_readme is not None:
+            bundle.write_text("RELEASE.md", release_readme)
+
         provenance: dict[str, Any] = {
             "schemaVersion": 1,
             "sourceGitSha": source_sha,
+            "projectVersion": self._project_version(),
+            "versionedContracts": self._contract_versions(),
             "runtime": {
                 "python": sys.version.split()[0],
                 "implementation": sys.implementation.name,
@@ -93,6 +165,9 @@ class PracticeBundleBuilder:
             "generatorInputs": self._generator_hashes(),
             "artifacts": self._hashes(bundle),
         }
+        if source_tag is not None:
+            provenance["sourceGitTag"] = source_tag
+
         bundle.write_text(
             "provenance.json",
             json.dumps(provenance, indent=2, sort_keys=True) + "\n",

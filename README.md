@@ -207,3 +207,8 @@ See [`docs/planning/roadmap.md`](docs/planning/roadmap.md).
 ## Contributing
 
 Contributions should improve portable practice material, deterministic public contracts, synthetic fixtures, validators, source transformations, or safe local-first workflows. Every pull request must satisfy the public disclosure and boundary checklist.
+
+
+## Releases
+
+Versioned deterministic public practice bundles are documented in [`docs/releases.md`](docs/releases.md).
