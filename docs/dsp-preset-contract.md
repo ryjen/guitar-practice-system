@@ -42,7 +42,7 @@ The canonical interoperability fixture is at
 
 | Field | v1 domain | Meaning |
 |---|---:|---|
-| preset | lowercase slug, max 64 chars | Stable preset identity only |
+| preset | lowercase ASCII slug, max 32 chars | Stable preset identity only |
 | tempo_bpm | integer 20..300 | Normalized tempo supplied to tempo-aware delay |
 | delay.feedback_milli | integer 0..950 | Feedback scaled by 1000; 320 means 0.320 |
 | delay.free_ms | integer 1..2000 | Free-running delay time in milliseconds |
@@ -72,20 +72,26 @@ languages.
 
 ## Canonical JSON
 
-Canonical serialization is UTF-8 JSON with:
+Canonical **wire** serialization is ASCII-compatible UTF-8 JSON with:
 
-- lexicographically sorted object keys;
+- exact top-level order: `schema`, `version`, `preset`, `tempo_bpm`, `parameters`;
+- exact parameter order: feedback, free-time, mix, subdivision;
 - no insignificant whitespace;
-- one trailing newline;
+- no BOM and no terminal newline;
+- shortest decimal integer encoding;
+- maximum canonical size of 256 bytes;
 - duplicate object keys rejected while decoding;
 - non-finite numeric tokens rejected;
-- raw input capped at 4096 characters before JSON decoding;
+- human-edited input capped at 4096 characters before JSON decoding;
 - exact schema/version validation before emission.
+
+The 4096-character input bound is an authoring boundary, not a wire-size allowance.
+Every valid v1 canonical output fits the 256-byte DSP consumer bound.
 
 The canonical jazz-blues fixture is therefore exactly:
 
 ~~~json
-{"parameters":{"delay.feedback_milli":320,"delay.free_ms":375,"delay.mix_milli":500,"delay.subdivision":"dotted-eighth"},"preset":"jazz-blues","schema":"guitar-dsp.preset","tempo_bpm":92,"version":1}
+{"schema":"guitar-dsp.preset","version":1,"preset":"jazz-blues","tempo_bpm":92,"parameters":{"delay.feedback_milli":320,"delay.free_ms":375,"delay.mix_milli":500,"delay.subdivision":"dotted-eighth"}}
 ~~~
 
 ## guitarctl
