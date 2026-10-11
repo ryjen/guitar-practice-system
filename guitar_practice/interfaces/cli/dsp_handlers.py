@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 from collections.abc import Callable, Sequence
-from pathlib import Path, PurePosixPath
+from pathlib import PurePosixPath
 
 from guitar_practice.domain import dsp_preset
 from guitar_practice.interfaces.cli import exit_codes

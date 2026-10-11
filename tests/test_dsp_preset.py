@@ -109,6 +109,14 @@ class DspPresetV1Tests(unittest.TestCase):
                 with self.assertRaises(dsp_preset.DspPresetError):
                     dsp_preset.validate(document)
 
+    def test_loads_rejects_duplicate_fields(self) -> None:
+        duplicate = FIXTURE.replace(
+            '"tempo_bpm":92',
+            '"tempo_bpm":92,"tempo_bpm":93',
+        )
+        with self.assertRaises(dsp_preset.DspPresetError):
+            dsp_preset.loads(duplicate)
+
     def test_subdivision_enum_is_frozen(self) -> None:
         for subdivision in (
             "free",
