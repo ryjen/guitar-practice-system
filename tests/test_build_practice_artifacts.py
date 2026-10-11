@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import json
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "scripts"))
+from guitar_practice.adapters.workspace_tree import WorkspaceFileTree
+from guitar_practice.application.practice_bundle import PracticeBundleBuilder
 
-import build_practice_artifacts  # noqa: E402
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def iter_files(root: Path) -> list[Path]:
+    return sorted(path for path in root.rglob("*") if path.is_file())
 
 
 class PracticeBundleTests(unittest.TestCase):
@@ -19,26 +22,35 @@ class PracticeBundleTests(unittest.TestCase):
             first = root / "first"
             second = root / "second"
             source_sha = "0123456789abcdef0123456789abcdef01234567"
+            builder = PracticeBundleBuilder(WorkspaceFileTree(ROOT))
 
-            build_practice_artifacts.build_bundle(first, source_sha)
-            build_practice_artifacts.build_bundle(second, source_sha)
+            builder.build(str(first), source_sha=source_sha)
+            builder.build(str(second), source_sha=source_sha)
 
             first_files = {
                 str(path.relative_to(first)): path.read_bytes()
-                for path in build_practice_artifacts.iter_files(first)
+                for path in iter_files(first)
             }
             second_files = {
                 str(path.relative_to(second)): path.read_bytes()
-                for path in build_practice_artifacts.iter_files(second)
+                for path in iter_files(second)
             }
             self.assertEqual(first_files, second_files)
 
             provenance = json.loads((first / "provenance.json").read_text())
             self.assertEqual(provenance["sourceGitSha"], source_sha)
-            self.assertIn("scripts/backing_track_engine.py", provenance["generatorInputs"])
-            self.assertIn("scripts/bass_engine.py", provenance["generatorInputs"])
-            self.assertIn("scripts/generate_backing_tracks.py", provenance["generatorInputs"])
-            self.assertIn("scripts/progression_catalog.py", provenance["generatorInputs"])
+            self.assertIn(
+                "guitar_practice/application/practice_bundle.py",
+                provenance["generatorInputs"],
+            )
+            self.assertIn(
+                "guitar_practice/application/practice_data_export.py",
+                provenance["generatorInputs"],
+            )
+            self.assertIn(
+                "guitar_practice/domain/practice_data.py",
+                provenance["generatorInputs"],
+            )
             self.assertIn(
                 "guitar_practice/application/generation.py",
                 provenance["generatorInputs"],
@@ -77,7 +89,12 @@ class PracticeBundleTests(unittest.TestCase):
     def test_source_sha_is_required(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaises(ValueError):
-                build_practice_artifacts.build_bundle(Path(tmp) / "bundle", "   ")
+                PracticeBundleBuilder(
+                    WorkspaceFileTree(ROOT)
+                ).build(
+                    str(Path(tmp) / "bundle"),
+                    source_sha="   ",
+                )
 
 
 if __name__ == "__main__":
