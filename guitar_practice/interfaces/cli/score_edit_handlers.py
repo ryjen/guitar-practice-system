@@ -14,8 +14,11 @@ from guitar_practice.adapters.json_files import JsonDocumentError, JsonFileStore
 from guitar_practice.adapters.midi_playback import FluidSynthMidiPlayer, MidiPlaybackError
 from guitar_practice.adapters.musicxml_export import MusicXmlExportError, MusicXmlExporter
 from guitar_practice.adapters.score_files import ScoreDocumentError, ScoreFileStore
+from guitar_practice.application.groove import DEFAULT_CATALOG, GrooveCatalog
 from guitar_practice.application.score_editor import ScoreEditError, ScoreEditSession
+from guitar_practice.application.score_rhythm_guide import ScoreRhythmGuide
 from guitar_practice.domain import score
+from guitar_practice.domain.score_groove import ScoreGrooveError
 from guitar_practice.interfaces.cli import exit_codes
 from guitar_practice.interfaces.cli.practice_args import (
     PracticePathError,
@@ -37,6 +40,7 @@ _HELP = """Commands:
   voicing <part-id> <input.json>
   rhythm <part-id> <input.json>
   technique <part-id> <input.json>
+  groove <preset-id> [--bar N] [--catalog <catalog.json>]
   play [--section <label> | --bars START:END] [--output <midi>] [--soundfont <sf2>]
   export <output.musicxml>
   save
@@ -62,6 +66,32 @@ def _chord_args(tokens: list[str]) -> tuple[str | None, str]:
     if not grid:
         raise ValueError("chords requires a chord grid")
     return section, grid
+
+
+
+def _groove_args(tokens: list[str]) -> tuple[str, int, str]:
+    if len(tokens) < 2:
+        raise ValueError("groove requires <preset-id>")
+    preset = tokens[1]
+    bar = 1
+    catalog = DEFAULT_CATALOG
+    index = 2
+    while index < len(tokens):
+        option = tokens[index]
+        if option not in {"--bar", "--catalog"}:
+            raise ValueError(f"unknown groove option: {option}")
+        if index + 1 >= len(tokens):
+            raise ValueError(f"{option} requires a value")
+        value = tokens[index + 1]
+        if option == "--bar":
+            try:
+                bar = int(value)
+            except ValueError as exc:
+                raise ValueError("--bar must be an integer") from exc
+        else:
+            catalog = value
+        index += 2
+    return preset, bar, catalog
 
 
 def _play_args(
@@ -193,6 +223,24 @@ def score_edit(argv: Sequence[str], context: CliContext) -> int:
                 _write_json(session.context(), context)
                 continue
 
+            if command == "groove":
+                preset, bar, catalog_value = _groove_args(tokens)
+                catalog = workspace_relative(
+                    catalog_value,
+                    label="groove catalog",
+                )
+                service = ScoreRhythmGuide(
+                    GrooveCatalog(
+                        JsonFileStore(context.workspace),
+                        catalog,
+                    )
+                )
+                _write_json(
+                    service.build(session.snapshot(), preset, bar=bar),
+                    context,
+                )
+                continue
+
             if command == "play":
                 (
                     section,
@@ -280,6 +328,7 @@ def score_edit(argv: Sequence[str], context: CliContext) -> int:
             MidiPlaybackError,
             MusicXmlExportError,
             ScoreEditError,
+            ScoreGrooveError,
             score.ScoreError,
             OSError,
             ValueError,
