@@ -21,7 +21,7 @@
     "preset": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 64,
+      "maxLength": 32,
       "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
     },
     "tempo_bpm": {
