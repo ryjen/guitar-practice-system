@@ -63,11 +63,11 @@ A promoted output should include provenance and a reason it cannot be regenerate
 Generate and validate one asset:
 
 ```bash
-python scripts/midi_workflow.py generate \
+guitarctl midi generate \
   backing-tracks/slide-slow-blues/manifest.json \
   generated/backing-tracks/slide-slow-blues-a-60.mid
 
-python scripts/midi_workflow.py validate \
+guitarctl midi validate \
   backing-tracks/slide-slow-blues/manifest.json \
   generated/backing-tracks/slide-slow-blues-a-60.mid
 ```
@@ -75,7 +75,7 @@ python scripts/midi_workflow.py validate \
 Generate and validate the entire committed backing-track catalog:
 
 ```bash
-python scripts/generate_backing_tracks.py
+guitarctl backing generate
 ```
 
 The catalog command discovers every `backing-tracks/*/manifest.json`, uses each manifest's canonical `outputs.midi` path, rejects repository-escape/output-name mismatches, regenerates the Type-1 MIDI, and validates it immediately.

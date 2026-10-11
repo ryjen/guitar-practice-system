@@ -59,4 +59,4 @@ A historical script shim may be deleted only when all of these are true:
 4. repository/package consumers do not import the shim for canonical behavior; and
 5. any intentionally retained historical Python API is explicitly documented.
 
-The operational shims remain classified in the command architecture until these conditions are satisfied. Path filters may still mention shim files so changes to compatibility code receive validation; that is not an execution dependency.
+The operational shims remain classified in the command architecture until these conditions are satisfied. CI does not enumerate individual shim filenames; broad `scripts/**` / `tools/**` repository-validation triggers may still watch compatibility code without making workflow behavior depend on a shim path.

@@ -102,7 +102,7 @@ without requiring a separate arrangement language.
 From the repository root:
 
 ```bash
-python3 scripts/generate_backing_tracks.py
+guitarctl backing generate
 ```
 
 The generator:

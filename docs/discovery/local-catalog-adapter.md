@@ -40,7 +40,7 @@ Catalog records are explicit metadata. Missing values remain unknown and do not 
 ## Search
 
 ```bash
-python scripts/discovery_catalog.py \
+guitarctl discover search \
   examples/discovery/slide-backing-track-request.json \
   catalogs/discovery/repository.json
 ```

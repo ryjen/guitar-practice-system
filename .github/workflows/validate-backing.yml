@@ -12,9 +12,6 @@ on:
       - "guitar_practice/domain/backing.py"
       - "guitar_practice/domain/backing_request.py"
       - "guitar_practice/interfaces/cli/**"
-      - "scripts/backing_track_engine.py"
-      - "scripts/resolve_backing_track_request.py"
-      - "scripts/check_public_boundary.py"
       - "tests/test_backing_track_engine.py"
       - "tests/test_backing_track_request.py"
       - "tests/test_native_backing_cli.py"
@@ -33,9 +30,6 @@ on:
       - "guitar_practice/domain/backing.py"
       - "guitar_practice/domain/backing_request.py"
       - "guitar_practice/interfaces/cli/**"
-      - "scripts/backing_track_engine.py"
-      - "scripts/resolve_backing_track_request.py"
-      - "scripts/check_public_boundary.py"
       - "tests/test_backing_track_engine.py"
       - "tests/test_backing_track_request.py"
       - "tests/test_native_backing_cli.py"
@@ -67,46 +61,20 @@ jobs:
           python -m unittest tests.test_backing_track_engine -v
           python -m unittest tests.test_backing_track_request -v
           python -m unittest tests.test_native_backing_cli -v
-      - name: Compare request shim and native CLI stdout
+      - name: Resolve backing requests through stable CLI
         run: |
-          python scripts/resolve_backing_track_request.py \
-            examples/backing-tracks/funk-wah-request.json \
-            > /tmp/backing-shim.json
           guitarctl backing resolve \
             examples/backing-tracks/funk-wah-request.json \
-            > /tmp/backing-native.json
-          cmp /tmp/backing-shim.json /tmp/backing-native.json
-      - name: Compare request shim and native CLI output files
-        run: |
-          python scripts/resolve_backing_track_request.py \
-            examples/backing-tracks/jazz-blues-12-request.json \
-            --output /tmp/backing-shim-output.json
+            > /tmp/backing.json
           guitarctl backing resolve \
             examples/backing-tracks/jazz-blues-12-request.json \
-            --output /tmp/backing-native-output.json
-          cmp /tmp/backing-shim-output.json /tmp/backing-native-output.json
-      - name: Compare backing renderer shim and package bytes
-        run: |
+            --output /tmp/backing-output.json
           python - <<'PY'
           import json
           from pathlib import Path
-          from guitar_practice.domain import backing
 
-          manifest_path = Path("backing-tracks/call-response-gap/manifest.json")
-          manifest = json.loads(manifest_path.read_text())
-          catalog = json.loads(Path("catalogs/grooves/catalog.json").read_text())
-          Path("/tmp/backing-native.mid").write_bytes(backing.render(manifest, catalog))
+          first = json.loads(Path("/tmp/backing.json").read_text())
+          second = json.loads(Path("/tmp/backing-output.json").read_text())
+          assert first["id"] == "funk-wah-pocket-em-96"
+          assert second["id"] == "jazz-blues-12-c-110"
           PY
-          python - <<'PY'
-          from pathlib import Path
-          import sys
-
-          sys.path.insert(0, "scripts")
-          import backing_track_engine
-
-          backing_track_engine.generate(
-              Path("backing-tracks/call-response-gap/manifest.json"),
-              Path("/tmp/backing-shim.mid"),
-          )
-          PY
-          cmp /tmp/backing-shim.mid /tmp/backing-native.mid

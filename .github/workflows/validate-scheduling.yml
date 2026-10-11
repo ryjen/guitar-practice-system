@@ -7,10 +7,6 @@ on:
       - "docs/scheduling/**"
       - "examples/scheduling/**"
       - "guitar_practice/**"
-      - "scripts/scheduling.py"
-      - "scripts/scheduling_v2.py"
-      - "scripts/assessment_core.py"
-      - "scripts/check_public_boundary.py"
       - "tests/test_scheduling*.py"
       - "tests/test_cli_architecture.py"
       - "pyproject.toml"
@@ -23,10 +19,6 @@ on:
       - "docs/scheduling/**"
       - "examples/scheduling/**"
       - "guitar_practice/**"
-      - "scripts/scheduling.py"
-      - "scripts/scheduling_v2.py"
-      - "scripts/assessment_core.py"
-      - "scripts/check_public_boundary.py"
       - "tests/test_scheduling*.py"
       - "tests/test_cli_architecture.py"
       - "pyproject.toml"
@@ -56,7 +48,7 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_scheduling*.py' -v
       - name: Generate v1 deterministic proposal
         run: |
-          python scripts/scheduling.py propose \
+          guitarctl schedule legacy propose \
             examples/scheduling/example-snapshot.json \
             > /tmp/schedule-v1.json
           python - <<'PY'
@@ -69,12 +61,7 @@ jobs:
           assert [item["item_id"] for item in proposal["selected"]] == ["ebow-foundations", "slide-foundations"]
           assert sum(item["minutes"] for item in proposal["selected"]) == 30
           PY
-      - name: Generate v2 proposal through compatibility shim
-        run: |
-          python scripts/scheduling_v2.py propose \
-            examples/scheduling/v2-example-snapshot.json \
-            > /tmp/schedule-v2-shim.json
-      - name: Generate v2 proposal through guitarctl
+      - name: Generate v2 proposal through stable CLI
         run: |
           guitarctl schedule propose \
             examples/scheduling/v2-example-snapshot.json \
@@ -84,8 +71,6 @@ jobs:
           from pathlib import Path
 
           native = json.loads(Path("/tmp/schedule-v2.json").read_text())
-          shim = json.loads(Path("/tmp/schedule-v2-shim.json").read_text())
-          assert native == shim
           assert native["contract_version"] == "scheduling/v2"
           assert native["status"] == "complete"
           assert native["requires_approval"] is True

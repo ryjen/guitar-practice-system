@@ -36,14 +36,14 @@ If a groove preset already defines a drum bar cycle, the progression composes th
 `generate_practice_progression.py` returns a `PracticeProgression` object containing the three resolved `BackingTrackSpec` values plus stage metadata.
 
 ```bash
-python3 scripts/generate_practice_progression.py \
+guitarctl progression generate \
   examples/backing-tracks/funk-wah-request.json
 ```
 
 To write manifests and render all MIDI files:
 
 ```bash
-python3 scripts/generate_practice_progression.py \
+guitarctl progression generate \
   examples/backing-tracks/funk-wah-request.json \
   --output-dir /tmp/funk-wah-progression \
   --render-midi

@@ -11,10 +11,6 @@ on:
       - "guitar_practice/domain/groove.py"
       - "guitar_practice/domain/bass.py"
       - "guitar_practice/interfaces/cli/**"
-      - "scripts/groove_catalog.py"
-      - "scripts/groove_engine.py"
-      - "scripts/bass_engine.py"
-      - "scripts/backing_track_engine.py"
       - "tests/test_groove_catalog.py"
       - "tests/test_groove_engine.py"
       - "tests/test_bass_engine.py"
@@ -35,10 +31,6 @@ on:
       - "guitar_practice/domain/groove.py"
       - "guitar_practice/domain/bass.py"
       - "guitar_practice/interfaces/cli/**"
-      - "scripts/groove_catalog.py"
-      - "scripts/groove_engine.py"
-      - "scripts/bass_engine.py"
-      - "scripts/backing_track_engine.py"
       - "tests/test_groove_catalog.py"
       - "tests/test_groove_engine.py"
       - "tests/test_bass_engine.py"
@@ -76,16 +68,10 @@ jobs:
           python -m unittest tests.test_native_groove_cli -v
           python -m unittest tests.test_backing_track_engine -v
           python -m unittest tests.test_backing_track_request -v
-      - name: Compare groove catalog shim and native CLI
+      - name: Smoke-test groove catalog CLI
         run: |
-          python scripts/groove_catalog.py validate > /tmp/groove-validate-shim.json
-          guitarctl groove validate > /tmp/groove-validate-native.json
-          cmp /tmp/groove-validate-shim.json /tmp/groove-validate-native.json
-
-          python scripts/groove_catalog.py list > /tmp/groove-list-shim.json
-          guitarctl groove list > /tmp/groove-list-native.json
-          cmp /tmp/groove-list-shim.json /tmp/groove-list-native.json
-
-          python scripts/groove_catalog.py show jazz-swing > /tmp/groove-show-shim.json
-          guitarctl groove show jazz-swing > /tmp/groove-show-native.json
-          cmp /tmp/groove-show-shim.json /tmp/groove-show-native.json
+          guitarctl groove validate > /tmp/groove-validate.json
+          guitarctl groove list > /tmp/groove-list.json
+          guitarctl groove show jazz-swing > /tmp/groove-show.json
+          python -m json.tool /tmp/groove-list.json >/dev/null
+          python -m json.tool /tmp/groove-show.json >/dev/null

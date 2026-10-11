@@ -10,9 +10,6 @@ on:
       - "guitar_practice/**"
       - "templates/evidence.json"
       - "templates/assessment-*.json"
-      - "scripts/evidence_feedback.py"
-      - "scripts/assessment_core.py"
-      - "scripts/check_public_boundary.py"
       - "tests/test_evidence_feedback*.py"
       - "tests/test_assessment_core.py"
       - "tests/test_cli_architecture.py"
@@ -29,9 +26,6 @@ on:
       - "guitar_practice/**"
       - "templates/evidence.json"
       - "templates/assessment-*.json"
-      - "scripts/evidence_feedback.py"
-      - "scripts/assessment_core.py"
-      - "scripts/check_public_boundary.py"
       - "tests/test_evidence_feedback*.py"
       - "tests/test_assessment_core.py"
       - "tests/test_cli_architecture.py"
@@ -60,13 +54,7 @@ jobs:
         run: guitarctl validate public-boundary > /tmp/public-boundary.json
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
-      - name: Summarize evidence through compatibility shim
-        run: |
-          python scripts/evidence_feedback.py \
-            examples/evidence/slide-feedback.json \
-            --as-of 2026-08-06 \
-            > /tmp/evidence-shim.json
-      - name: Summarize evidence through guitarctl
+      - name: Summarize evidence through stable CLI
         run: |
           guitarctl evidence feedback \
             examples/evidence/slide-feedback.json \
@@ -77,8 +65,6 @@ jobs:
           from pathlib import Path
 
           result = json.loads(Path("/tmp/evidence-summary.json").read_text())
-          shim = json.loads(Path("/tmp/evidence-shim.json").read_text())
-          assert result == shim
           target = result["targets"][0]
           assert result["advisory"] is True
           assert target["target_id"] == "slide-foundations"
@@ -86,13 +72,7 @@ jobs:
           assert target["maintenance_status"] == "not-due"
           assert target["requires_approval"] is True
           PY
-      - name: Evaluate assessment through compatibility shim
-        run: |
-          python scripts/assessment_core.py \
-            examples/assessment/slide-reliable-context.json \
-            templates/assessment-gate-set.json \
-            > /tmp/assessment-shim.json
-      - name: Evaluate assessment through guitarctl
+      - name: Evaluate assessment through stable CLI
         run: |
           guitarctl assess evaluate \
             examples/assessment/slide-reliable-context.json \
@@ -103,8 +83,6 @@ jobs:
           from pathlib import Path
 
           result = json.loads(Path("/tmp/assessment.json").read_text())
-          shim = json.loads(Path("/tmp/assessment-shim.json").read_text())
-          assert result == shim
           assert result["transition_valid"] is True
           assert result["proposed_state"] == "reliable-context"
           assert result["requires_approval"] is True

@@ -30,18 +30,6 @@ on:
       - "guitar_practice/domain/score_midi.py"
       - "guitar_practice/domain/score_realization.py"
       - "guitar_practice/interfaces/cli/**"
-      - "scripts/backing_track_engine.py"
-      - "scripts/bass_engine.py"
-      - "scripts/build_practice_artifacts.py"
-      - "scripts/export_practice_data.py"
-      - "scripts/groove_engine.py"
-      - "scripts/groove_catalog.py"
-      - "scripts/generate_backing_tracks.py"
-      - "scripts/generate_practice_progression.py"
-      - "scripts/midi_workflow.py"
-      - "scripts/progression_catalog.py"
-      - "scripts/resolve_backing_track_request.py"
-      - "scripts/check_public_boundary.py"
       - "tests/test_backing_track_engine.py"
       - "tests/test_backing_track_request.py"
       - "tests/test_bass_engine.py"
@@ -88,18 +76,6 @@ on:
       - "guitar_practice/domain/score_midi.py"
       - "guitar_practice/domain/score_realization.py"
       - "guitar_practice/interfaces/cli/**"
-      - "scripts/backing_track_engine.py"
-      - "scripts/bass_engine.py"
-      - "scripts/build_practice_artifacts.py"
-      - "scripts/export_practice_data.py"
-      - "scripts/groove_engine.py"
-      - "scripts/groove_catalog.py"
-      - "scripts/generate_backing_tracks.py"
-      - "scripts/generate_practice_progression.py"
-      - "scripts/midi_workflow.py"
-      - "scripts/progression_catalog.py"
-      - "scripts/resolve_backing_track_request.py"
-      - "scripts/check_public_boundary.py"
       - "tests/test_backing_track_engine.py"
       - "tests/test_backing_track_request.py"
       - "tests/test_bass_engine.py"
@@ -139,14 +115,14 @@ jobs:
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
       - name: Validate groove catalog
-        run: python scripts/groove_catalog.py validate
+        run: guitarctl groove validate
       - name: Validate progression catalog
         run: |
-          python scripts/progression_catalog.py validate
-          python scripts/progression_catalog.py resolve jazz-blues-12 C > /tmp/jazz-blues-c.json
-          python scripts/progression_catalog.py resolve progression-jazz-major-ii-v-i C > /tmp/ii-v-i-c.json
-          python scripts/progression_catalog.py resolve progression-major-i-iv-v G > /tmp/i-iv-v-g.json
-          python scripts/progression_catalog.py fourths \
+          guitarctl progression validate
+          guitarctl progression resolve jazz-blues-12 C > /tmp/jazz-blues-c.json
+          guitarctl progression resolve progression-jazz-major-ii-v-i C > /tmp/ii-v-i-c.json
+          guitarctl progression resolve progression-major-i-iv-v G > /tmp/i-iv-v-g.json
+          guitarctl progression fourths \
             progression-jazz-major-ii-v-i \
             --start-key C \
             --count 4 > /tmp/ii-v-i-fourths.json
@@ -174,7 +150,7 @@ jobs:
           PY
       - name: Resolve backing-track request example
         run: |
-          python scripts/resolve_backing_track_request.py \
+          guitarctl backing resolve \
             examples/backing-tracks/funk-wah-request.json \
             --output /tmp/funk-wah-spec.json
           python - <<'PY'
@@ -189,13 +165,13 @@ jobs:
           PY
       - name: Resolve catalog-backed progression requests
         run: |
-          python scripts/resolve_backing_track_request.py \
+          guitarctl backing resolve \
             examples/backing-tracks/jazz-blues-12-request.json \
             --output /tmp/jazz-blues-spec.json
-          python scripts/resolve_backing_track_request.py \
+          guitarctl backing resolve \
             examples/backing-tracks/ii-v-i-c-request.json \
             --output /tmp/ii-v-i-spec.json
-          python scripts/resolve_backing_track_request.py \
+          guitarctl backing resolve \
             examples/backing-tracks/i-iv-v-g-request.json \
             --output /tmp/i-iv-v-spec.json
           python - <<'PY'
@@ -227,7 +203,7 @@ jobs:
           PY
       - name: Generate practice progression example
         run: |
-          python scripts/generate_practice_progression.py \
+          guitarctl progression generate \
             examples/backing-tracks/funk-wah-request.json \
             --output-dir /tmp/funk-wah-progression \
             --render-midi
@@ -241,37 +217,37 @@ jobs:
           assert all((Path("/tmp/funk-wah-progression") / stage["spec"]["outputs"]["midi"]).exists() for stage in progression["stages"])
           PY
       - name: Generate and validate backing-track catalog
-        run: python scripts/generate_backing_tracks.py
-      - name: Verify MIDI shim and native CLI byte parity
+        run: guitarctl backing generate
+      - name: Verify deterministic MIDI replay and validation
         run: |
-          python scripts/midi_workflow.py generate \
-            backing-tracks/slide-slow-blues/manifest.json \
-            /tmp/legacy.mid > /tmp/legacy-midi-report.json
           guitarctl midi generate \
             backing-tracks/slide-slow-blues/manifest.json \
-            /tmp/native.mid > /tmp/native-midi-report.json
-          cmp /tmp/legacy.mid /tmp/native.mid
+            /tmp/first.mid > /tmp/first-midi-report.json
+          guitarctl midi generate \
+            backing-tracks/slide-slow-blues/manifest.json \
+            /tmp/replay.mid > /tmp/replay-midi-report.json
+          cmp /tmp/first.mid /tmp/replay.mid
           python - <<'PY'
           import hashlib
           import json
           from pathlib import Path
 
-          legacy = json.loads(Path("/tmp/legacy-midi-report.json").read_text())
-          native = json.loads(Path("/tmp/native-midi-report.json").read_text())
-          assert legacy == native
-          legacy_bytes = Path("/tmp/legacy.mid").read_bytes()
-          native_bytes = Path("/tmp/native.mid").read_bytes()
-          assert hashlib.sha256(legacy_bytes).digest() == hashlib.sha256(native_bytes).digest()
+          first = json.loads(Path("/tmp/first-midi-report.json").read_text())
+          replay = json.loads(Path("/tmp/replay-midi-report.json").read_text())
+          assert first == replay
+          first_bytes = Path("/tmp/first.mid").read_bytes()
+          replay_bytes = Path("/tmp/replay.mid").read_bytes()
+          assert hashlib.sha256(first_bytes).digest() == hashlib.sha256(replay_bytes).digest()
           PY
           guitarctl midi validate \
             backing-tracks/slide-slow-blues/manifest.json \
-            /tmp/native.mid > /tmp/native-midi-validation.json
+            /tmp/replay.mid > /tmp/midi-validation.json
           python - <<'PY'
           import json
           from pathlib import Path
 
-          generated = json.loads(Path("/tmp/native-midi-report.json").read_text())
-          validated = json.loads(Path("/tmp/native-midi-validation.json").read_text())
+          generated = json.loads(Path("/tmp/replay-midi-report.json").read_text())
+          validated = json.loads(Path("/tmp/midi-validation.json").read_text())
           assert generated == validated
           PY
       - name: Build deterministic practice bundle
