@@ -31,6 +31,9 @@ def main() -> int:
         print(str(exc), file=sys.stderr)
         return 2
     except ValidationFailed as exc:
+        print(f"{exc.label} failed", file=sys.stderr)
+        for detail in exc.details:
+            print(detail, file=sys.stderr)
         return exc.returncode or 1
     print("\nRepository validation passed.")
     return 0

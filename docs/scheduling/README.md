@@ -242,11 +242,11 @@ Scheduling consumes only approved progression projections and their provenance r
 ## Example
 
 ```bash
-python scripts/scheduling_v2.py propose \
+guitarctl schedule propose \
   examples/scheduling/v2-example-snapshot.json \
   > /tmp/schedule-v2.json
 
-python scripts/scheduling_v2.py check-approval \
+guitarctl schedule check-approval \
   /tmp/schedule-v2.json \
   examples/scheduling/v2-example-snapshot.json
 ```

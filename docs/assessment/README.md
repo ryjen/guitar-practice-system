@@ -92,7 +92,7 @@ A state-application layer must reject the proposal if canonical state has change
 ## Example
 
 ```bash
-python scripts/assessment_core.py \
+guitarctl assess evaluate \
   examples/assessment/slide-reliable-context.json \
   templates/assessment-gate-set.json
 ```

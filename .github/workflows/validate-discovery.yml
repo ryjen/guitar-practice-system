@@ -15,9 +15,6 @@ on:
       - "docs/ebow-and-sustain.md"
       - "examples/discovery/**"
       - "guitar_practice/**"
-      - "scripts/discovery*.py"
-      - "scripts/adaptive_session.py"
-      - "scripts/check_public_boundary.py"
       - "tests/test_discovery*.py"
       - "tests/test_adaptive_session*.py"
       - ".github/workflows/validate-discovery.yml"
@@ -37,9 +34,6 @@ on:
       - "docs/ebow-and-sustain.md"
       - "examples/discovery/**"
       - "guitar_practice/**"
-      - "scripts/discovery*.py"
-      - "scripts/adaptive_session.py"
-      - "scripts/check_public_boundary.py"
       - "tests/test_discovery*.py"
       - "tests/test_adaptive_session*.py"
       - ".github/workflows/validate-discovery.yml"
@@ -68,7 +62,7 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Search repository catalog
         run: |
-          python scripts/discovery_catalog.py \
+          guitarctl discover search \
             examples/discovery/slide-backing-track-request.json \
             catalogs/discovery/repository.json \
             > /tmp/discovery-result.json
@@ -81,12 +75,7 @@ jobs:
           assert result["catalog"] == "repository"
           assert result["candidates"][0]["source_id"] == "slide-slow-blues-a-60"
           PY
-      - name: Generate adaptive session through compatibility shim
-        run: |
-          python scripts/adaptive_session.py \
-            examples/discovery/adaptive-session-request.json \
-            > /tmp/session-shim.json
-      - name: Generate adaptive session through guitarctl
+      - name: Generate adaptive session through stable CLI
         run: |
           guitarctl session adapt \
             examples/discovery/adaptive-session-request.json \
@@ -96,8 +85,6 @@ jobs:
           from pathlib import Path
 
           result = json.loads(Path("/tmp/session.json").read_text())
-          shim = json.loads(Path("/tmp/session-shim.json").read_text())
-          assert result == shim
           assert result["requires_approval"] is True
           assert sum(block["minutes"] for block in result["blocks"]) == 30
           assert result["focus_technique"] == "slide-foundations"

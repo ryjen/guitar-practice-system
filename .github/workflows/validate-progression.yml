@@ -11,9 +11,6 @@ on:
       - "guitar_practice/domain/progression.py"
       - "guitar_practice/domain/timing.py"
       - "guitar_practice/interfaces/cli/**"
-      - "scripts/progression_catalog.py"
-      - "scripts/timing.py"
-      - "scripts/check_public_boundary.py"
       - "tests/test_progression_catalog.py"
       - "tests/test_modal_progressions.py"
       - "tests/test_timing.py"
@@ -32,9 +29,6 @@ on:
       - "guitar_practice/domain/progression.py"
       - "guitar_practice/domain/timing.py"
       - "guitar_practice/interfaces/cli/**"
-      - "scripts/progression_catalog.py"
-      - "scripts/timing.py"
-      - "scripts/check_public_boundary.py"
       - "tests/test_progression_catalog.py"
       - "tests/test_modal_progressions.py"
       - "tests/test_timing.py"
@@ -68,24 +62,15 @@ jobs:
           python -m unittest discover -s tests -p 'test_modal_progressions.py' -v
           python -m unittest discover -s tests -p 'test_timing.py' -v
           python -m unittest discover -s tests -p 'test_native_progression_cli.py' -v
-      - name: Compare progression shim and native CLI
+      - name: Smoke-test progression CLI
         run: |
-          python scripts/progression_catalog.py resolve jazz-blues-12 C > /tmp/progression-shim.json
-          guitarctl progression resolve jazz-blues-12 C > /tmp/progression-native.json
-          cmp /tmp/progression-shim.json /tmp/progression-native.json
-
-          python scripts/progression_catalog.py fourths \
-            progression-jazz-major-ii-v-i --start-key A --count 4 \
-            > /tmp/fourths-shim.json
+          guitarctl progression validate
+          guitarctl progression list > /tmp/progression-list.json
+          guitarctl progression resolve jazz-blues-12 C > /tmp/progression.json
           guitarctl progression fourths \
             progression-jazz-major-ii-v-i --start-key A --count 4 \
-            > /tmp/fourths-native.json
-          cmp /tmp/fourths-shim.json /tmp/fourths-native.json
-
-          python scripts/progression_catalog.py show jazz-blues-12 > /tmp/show-shim.json
-          guitarctl progression show jazz-blues-12 > /tmp/show-native.json
-          cmp /tmp/show-shim.json /tmp/show-native.json
-      - name: Compare validate and list text contracts
-        run: |
-          test "$(python scripts/progression_catalog.py validate)" = "$(guitarctl progression validate)"
-          test "$(python scripts/progression_catalog.py list)" = "$(guitarctl progression list)"
+            > /tmp/fourths.json
+          guitarctl progression show jazz-blues-12 > /tmp/show.json
+          python -m json.tool /tmp/progression.json >/dev/null
+          python -m json.tool /tmp/fourths.json >/dev/null
+          python -m json.tool /tmp/show.json >/dev/null

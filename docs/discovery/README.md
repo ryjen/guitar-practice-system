@@ -116,7 +116,7 @@ The repository adapter searches versioned catalog data and applies deterministic
 Example:
 
 ```bash
-python scripts/discovery_catalog.py search \
+guitarctl discover search \
   examples/discovery/slide-backing-track-request.json \
   catalogs/discovery/repository.json
 ```

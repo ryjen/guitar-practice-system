@@ -13,9 +13,6 @@ on:
       - "guitar_practice/domain/midi_exercises.py"
       - "guitar_practice/domain/practice_progression.py"
       - "guitar_practice/interfaces/cli/**"
-      - "scripts/generate_backing_tracks.py"
-      - "scripts/generate_practice_progression.py"
-      - "tools/generate_midi.py"
       - "tests/test_generate_backing_tracks.py"
       - "tests/test_practice_progression.py"
       - "tests/test_midi_exercises.py"
@@ -36,9 +33,6 @@ on:
       - "guitar_practice/domain/midi_exercises.py"
       - "guitar_practice/domain/practice_progression.py"
       - "guitar_practice/interfaces/cli/**"
-      - "scripts/generate_backing_tracks.py"
-      - "scripts/generate_practice_progression.py"
-      - "tools/generate_midi.py"
       - "tests/test_generate_backing_tracks.py"
       - "tests/test_practice_progression.py"
       - "tests/test_midi_exercises.py"
@@ -72,43 +66,43 @@ jobs:
           python -m unittest tests.test_practice_progression -v
           python -m unittest tests.test_midi_exercises -v
           python -m unittest tests.test_native_generation_cli -v
-      - name: Compare bulk backing shim and native command
+      - name: Verify deterministic bulk backing replay
         run: |
-          rm -rf generated/backing-tracks /tmp/backing-shim-dir
-          python scripts/generate_backing_tracks.py > /tmp/backing-shim.json
-          cp -a generated/backing-tracks /tmp/backing-shim-dir
+          rm -rf generated/backing-tracks /tmp/backing-first-dir
+          guitarctl backing generate > /tmp/backing-first.json
+          cp -a generated/backing-tracks /tmp/backing-first-dir
           rm -rf generated/backing-tracks
-          guitarctl backing generate > /tmp/backing-native.json
-          cmp /tmp/backing-shim.json /tmp/backing-native.json
-          diff -qr /tmp/backing-shim-dir generated/backing-tracks
-      - name: Compare practice progression shim and native command
+          guitarctl backing generate > /tmp/backing-replay.json
+          cmp /tmp/backing-first.json /tmp/backing-replay.json
+          diff -qr /tmp/backing-first-dir generated/backing-tracks
+      - name: Verify deterministic practice progression replay
         run: |
-          python scripts/generate_practice_progression.py \
-            examples/backing-tracks/funk-wah-request.json \
-            > /tmp/progression-shim.json
           guitarctl progression generate \
             examples/backing-tracks/funk-wah-request.json \
-            > /tmp/progression-native.json
-          cmp /tmp/progression-shim.json /tmp/progression-native.json
+            > /tmp/progression-first.json
+          guitarctl progression generate \
+            examples/backing-tracks/funk-wah-request.json \
+            > /tmp/progression-replay.json
+          cmp /tmp/progression-first.json /tmp/progression-replay.json
 
-          rm -rf /tmp/progression-shim /tmp/progression-native
-          python scripts/generate_practice_progression.py \
-            examples/backing-tracks/funk-wah-request.json \
-            --output-dir /tmp/progression-shim \
-            --render-midi > /tmp/progression-shim.out
+          rm -rf /tmp/progression-first /tmp/progression-replay
           guitarctl progression generate \
             examples/backing-tracks/funk-wah-request.json \
-            --output-dir /tmp/progression-native \
-            --render-midi > /tmp/progression-native.out
-          test "$(cat /tmp/progression-shim.out)" = "/tmp/progression-shim"
-          test "$(cat /tmp/progression-native.out)" = "/tmp/progression-native"
-          diff -qr /tmp/progression-shim /tmp/progression-native
-      - name: Compare starter MIDI shim and native command
+            --output-dir /tmp/progression-first \
+            --render-midi > /tmp/progression-first.out
+          guitarctl progression generate \
+            examples/backing-tracks/funk-wah-request.json \
+            --output-dir /tmp/progression-replay \
+            --render-midi > /tmp/progression-replay.out
+          test "$(cat /tmp/progression-first.out)" = "/tmp/progression-first"
+          test "$(cat /tmp/progression-replay.out)" = "/tmp/progression-replay"
+          diff -qr /tmp/progression-first /tmp/progression-replay
+      - name: Verify deterministic starter MIDI replay
         run: |
-          rm -rf generated/midi /tmp/exercises-shim-dir
-          python tools/generate_midi.py > /tmp/exercises-shim.txt
-          cp -a generated/midi /tmp/exercises-shim-dir
+          rm -rf generated/midi /tmp/exercises-first-dir
+          guitarctl midi generate-exercises > /tmp/exercises-first.txt
+          cp -a generated/midi /tmp/exercises-first-dir
           rm -rf generated/midi
-          guitarctl midi generate-exercises > /tmp/exercises-native.txt
-          cmp /tmp/exercises-shim.txt /tmp/exercises-native.txt
-          diff -qr /tmp/exercises-shim-dir generated/midi
+          guitarctl midi generate-exercises > /tmp/exercises-replay.txt
+          cmp /tmp/exercises-first.txt /tmp/exercises-replay.txt
+          diff -qr /tmp/exercises-first-dir generated/midi

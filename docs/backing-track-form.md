@@ -78,7 +78,7 @@ navigation.
 ## Canonical generator
 
 ```bash
-python3 scripts/generate_backing_tracks.py
+guitarctl backing generate
 ```
 
 `generate_backing_tracks.py` routes manifests through `backing_track_engine.py`, the
