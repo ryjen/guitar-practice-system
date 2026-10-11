@@ -67,8 +67,11 @@ Completion and evidence review remain separate actions.
 
 ## Usage
 
+The stable interface is package-native; `scripts/adaptive_session.py` is retained only as a compatibility shim.
+
+
 ```bash
-python scripts/adaptive_session.py examples/discovery/adaptive-session-request.json
+guitarctl session adapt examples/discovery/adaptive-session-request.json
 ```
 
 ## Dependency on the feedback loop
