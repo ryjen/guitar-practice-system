@@ -388,3 +388,17 @@ guitarctl validate repo
 Inputs and outputs that name files must remain inside the explicit workspace. Operational commands follow the shared exit-code/stdout/stderr policy documented in `docs/validation.md`.
 
 Legacy scripts for these commands are compatibility shims; they are not the preferred interface and contain no canonical decision/orchestration logic.
+
+
+## DSP preset contract
+
+The control-plane side of the versioned guitar-to-DSP contract is explicit and transport-neutral:
+
+~~~bash
+guitarctl dsp preset validate contracts/dsp/fixtures/jazz-blues-preset-v1.json
+guitarctl dsp preset canonicalize contracts/dsp/fixtures/jazz-blues-preset-v1.json
+~~~
+
+Validation rejects unknown fields, unknown parameter IDs, unsupported versions, and out-of-range controls. Canonicalization emits byte-stable compact JSON with one trailing newline.
+
+The v1 contract, parameter semantics, scaled-integer representation, and independent consumer boundary with **ryjen/dsp#7** are documented in **docs/dsp-preset-contract.md**. There is intentionally no device/send command in v1.
