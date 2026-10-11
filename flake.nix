@@ -41,7 +41,8 @@
       # Run the same package-native trust gate in a pinned Nix environment.
       # Copy the flake source into writable storage: compileall and unittest
       # need to create temporary files without modifying the Nix store.
-      checks.${system}.repository-validation = pkgs.runCommand
+      checks.${system} = {
+        repository-validation = pkgs.runCommand
         "guitar-practice-repository-validation"
         { nativeBuildInputs = [ python guitarctl ]; }
         ''
@@ -56,7 +57,7 @@
           cp "$TMPDIR/repository-validation.json" "$out/report.json"
         '';
 
-      checks.${system}.toolchain = pkgs.runCommand "guitar-practice-toolchain-check" {
+        toolchain = pkgs.runCommand "guitar-practice-toolchain-check" {
         nativeBuildInputs = toolchain;
       } ''
         command -v python >/dev/null
@@ -68,5 +69,6 @@
         test -f ${soundfont}
         touch $out
       '';
+      };
     };
 }
