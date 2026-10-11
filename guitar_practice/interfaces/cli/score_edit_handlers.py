@@ -68,7 +68,6 @@ def _chord_args(tokens: list[str]) -> tuple[str | None, str]:
     return section, grid
 
 
-
 def _groove_args(tokens: list[str]) -> tuple[str, int, str]:
     if len(tokens) < 2:
         raise ValueError("groove requires <preset-id>")
