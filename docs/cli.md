@@ -106,7 +106,7 @@ guitarctl progression generate --help
 
 The musical core is package-native: discovery, scheduling v2, assessment, progression catalog operations, groove catalog operations, backing request resolution/generation, Score IR-derived backing rendering, MIDI generation/validation, starter MIDI exercises, practice-progression generation, canonical Score IR creation/import/authoring/inspection/validation, and RC-3 drum export do not require repository scripts at runtime.
 
-The remaining compatibility-process commands are outside this generation subsystem, including scheduling v1, adaptive-session/evidence workflows, repository validation/export, and artifact-bundle tooling. Historical musical `scripts/*.py` and `tools/*.py` entrypoints remain compatibility shims while callers migrate.
+All stable `guitarctl` commands are package-native, including evidence feedback, adaptive sessions, practice-data export, artifact building, public-boundary validation, and repository validation. Only deprecated scheduling v1 remains process-backed under the explicit `guitarctl schedule legacy ...` namespace. Historical `scripts/*.py` and `tools/*.py` entrypoints are classified compatibility shims, not the preferred user interface.
 
 ## Score documents
 
@@ -129,7 +129,7 @@ The remaining compatibility-process commands are outside this generation subsyst
 - `score play <score>` — persist the same MIDI artifact first, then audition it through the bounded FluidSynth player. `--section`, `--bars`, `--output`, and `--soundfont` are explicit; the flake-provided `GUITAR_SOUNDFONT` is the default SoundFont.
 - `score edit <score>` — open an interactive in-memory edit session over one explicit Score IR document. Changes reuse the deterministic authoring application service and reach the source only through explicit validated `save`; `cancel` or EOF leaves the source unchanged.
 
-All input/output paths are explicit and workspace-relative. Authoring transforms write a new target and leave the source unchanged. There is no implicit current score. `score render --format musicxml` is package-native; MIDI render/playback and `score edit` remain owned by #113 and #114.
+All input/output paths are explicit and workspace-relative. Authoring transforms write a new target and leave the source unchanged. There is no implicit current score. `score render --format musicxml`, MIDI rendering/playback, and `score edit` are package-native; #113 and #114 completed the latter two workflows.
 
 ## Musical generation boundaries
 
@@ -137,7 +137,7 @@ MIDI encoding and structural validation are pure package-domain operations over 
 
 Practice-progression rules derive slow/medium/fast stages as pure domain data. Starter MIDI exercises are also pure byte generators. Application services own catalog loading, bounded manifest discovery, and artifact persistence through structured-document and binary-artifact ports.
 
-Compatibility entrypoints are parity-tested while callers migrate. CI compares native and historical command JSON/text output as well as generated MIDI directories and byte streams.
+Compatibility parity remains covered by package tests where historical callers still exist. CI invokes the stable `guitarctl` surface directly and verifies deterministic outputs without executing deprecated script entrypoints.
 
 ## Stability
 
