@@ -309,6 +309,70 @@ class ScoreAuthoringApplicationTests(unittest.TestCase):
             )
         self.assertNotIn("written.json", store.values)
 
+    def test_part_input_preserves_explicit_tuning_and_rejects_invalid_shortcuts(self) -> None:
+        explicit = [
+            {"string": 6, "pitch": {"step": "D", "alter": 0, "octave": 2}},
+            {"string": 5, "pitch": {"step": "A", "alter": 0, "octave": 2}},
+            {"string": 4, "pitch": {"step": "D", "alter": 0, "octave": 3}},
+            {"string": 3, "pitch": {"step": "G", "alter": 0, "octave": 3}},
+            {"string": 2, "pitch": {"step": "B", "alter": 0, "octave": 3}},
+            {"string": 1, "pitch": {"step": "E", "alter": 0, "octave": 4}},
+        ]
+        part = normalize_part_input(
+            {
+                "id": "drop-d",
+                "name": "Drop D Guitar",
+                "role": "guitar",
+                "instrument": {"name": "Guitar", "family": "guitar"},
+                "guitar": {"tuning": explicit},
+            }
+        )
+        self.assertEqual(explicit, part["guitar"]["tuning"])
+
+        with self.assertRaisesRegex(ValueError, "tuning"):
+            normalize_part_input(
+                {
+                    "id": "bad",
+                    "name": "Bad Guitar",
+                    "role": "guitar",
+                    "instrument": {"name": "Guitar", "family": "guitar"},
+                    "guitar": {"tuning": "drop-d"},
+                }
+            )
+
+    def test_add_part_application_rejects_invalid_explicit_tuning(self) -> None:
+        source = minimal_score()
+        store = MemoryDocuments(
+            {
+                "source.json": source,
+                "part.json": {
+                    "part": {
+                        "id": "bad-guitar",
+                        "name": "Bad Guitar",
+                        "role": "guitar",
+                        "instrument": {"name": "Guitar", "family": "guitar"},
+                        "guitar": {
+                            "tuning": [
+                                {
+                                    "string": 1,
+                                    "pitch": {"step": "H", "alter": 0, "octave": 4},
+                                }
+                            ]
+                        },
+                    }
+                },
+            }
+        )
+        service = ScoreAuthoring(store, inputs=store)
+
+        with self.assertRaisesRegex(ValueError, "step"):
+            service.add_part(
+                "source.json",
+                input_path="part.json",
+                output="written.json",
+            )
+        self.assertNotIn("written.json", store.values)
+
     def test_add_part_application_writes_new_document_only(self) -> None:
         source = minimal_score()
         input_document = {
