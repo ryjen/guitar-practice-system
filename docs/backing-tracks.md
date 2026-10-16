@@ -164,6 +164,49 @@ The support arrangement provides a firm pulse and power-chord landmarks but inte
 
 Use the long harmonic windows for sustained bends, vibrato, dynamic arcs, call-and-response, delayed entries, early releases, and explicit rests. `RESPONSE-C` is especially useful for leaving one phrase unanswered rather than filling every bar.
 
+
+## Section-local performance overrides
+
+A backing **manifest** (not the narrower `BackingTrackRequest v1`) may author
+drum fills and bass riffs on specific 1-based bars within named sections.
+The engine compiles these to deterministic Type-1 MIDI without storing
+performance audio or copying artist-specific recordings.
+
+- `drum_fills` requires exactly one groove-aware drum track. Each entry
+  has `bar`, optional `replace` kit voices, and 1–16 explicit `hits`
+  (`instrument`, `step`, `velocity`). Unreplaced kick/snare hits remain
+  audible; a named replacement removes that voice's base-groove notes.
+- `bass_riffs` requires a bass track with its existing bass spec and one
+  groove-aware drum track. Each entry has `bar` and 1–16 ordered `notes`;
+  `offset` is a semitone interval from that bar's chord root, while
+  `velocity` is optional and `step` uses the selected groove's subdivision.
+  Authored riffs replace, rather than double, the normal bass accompaniment
+  on that bar.
+- Drum and bass override timing uses the active groove's swing. The
+  `count_in_bars` are excluded from section indexing; global accompaniment
+  mutes still take precedence. Out-of-range steps, duplicate bars, duplicate
+  drum hits, polyphonic bass steps, unsupported kit voices and invalid
+  velocities fail during manifest validation.
+- Keep generator presets reusable; section-local expression belongs in the
+  manifest. Import MIDI into REAPER or GarageBand to select drum/bass
+  instruments and refine the mix.
+
+Original example: [Riverside G/108 blues-rock video bed](../backing-tracks/riverside-blues-video/manifest.json),
+with four marked choruses, a dry drum/bass arrangement, tom fills at
+section boundaries, and chord-relative bass turnarounds. It is an
+original accompaniment scaffold, not a transcription.
+
+Generate it (along with the rest of the catalog):
+
+```bash
+nix develop
+guitarctl backing generate
+```
+
+The output is `generated/backing-tracks/riverside-blues-video-g-108.mid`.
+Record guitar and vocals separately so the MIDI's drum and bass roles remain
+mixable and the video can be synchronized to the fixed backing.
+
 ## Trade-offs
 
 ### Programmatic generation
