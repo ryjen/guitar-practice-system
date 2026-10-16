@@ -192,9 +192,14 @@ performance audio or copying artist-specific recordings.
   instruments and refine the mix.
 
 Original example: [Riverside G/108 blues-rock video bed](../backing-tracks/riverside-blues-video/manifest.json),
-with four marked choruses, a dry drum/bass arrangement, tom fills at
-section boundaries, and chord-relative bass turnarounds. It is an
-original accompaniment scaffold, not a transcription.
+with seven named sections (8-bar G riff vamps alternating with 12-bar
+blues verse/solo sections), a dry drum/bass arrangement, tom fills, and
+chord-relative bass turnarounds. These section lengths are **original video
+arrangement choices**, not verified bar counts from the Led Zeppelin recording.
+The riff-based sections use a G7 harmonic placeholder because the current
+manifest only represents one chord per bar; brief passing harmonies are
+instead implied by authored bass motion. Exact performance alignment
+requires measure-by-measure listening or an authorized score/Score IR import.
 
 Generate it (along with the rest of the catalog):
 
