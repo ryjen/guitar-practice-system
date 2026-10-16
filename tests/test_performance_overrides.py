@@ -4,6 +4,7 @@ import copy
 import json
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from guitar_practice.domain import backing, groove, midi, performance
 
@@ -95,6 +96,81 @@ class PerformanceOverrideTests(unittest.TestCase):
         invalid["sections"][0]["drum_fills"][0]["hits"][0]["step"] = -1
         with self.assertRaisesRegex(midi.ManifestError, "drum_fills.hits.step"):
             backing.validate_manifest(invalid, CATALOG)
+
+    def test_groove_count_in_never_gets_section_one_fill(self) -> None:
+        manifest = copy.deepcopy(MANIFEST)
+        resolved_groove = groove.get_preset(CATALOG, "blues-shuffle")["groove"]
+        resolved_groove["count_in"] = "groove"
+        drum = manifest["tracks"][0]
+        drum.pop("groove_preset")
+        drum["groove"] = resolved_groove
+
+        groove_spec = groove.parse_groove(resolved_groove, meter=manifest["meter"])
+        expected = performance.parse(
+            manifest, groove_spec=groove_spec, has_bass=True
+        )
+        with patch.object(
+            performance, "apply_drum_fill", wraps=performance.apply_drum_fill
+        ) as apply_fill:
+            backing.render(manifest, CATALOG)
+        # For this manifest a bar-1 fill exists and there are two count-in
+        # bars. The previous bug called apply_drum_fill twice too often.
+        self.assertEqual(len(expected.drum_fills), apply_fill.call_count)
+
+    def test_meter_derived_step_grid_accepts_12_8_step_40(self) -> None:
+        meter = [12, 8]
+        groove_spec = groove.parse_groove(
+            {
+                "subdivision": 32,
+                "instruments": {
+                    "kick": {"steps": [0, 40], "velocity": 90}
+                },
+            },
+            meter=meter,
+        )
+        manifest = {
+            "meter": meter,
+            "sections": [
+                {
+                    "name": "TEST",
+                    "bars": 1,
+                    "chords": ["G7"],
+                    "drum_fills": [
+                        {
+                            "bar": 1,
+                            "hits": [
+                                {"instrument": "low_tom", "step": 40, "velocity": 90}
+                            ],
+                        }
+                    ],
+                    "bass_riffs": [
+                        {"bar": 1, "notes": [{"step": 40, "offset": 0}]}
+                    ],
+                }
+            ],
+        }
+        parsed = performance.parse(
+            manifest, groove_spec=groove_spec, has_bass=True
+        )
+        self.assertEqual(40 * 60, parsed.drum_fills[0].hits[0].tick)
+        self.assertEqual(40, parsed.bass_riffs[0][0].step)
+
+        schema = json.loads(
+            (ROOT / "contracts/backing-tracks/backing-track-spec.schema.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        section_properties = schema["$defs"]["section"]["properties"]
+        drum_step = (
+            section_properties["drum_fills"]["items"]["properties"]["hits"]
+            ["items"]["properties"]["step"]
+        )
+        bass_step = (
+            section_properties["bass_riffs"]["items"]["properties"]["notes"]
+            ["items"]["properties"]["step"]
+        )
+        self.assertNotIn("maximum", drum_step)
+        self.assertNotIn("maximum", bass_step)
 
     def test_rejects_missing_groove_and_bass_roles(self) -> None:
         missing_groove = copy.deepcopy(MANIFEST)
