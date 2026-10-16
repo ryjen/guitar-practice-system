@@ -201,6 +201,11 @@ manifest only represents one chord per bar; brief passing harmonies are
 instead implied by authored bass motion. Exact performance alignment
 requires measure-by-measure listening or an authorized score/Score IR import.
 
+See the [Riverside video cue map and reference audit](recordings/riverside-video-cue-map.md)
+for the calculated 108-BPM section start times, evidence status, and
+REAPER reference-audition checklist. Treat the beat grid as our original
+shortened arrangement, not verified timestamps from Zeppelin's recording.
+
 Generate it (along with the rest of the catalog):
 
 ```bash
