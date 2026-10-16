@@ -1,0 +1,461 @@
+{
+  "id": "riverside-blues-video-g-108",
+  "title": "Riverside Blues — Original Driving Blues-Rock Bed in G",
+  "purpose": "Original rhythm scaffold for a filmed guitar and vocal cover; driving drums, supportive bass and authored section transitions without copying a commercial performance.",
+  "linked_techniques": [
+    "blues-phrasing",
+    "rhythm-pocket"
+  ],
+  "linked_songs": [],
+  "key_signature": "G",
+  "tempo_bpm": 108,
+  "meter": [
+    4,
+    4
+  ],
+  "feel": "driving eighth-note shuffle with restrained tom turnaround fills",
+  "count_in_bars": 2,
+  "loop": {
+    "start_marker": "VERSE-1",
+    "end_marker": "END"
+  },
+  "sections": [
+    {
+      "name": "VERSE-1",
+      "bars": 12,
+      "chords": [
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "C7",
+        "C7",
+        "G7",
+        "G7",
+        "D7",
+        "C7",
+        "G7",
+        "D7"
+      ],
+      "drum_fills": [
+        {
+          "bar": 1,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "crash",
+              "step": 0,
+              "velocity": 105
+            }
+          ]
+        },
+        {
+          "bar": 12,
+          "replace": [
+            "closed_hat",
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "mid_tom",
+              "step": 4,
+              "velocity": 96
+            },
+            {
+              "instrument": "mid_tom",
+              "step": 5,
+              "velocity": 96
+            },
+            {
+              "instrument": "low_tom",
+              "step": 6,
+              "velocity": 102
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 110
+            }
+          ]
+        }
+      ],
+      "bass_riffs": [
+        {
+          "bar": 12,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 94
+            },
+            {
+              "step": 1,
+              "offset": 7
+            },
+            {
+              "step": 2,
+              "offset": 10
+            },
+            {
+              "step": 3,
+              "offset": 7
+            },
+            {
+              "step": 4,
+              "offset": 5
+            },
+            {
+              "step": 5,
+              "offset": 2
+            },
+            {
+              "step": 6,
+              "offset": 0
+            },
+            {
+              "step": 7,
+              "offset": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "VERSE-2",
+      "bars": 12,
+      "chords": [
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "C7",
+        "C7",
+        "G7",
+        "G7",
+        "D7",
+        "C7",
+        "G7",
+        "D7"
+      ],
+      "drum_fills": [
+        {
+          "bar": 1,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "crash",
+              "step": 0,
+              "velocity": 105
+            }
+          ]
+        },
+        {
+          "bar": 12,
+          "replace": [
+            "closed_hat",
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "mid_tom",
+              "step": 4,
+              "velocity": 96
+            },
+            {
+              "instrument": "mid_tom",
+              "step": 5,
+              "velocity": 96
+            },
+            {
+              "instrument": "low_tom",
+              "step": 6,
+              "velocity": 102
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 110
+            }
+          ]
+        }
+      ],
+      "bass_riffs": [
+        {
+          "bar": 12,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 94
+            },
+            {
+              "step": 1,
+              "offset": 7
+            },
+            {
+              "step": 2,
+              "offset": 10
+            },
+            {
+              "step": 3,
+              "offset": 7
+            },
+            {
+              "step": 4,
+              "offset": 5
+            },
+            {
+              "step": 5,
+              "offset": 2
+            },
+            {
+              "step": 6,
+              "offset": 0
+            },
+            {
+              "step": 7,
+              "offset": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SOLO",
+      "bars": 12,
+      "chords": [
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "C7",
+        "C7",
+        "G7",
+        "G7",
+        "D7",
+        "C7",
+        "G7",
+        "D7"
+      ],
+      "drum_fills": [
+        {
+          "bar": 1,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "crash",
+              "step": 0,
+              "velocity": 105
+            }
+          ]
+        },
+        {
+          "bar": 12,
+          "replace": [
+            "closed_hat",
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "mid_tom",
+              "step": 4,
+              "velocity": 96
+            },
+            {
+              "instrument": "mid_tom",
+              "step": 5,
+              "velocity": 96
+            },
+            {
+              "instrument": "low_tom",
+              "step": 6,
+              "velocity": 102
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 110
+            }
+          ]
+        }
+      ],
+      "bass_riffs": [
+        {
+          "bar": 12,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 94
+            },
+            {
+              "step": 1,
+              "offset": 7
+            },
+            {
+              "step": 2,
+              "offset": 10
+            },
+            {
+              "step": 3,
+              "offset": 7
+            },
+            {
+              "step": 4,
+              "offset": 5
+            },
+            {
+              "step": 5,
+              "offset": 2
+            },
+            {
+              "step": 6,
+              "offset": 0
+            },
+            {
+              "step": 7,
+              "offset": -2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "OUTRO",
+      "bars": 12,
+      "chords": [
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "C7",
+        "C7",
+        "G7",
+        "G7",
+        "D7",
+        "C7",
+        "G7",
+        "D7"
+      ],
+      "drum_fills": [
+        {
+          "bar": 1,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "crash",
+              "step": 0,
+              "velocity": 105
+            }
+          ]
+        },
+        {
+          "bar": 12,
+          "replace": [
+            "closed_hat",
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "mid_tom",
+              "step": 4,
+              "velocity": 96
+            },
+            {
+              "instrument": "mid_tom",
+              "step": 5,
+              "velocity": 96
+            },
+            {
+              "instrument": "low_tom",
+              "step": 6,
+              "velocity": 102
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 110
+            },
+            {
+              "instrument": "crash",
+              "step": 0,
+              "velocity": 94
+            }
+          ]
+        }
+      ],
+      "bass_riffs": [
+        {
+          "bar": 12,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 94
+            },
+            {
+              "step": 1,
+              "offset": 7
+            },
+            {
+              "step": 2,
+              "offset": 10
+            },
+            {
+              "step": 3,
+              "offset": 7
+            },
+            {
+              "step": 4,
+              "offset": 5
+            },
+            {
+              "step": 5,
+              "offset": 2
+            },
+            {
+              "step": 6,
+              "offset": 0
+            },
+            {
+              "step": 7,
+              "offset": -2
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Drums",
+      "role": "drums",
+      "channel": 9,
+      "velocity": 98,
+      "groove_preset": "blues-shuffle",
+      "instrument_intent": "Dry, big acoustic kit with snare backbeat, heavy kick and simple section-ending tom fills"
+    },
+    {
+      "name": "Bass",
+      "role": "bass",
+      "channel": 0,
+      "program": 34,
+      "velocity": 90,
+      "bass": {
+        "style": "kick-root-fifth",
+        "gate_percent": 82,
+        "follow_kick_velocity": true
+      },
+      "instrument_intent": "Warm slightly gritty electric bass; root/fifth pulse and original chromatic turnaround riffs"
+    }
+  ],
+  "provenance": {
+    "type": "original",
+    "notes": "Original generic 12-bar harmony and authored accents; not a transcription of Led Zeppelin or Robert Johnson."
+  },
+  "outputs": {
+    "midi": "generated/backing-tracks/riverside-blues-video-g-108.mid",
+    "audio": null,
+    "daw_project": null
+  }
+}
