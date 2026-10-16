@@ -235,6 +235,7 @@ def generate_track(
     beat_ticks: int,
     tempo_bpm: int,
     groove_spec: groove.GrooveSpec | None,
+    riff_overrides: dict[int, list[BassHit]] | None = None,
 ) -> bytes:
     if track.get("role") != "bass":
         raise midi.ManifestError("bass spec is only supported on bass tracks")
@@ -260,7 +261,8 @@ def generate_track(
             continue
         musical_bar = max(0, absolute_bar - count_in_bars)
         start = absolute_bar * bar_ticks
-        for hit in render_bar(
+        override = riff_overrides.get(musical_bar) if riff_overrides else None
+        hits = override if override is not None else render_bar(
             spec,
             chord=chord,
             bar_index=musical_bar,
@@ -270,7 +272,8 @@ def generate_track(
             tempo_bpm=tempo_bpm,
             base_velocity=velocity,
             groove_spec=groove_spec,
-        ):
+        )
+        for hit in hits:
             events.extend(
                 midi.note_events(
                     channel=channel,
