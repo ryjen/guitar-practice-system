@@ -22,7 +22,7 @@ class PerformanceOverrideTests(unittest.TestCase):
     def test_section_indices_are_musical_bars_and_not_count_in(self) -> None:
         _, value = _parsed()
         self.assertEqual({0, 7, 8, 19, 20, 27, 28, 39, 40, 47, 48, 59, 60, 67}, set(value.drum_fills))
-        self.assertEqual({0, 2, 4, 6, 19, 20, 22, 24, 26, 39, 40, 42, 44, 46, 59, 60, 62, 64, 66}, set(value.bass_riffs))
+        self.assertEqual({0, 2, 4, 6, 11, 15, 17, 19, 20, 22, 24, 26, 31, 35, 37, 39, 40, 42, 44, 46, 51, 55, 57, 59, 60, 62, 64, 66}, set(value.bass_riffs))
 
     def test_riff_vamps_and_blues_verses_are_distinct_sections(self) -> None:
         lengths = [section["bars"] for section in MANIFEST["sections"]]
@@ -34,6 +34,14 @@ class PerformanceOverrideTests(unittest.TestCase):
         verse = MANIFEST["sections"][1]["chords"]
         self.assertEqual(["G7", "C7", "D7"], [verse[0], verse[4], verse[8]])
         self.assertIn("not an independently verified transcription", MANIFEST["provenance"]["notes"])
+
+    def test_blues_verses_have_distinct_bass_responses(self) -> None:
+        _, overrides = _parsed()
+        self.assertEqual([11, 15, 17, 19], [bar for bar in sorted(overrides.bass_riffs) if 8 <= bar < 20])
+        self.assertEqual([31, 35, 37, 39], [bar for bar in sorted(overrides.bass_riffs) if 28 <= bar < 40])
+        self.assertEqual([51, 55, 57, 59], [bar for bar in sorted(overrides.bass_riffs) if 48 <= bar < 60])
+        self.assertNotEqual(overrides.bass_riffs[11], overrides.bass_riffs[15])
+        self.assertNotEqual(overrides.bass_riffs[19], overrides.bass_riffs[11])
 
     def test_fill_replaces_hats_but_preserves_kick_and_snare(self) -> None:
         spec, value = _parsed()
