@@ -291,6 +291,120 @@
       ],
       "bass_riffs": [
         {
+          "bar": 4,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 1,
+              "offset": 0
+            },
+            {
+              "step": 2,
+              "offset": 7
+            },
+            {
+              "step": 3,
+              "offset": 9
+            },
+            {
+              "step": 4,
+              "offset": 10
+            },
+            {
+              "step": 5,
+              "offset": 9
+            },
+            {
+              "step": 6,
+              "offset": 7
+            },
+            {
+              "step": 7,
+              "offset": 5
+            }
+          ]
+        },
+        {
+          "bar": 8,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 1,
+              "offset": 7
+            },
+            {
+              "step": 2,
+              "offset": 10
+            },
+            {
+              "step": 3,
+              "offset": 7
+            },
+            {
+              "step": 4,
+              "offset": 5
+            },
+            {
+              "step": 5,
+              "offset": 3
+            },
+            {
+              "step": 6,
+              "offset": 2
+            },
+            {
+              "step": 7,
+              "offset": 0
+            }
+          ]
+        },
+        {
+          "bar": 10,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 1,
+              "offset": 0
+            },
+            {
+              "step": 2,
+              "offset": 7
+            },
+            {
+              "step": 3,
+              "offset": 9
+            },
+            {
+              "step": 4,
+              "offset": 10
+            },
+            {
+              "step": 5,
+              "offset": 9
+            },
+            {
+              "step": 6,
+              "offset": 7
+            },
+            {
+              "step": 7,
+              "offset": 5
+            }
+          ]
+        },
+        {
           "bar": 12,
           "notes": [
             {
@@ -600,6 +714,120 @@
         }
       ],
       "bass_riffs": [
+        {
+          "bar": 4,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 1,
+              "offset": 0
+            },
+            {
+              "step": 2,
+              "offset": 7
+            },
+            {
+              "step": 3,
+              "offset": 9
+            },
+            {
+              "step": 4,
+              "offset": 10
+            },
+            {
+              "step": 5,
+              "offset": 9
+            },
+            {
+              "step": 6,
+              "offset": 7
+            },
+            {
+              "step": 7,
+              "offset": 5
+            }
+          ]
+        },
+        {
+          "bar": 8,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 1,
+              "offset": 7
+            },
+            {
+              "step": 2,
+              "offset": 10
+            },
+            {
+              "step": 3,
+              "offset": 7
+            },
+            {
+              "step": 4,
+              "offset": 5
+            },
+            {
+              "step": 5,
+              "offset": 3
+            },
+            {
+              "step": 6,
+              "offset": 2
+            },
+            {
+              "step": 7,
+              "offset": 0
+            }
+          ]
+        },
+        {
+          "bar": 10,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 1,
+              "offset": 0
+            },
+            {
+              "step": 2,
+              "offset": 7
+            },
+            {
+              "step": 3,
+              "offset": 9
+            },
+            {
+              "step": 4,
+              "offset": 10
+            },
+            {
+              "step": 5,
+              "offset": 9
+            },
+            {
+              "step": 6,
+              "offset": 7
+            },
+            {
+              "step": 7,
+              "offset": 5
+            }
+          ]
+        },
         {
           "bar": 12,
           "notes": [
@@ -911,6 +1139,120 @@
       ],
       "bass_riffs": [
         {
+          "bar": 4,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 1,
+              "offset": 0
+            },
+            {
+              "step": 2,
+              "offset": 7
+            },
+            {
+              "step": 3,
+              "offset": 9
+            },
+            {
+              "step": 4,
+              "offset": 10
+            },
+            {
+              "step": 5,
+              "offset": 9
+            },
+            {
+              "step": 6,
+              "offset": 7
+            },
+            {
+              "step": 7,
+              "offset": 5
+            }
+          ]
+        },
+        {
+          "bar": 8,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 1,
+              "offset": 7
+            },
+            {
+              "step": 2,
+              "offset": 10
+            },
+            {
+              "step": 3,
+              "offset": 7
+            },
+            {
+              "step": 4,
+              "offset": 5
+            },
+            {
+              "step": 5,
+              "offset": 3
+            },
+            {
+              "step": 6,
+              "offset": 2
+            },
+            {
+              "step": 7,
+              "offset": 0
+            }
+          ]
+        },
+        {
+          "bar": 10,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 1,
+              "offset": 0
+            },
+            {
+              "step": 2,
+              "offset": 7
+            },
+            {
+              "step": 3,
+              "offset": 9
+            },
+            {
+              "step": 4,
+              "offset": 10
+            },
+            {
+              "step": 5,
+              "offset": 9
+            },
+            {
+              "step": 6,
+              "offset": 7
+            },
+            {
+              "step": 7,
+              "offset": 5
+            }
+          ]
+        },
+        {
           "bar": 12,
           "notes": [
             {
@@ -1181,12 +1523,12 @@
         "gate_percent": 82,
         "follow_kick_velocity": true
       },
-      "instrument_intent": "Warm slightly gritty electric bass; root/fifth pulse and original chromatic turnaround riffs"
+      "instrument_intent": "Warm slightly gritty electric bass; kick-root-fifth between authored section-specific G-vamp figures, melodic verse response bars and turnaround riffs."
     }
   ],
   "provenance": {
     "type": "original",
-    "notes": "Original shortened video arrangement inspired by the general riff/vamp-versus-blues-form contrast. 8-bar riff and 12-bar verse units are editable arranging choices, not an independently verified transcription of the 1969 Led Zeppelin performance. No commercial riff or audio reproduced."
+    "notes": "Original shortened video arrangement inspired by the general riff/vamp-versus-blues-form contrast. 8-bar riff and 12-bar verse units are editable arranging choices, not an independently verified transcription of the 1969 Led Zeppelin performance. No commercial riff or audio reproduced. Verse bass response cells are original chord-root-relative practice phrases and are not derived from a commercial transcription."
   },
   "outputs": {
     "midi": "generated/backing-tracks/riverside-blues-video-g-108.mid",
