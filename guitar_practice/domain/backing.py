@@ -7,7 +7,7 @@ import struct
 from dataclasses import dataclass
 from typing import Any
 
-from guitar_practice.domain import bass, groove, midi
+from guitar_practice.domain import bass, groove, midi, performance
 
 
 @dataclass(frozen=True)
@@ -165,6 +165,11 @@ def validate_manifest(
         for track in manifest["tracks"]
     ]
     groove_specs = _groove_specs(resolved, manifest["meter"])
+    performance.parse(
+        manifest,
+        groove_spec=groove_specs[0] if len(groove_specs) == 1 else None,
+        has_bass=any(track["role"] == "bass" and "bass" in track for track in resolved),
+    )
 
     for track in resolved:
         if track["role"] != "bass" or "bass" not in track:
@@ -205,6 +210,7 @@ def _generate_groove_drum_track(
     beat_ticks: int,
     tempo_bpm: int,
     muted_bars: set[int],
+    drum_fills: dict[int, performance.DrumFill],
 ) -> bytes:
     spec = groove.parse_groove(
         track["groove"],
@@ -231,6 +237,13 @@ def _generate_groove_drum_track(
                 bar_ticks=bar_ticks,
                 tempo_bpm=tempo_bpm,
             )
+            # Count-in groove bars are not part of section-local musical indexing.
+            # Without this guard a fill on the first musical bar also leaks into
+            # each groove-backed count-in bar (musical_bar is clamped to zero).
+            if absolute_bar >= count_in_bars:
+                fill = drum_fills.get(musical_bar)
+                if fill is not None:
+                    hits = performance.apply_drum_fill(hits, fill)
 
         start = absolute_bar * bar_ticks
         for hit in hits:
@@ -313,6 +326,11 @@ def render(manifest: dict[str, Any], groove_catalog: dict[str, Any]) -> bytes:
         for track in manifest["tracks"]
     ]
     reference_groove = _reference_groove(resolved_tracks, manifest["meter"])
+    performance_overrides = performance.parse(
+        manifest,
+        groove_spec=reference_groove,
+        has_bass=any(track["role"] == "bass" and "bass" in track for track in resolved_tracks),
+    )
 
     tracks = [midi.conductor_track(manifest, bar_ticks)]
     for track in resolved_tracks:
@@ -327,6 +345,7 @@ def render(manifest: dict[str, Any], groove_catalog: dict[str, Any]) -> bytes:
                     beat_ticks=beat_ticks,
                     tempo_bpm=manifest["tempo_bpm"],
                     muted_bars=muted_bars,
+                    drum_fills=performance_overrides.drum_fills,
                 )
             )
         elif track["role"] == "drums" and muted_bars:
@@ -340,6 +359,19 @@ def render(manifest: dict[str, Any], groove_catalog: dict[str, Any]) -> bytes:
                 )
             )
         elif track["role"] == "bass" and "bass" in track:
+            bass_spec = bass.parse_bass(track["bass"])
+            riff_overrides = {
+                bar: performance.render_bass_riff(
+                    notes,
+                    chord=masked_chords[manifest["count_in_bars"] + bar],
+                    groove_spec=reference_groove,
+                    meter=manifest["meter"],
+                    bar_ticks=bar_ticks,
+                    base_velocity=int(track.get("velocity", 78)),
+                    gate_percent=bass_spec.gate_percent,
+                )
+                for bar, notes in performance_overrides.bass_riffs.items()
+            }
             tracks.append(
                 bass.generate_track(
                     track,
@@ -350,6 +382,7 @@ def render(manifest: dict[str, Any], groove_catalog: dict[str, Any]) -> bytes:
                     beat_ticks=beat_ticks,
                     tempo_bpm=manifest["tempo_bpm"],
                     groove_spec=reference_groove,
+                    riff_overrides=riff_overrides,
                 )
             )
         else:

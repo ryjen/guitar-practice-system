@@ -2,40 +2,89 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ryjen.github.io/guitar-practice-system/contracts/backing-tracks/backing-track-spec.schema.json",
   "title": "BackingTrackSpec",
-  "description": "Deterministic backing-track manifest with optional named groove preset, bass accompaniment, and arrangement-wide bar cycle.",
+  "description": "Deterministic backing-track manifest with optional groove, bass accompaniment, section-local fills/riffs, and arrangement-wide cycles.",
   "type": "object",
-  "required": ["id", "title", "key_signature", "tempo_bpm", "meter", "count_in_bars", "sections", "tracks", "outputs"],
+  "required": [
+    "id",
+    "title",
+    "key_signature",
+    "tempo_bpm",
+    "meter",
+    "count_in_bars",
+    "sections",
+    "tracks",
+    "outputs"
+  ],
   "properties": {
-    "id": {"type": "string", "minLength": 1},
-    "title": {"type": "string", "minLength": 1},
-    "key_signature": {"type": "string", "minLength": 1},
-    "tempo_bpm": {"type": "integer", "minimum": 20, "maximum": 300},
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "key_signature": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tempo_bpm": {
+      "type": "integer",
+      "minimum": 20,
+      "maximum": 300
+    },
     "meter": {
       "type": "array",
       "prefixItems": [
-        {"type": "integer", "minimum": 1},
-        {"type": "integer", "enum": [1, 2, 4, 8, 16]}
+        {
+          "type": "integer",
+          "minimum": 1
+        },
+        {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            4,
+            8,
+            16
+          ]
+        }
       ],
       "minItems": 2,
       "maxItems": 2
     },
-    "count_in_bars": {"type": "integer", "minimum": 0},
-    "arrangement": {"$ref": "#/$defs/arrangement"},
+    "count_in_bars": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "arrangement": {
+      "$ref": "#/$defs/arrangement"
+    },
     "sections": {
       "type": "array",
       "minItems": 1,
-      "items": {"$ref": "#/$defs/section"}
+      "items": {
+        "$ref": "#/$defs/section"
+      }
     },
     "tracks": {
       "type": "array",
       "minItems": 1,
-      "items": {"$ref": "#/$defs/track"}
+      "items": {
+        "$ref": "#/$defs/track"
+      }
     },
     "outputs": {
       "type": "object",
-      "required": ["midi"],
+      "required": [
+        "midi"
+      ],
       "properties": {
-        "midi": {"type": "string", "pattern": "^generated/backing-tracks/.+\\.mid$"},
+        "midi": {
+          "type": "string",
+          "pattern": "^generated/backing-tracks/.+\\.mid$"
+        },
         "audio": {},
         "daw_project": {}
       },
@@ -47,13 +96,24 @@
     "barCycle": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["length", "mute_bars"],
+      "required": [
+        "length",
+        "mute_bars"
+      ],
       "properties": {
-        "length": {"type": "integer", "minimum": 1, "maximum": 64},
+        "length": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
         "mute_bars": {
           "type": "array",
           "uniqueItems": true,
-          "items": {"type": "integer", "minimum": 0, "maximum": 63}
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 63
+          }
         }
       }
     },
@@ -61,31 +121,206 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "bar_cycle": {"$ref": "#/$defs/barCycle"}
+        "bar_cycle": {
+          "$ref": "#/$defs/barCycle"
+        }
       }
     },
     "section": {
       "type": "object",
-      "required": ["name", "bars", "chords"],
+      "required": [
+        "name",
+        "bars",
+        "chords"
+      ],
       "properties": {
-        "name": {"type": "string", "minLength": 1},
-        "bars": {"type": "integer", "minimum": 1},
-        "chords": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bars": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "chords": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "drum_fills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "bar",
+              "hits"
+            ],
+            "properties": {
+              "bar": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 128
+              },
+              "replace": {
+                "type": "array",
+                "uniqueItems": true,
+                "maxItems": 12,
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "kick",
+                    "side_stick",
+                    "snare",
+                    "clap",
+                    "closed_hat",
+                    "pedal_hat",
+                    "open_hat",
+                    "low_tom",
+                    "mid_tom",
+                    "high_tom",
+                    "crash",
+                    "ride"
+                  ]
+                }
+              },
+              "hits": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 16,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "instrument",
+                    "step",
+                    "velocity"
+                  ],
+                  "properties": {
+                    "instrument": {
+                      "type": "string",
+                      "enum": [
+                        "kick",
+                        "side_stick",
+                        "snare",
+                        "clap",
+                        "closed_hat",
+                        "pedal_hat",
+                        "open_hat",
+                        "low_tom",
+                        "mid_tom",
+                        "high_tom",
+                        "crash",
+                        "ride"
+                      ]
+                    },
+                    "step": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "0-based step index; upper bound depends on the section meter and selected groove subdivision and is validated by the renderer."
+                    },
+                    "velocity": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 127
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "bass_riffs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "bar",
+              "notes"
+            ],
+            "properties": {
+              "bar": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 128
+              },
+              "notes": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 16,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "step",
+                    "offset"
+                  ],
+                  "properties": {
+                    "step": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "0-based step index; upper bound depends on the section meter and selected groove subdivision and is validated by the renderer."
+                    },
+                    "offset": {
+                      "type": "integer",
+                      "minimum": -12,
+                      "maximum": 12
+                    },
+                    "velocity": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 127
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "additionalProperties": true
     },
     "track": {
       "type": "object",
-      "required": ["name", "role", "channel"],
+      "required": [
+        "name",
+        "role",
+        "channel"
+      ],
       "properties": {
-        "name": {"type": "string", "minLength": 1},
-        "role": {"type": "string", "minLength": 1},
-        "channel": {"type": "integer", "minimum": 0, "maximum": 15},
-        "groove": {"$ref": "groove-spec.schema.json"},
-        "groove_preset": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
-        "bass": {"$ref": "bass-spec.schema.json"}
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "channel": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "groove": {
+          "$ref": "groove-spec.schema.json"
+        },
+        "groove_preset": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "bass": {
+          "$ref": "bass-spec.schema.json"
+        }
       },
-      "not": {"required": ["groove", "groove_preset"]},
+      "not": {
+        "required": [
+          "groove",
+          "groove_preset"
+        ]
+      },
       "additionalProperties": true
     }
   }
