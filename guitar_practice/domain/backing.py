@@ -237,9 +237,13 @@ def _generate_groove_drum_track(
                 bar_ticks=bar_ticks,
                 tempo_bpm=tempo_bpm,
             )
-            fill = drum_fills.get(musical_bar)
-            if fill is not None:
-                hits = performance.apply_drum_fill(hits, fill)
+            # Count-in groove bars are not part of section-local musical indexing.
+            # Without this guard a fill on the first musical bar also leaks into
+            # each groove-backed count-in bar (musical_bar is clamped to zero).
+            if absolute_bar >= count_in_bars:
+                fill = drum_fills.get(musical_bar)
+                if fill is not None:
+                    hits = performance.apply_drum_fill(hits, fill)
 
         start = absolute_bar * bar_ticks
         for hit in hits:
