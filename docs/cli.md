@@ -41,6 +41,14 @@ guitarctl midi generate \
 guitarctl midi validate \
   backing-tracks/slide-slow-blues/manifest.json \
   /tmp/slide-slow-blues.mid
+
+# Enhanced backing manifests preserve authored fills and bass riffs:
+guitarctl midi generate \
+  backing-tracks/riverside-blues-video/manifest.json \
+  generated/backing-tracks/riverside-blues-video-g-108.mid
+guitarctl midi validate \
+  backing-tracks/riverside-blues-video/manifest.json \
+  generated/backing-tracks/riverside-blues-video-g-108.mid
 guitarctl midi generate-exercises
 
 guitarctl score init --title "Blue Thing" > blue-thing.score.json
@@ -101,6 +109,13 @@ Global options such as `--workspace` appear before the command. Package-native c
 ```bash
 guitarctl progression generate --help
 ```
+
+When a backing manifest contains groove, bass, or section performance
+overrides, `midi generate` automatically selects the canonical backing
+renderer and `midi validate` checks exact authored note content as well as
+MIDI metadata. Missing workspace groove catalogs or invalid overrides fail
+without silently falling back to plain MIDI rendering. Legacy bare MIDI
+manifests retain their former behavior.
 
 ## Migration status
 

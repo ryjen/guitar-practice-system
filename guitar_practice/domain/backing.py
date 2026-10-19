@@ -88,6 +88,27 @@ def arrangement_muted_bars(manifest: dict[str, Any]) -> set[int]:
     }
 
 
+def needs_backing_renderer(manifest: dict[str, Any]) -> bool:
+    """Detect manifest features that the basic MIDI renderer cannot preserve.
+
+    Detection intentionally precedes validation: malformed enhanced fields must
+    be rejected by the backing renderer rather than silently omitted.
+    """
+    return (
+        "arrangement" in manifest
+        or any(
+            isinstance(track, dict)
+            and bool({"groove", "groove_preset", "bass"} & track.keys())
+            for track in manifest.get("tracks", [])
+        )
+        or any(
+            isinstance(section, dict)
+            and bool({"drum_fills", "bass_riffs"} & section.keys())
+            for section in manifest.get("sections", [])
+        )
+    )
+
+
 def resolve_track(
     track: dict[str, Any],
     meter: list[int],

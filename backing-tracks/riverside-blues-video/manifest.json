@@ -1,7 +1,7 @@
 {
   "id": "riverside-blues-video-g-108",
   "title": "Riverside Blues — Original Riff-and-Verse Blues-Rock Video Bed in G",
-  "purpose": "Short original rhythm bed for a filmed blues-rock performance; distinct G-centered riff vamps and blues verse sections; NOT an exact bar-by-bar recreation of any recorded arrangement.",
+  "purpose": "Original video backing for a G blues-rock performance with heavy swung drums, varied phrase-end fills and deliberately sparse bass. Not a transcription of any recorded arrangement.",
   "linked_techniques": [
     "blues-phrasing",
     "rhythm-pocket"
@@ -13,7 +13,7 @@
     4,
     4
   ],
-  "feel": "driving eighth-note shuffle with restrained tom turnaround fills",
+  "feel": "Grounded heavy blues-rock pocket, gentle swing, restrained bass and conversational fills.",
   "count_in_bars": 2,
   "loop": {
     "start_marker": "INTRO-RIFF",
@@ -41,7 +41,46 @@
             {
               "instrument": "crash",
               "step": 0,
-              "velocity": 105
+              "velocity": 94
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 49
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 77
+            }
+          ]
+        },
+        {
+          "bar": 7,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "kick",
+              "step": 7,
+              "velocity": 89
+            },
+            {
+              "instrument": "mid_tom",
+              "step": 5,
+              "velocity": 82
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 93
             }
           ]
         },
@@ -55,12 +94,12 @@
             {
               "instrument": "mid_tom",
               "step": 4,
-              "velocity": 96
+              "velocity": 90
             },
             {
               "instrument": "mid_tom",
               "step": 5,
-              "velocity": 96
+              "velocity": 94
             },
             {
               "instrument": "low_tom",
@@ -70,7 +109,7 @@
             {
               "instrument": "low_tom",
               "step": 7,
-              "velocity": 110
+              "velocity": 108
             }
           ]
         }
@@ -82,111 +121,12 @@
             {
               "step": 0,
               "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 7
-            },
-            {
-              "step": 2,
-              "offset": 10
-            },
-            {
-              "step": 3,
-              "offset": 12
+              "velocity": 89
             },
             {
               "step": 4,
-              "offset": 10
-            },
-            {
-              "step": 5,
-              "offset": 7
-            },
-            {
-              "step": 6,
-              "offset": 5
-            },
-            {
-              "step": 7,
-              "offset": 3
-            }
-          ]
-        },
-        {
-          "bar": 3,
-          "notes": [
-            {
-              "step": 0,
-              "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 3
-            },
-            {
-              "step": 2,
-              "offset": 5
-            },
-            {
-              "step": 3,
-              "offset": 7
-            },
-            {
-              "step": 4,
-              "offset": 5
-            },
-            {
-              "step": 5,
-              "offset": 3
-            },
-            {
-              "step": 6,
-              "offset": 2
-            },
-            {
-              "step": 7,
-              "offset": 0
-            }
-          ]
-        },
-        {
-          "bar": 5,
-          "notes": [
-            {
-              "step": 0,
-              "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 7
-            },
-            {
-              "step": 2,
-              "offset": 10
-            },
-            {
-              "step": 3,
-              "offset": 12
-            },
-            {
-              "step": 4,
-              "offset": 10
-            },
-            {
-              "step": 5,
-              "offset": 7
-            },
-            {
-              "step": 6,
-              "offset": 5
-            },
-            {
-              "step": 7,
-              "offset": 3
+              "offset": 7,
+              "velocity": 79
             }
           ]
         },
@@ -196,35 +136,17 @@
             {
               "step": 0,
               "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 3
-            },
-            {
-              "step": 2,
-              "offset": 5
-            },
-            {
-              "step": 3,
-              "offset": 7
+              "velocity": 88
             },
             {
               "step": 4,
-              "offset": 5
-            },
-            {
-              "step": 5,
-              "offset": 3
-            },
-            {
-              "step": 6,
-              "offset": 2
+              "offset": 7,
+              "velocity": 81
             },
             {
               "step": 7,
-              "offset": 0
+              "offset": -2,
+              "velocity": 74
             }
           ]
         }
@@ -255,7 +177,71 @@
             {
               "instrument": "crash",
               "step": 0,
-              "velocity": 105
+              "velocity": 96
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 50
+            },
+            {
+              "instrument": "snare",
+              "step": 7,
+              "velocity": 46
+            },
+            {
+              "instrument": "mid_tom",
+              "step": 7,
+              "velocity": 75
+            }
+          ]
+        },
+        {
+          "bar": 8,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "high_tom",
+              "step": 5,
+              "velocity": 81
+            },
+            {
+              "instrument": "mid_tom",
+              "step": 6,
+              "velocity": 88
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 94
+            }
+          ]
+        },
+        {
+          "bar": 11,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 52
+            },
+            {
+              "instrument": "kick",
+              "step": 7,
+              "velocity": 90
             }
           ]
         },
@@ -269,7 +255,7 @@
             {
               "instrument": "mid_tom",
               "step": 4,
-              "velocity": 96
+              "velocity": 93
             },
             {
               "instrument": "mid_tom",
@@ -291,116 +277,17 @@
       ],
       "bass_riffs": [
         {
-          "bar": 4,
-          "notes": [
-            {
-              "step": 0,
-              "offset": 0,
-              "velocity": 93
-            },
-            {
-              "step": 1,
-              "offset": 0
-            },
-            {
-              "step": 2,
-              "offset": 7
-            },
-            {
-              "step": 3,
-              "offset": 9
-            },
-            {
-              "step": 4,
-              "offset": 10
-            },
-            {
-              "step": 5,
-              "offset": 9
-            },
-            {
-              "step": 6,
-              "offset": 7
-            },
-            {
-              "step": 7,
-              "offset": 5
-            }
-          ]
-        },
-        {
           "bar": 8,
           "notes": [
             {
               "step": 0,
               "offset": 0,
-              "velocity": 93
-            },
-            {
-              "step": 1,
-              "offset": 7
-            },
-            {
-              "step": 2,
-              "offset": 10
-            },
-            {
-              "step": 3,
-              "offset": 7
+              "velocity": 84
             },
             {
               "step": 4,
-              "offset": 5
-            },
-            {
-              "step": 5,
-              "offset": 3
-            },
-            {
-              "step": 6,
-              "offset": 2
-            },
-            {
-              "step": 7,
-              "offset": 0
-            }
-          ]
-        },
-        {
-          "bar": 10,
-          "notes": [
-            {
-              "step": 0,
-              "offset": 0,
-              "velocity": 93
-            },
-            {
-              "step": 1,
-              "offset": 0
-            },
-            {
-              "step": 2,
-              "offset": 7
-            },
-            {
-              "step": 3,
-              "offset": 9
-            },
-            {
-              "step": 4,
-              "offset": 10
-            },
-            {
-              "step": 5,
-              "offset": 9
-            },
-            {
-              "step": 6,
-              "offset": 7
-            },
-            {
-              "step": 7,
-              "offset": 5
+              "offset": 7,
+              "velocity": 78
             }
           ]
         },
@@ -410,35 +297,17 @@
             {
               "step": 0,
               "offset": 0,
-              "velocity": 94
-            },
-            {
-              "step": 1,
-              "offset": 7
-            },
-            {
-              "step": 2,
-              "offset": 10
-            },
-            {
-              "step": 3,
-              "offset": 7
+              "velocity": 88
             },
             {
               "step": 4,
-              "offset": 5
-            },
-            {
-              "step": 5,
-              "offset": 2
-            },
-            {
-              "step": 6,
-              "offset": 0
+              "offset": 5,
+              "velocity": 80
             },
             {
               "step": 7,
-              "offset": -2
+              "offset": -2,
+              "velocity": 77
             }
           ]
         }
@@ -465,7 +334,46 @@
             {
               "instrument": "crash",
               "step": 0,
-              "velocity": 105
+              "velocity": 100
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 49
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 77
+            }
+          ]
+        },
+        {
+          "bar": 7,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "kick",
+              "step": 7,
+              "velocity": 89
+            },
+            {
+              "instrument": "mid_tom",
+              "step": 5,
+              "velocity": 82
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 93
             }
           ]
         },
@@ -479,12 +387,12 @@
             {
               "instrument": "mid_tom",
               "step": 4,
-              "velocity": 96
+              "velocity": 90
             },
             {
               "instrument": "mid_tom",
               "step": 5,
-              "velocity": 96
+              "velocity": 94
             },
             {
               "instrument": "low_tom",
@@ -494,7 +402,7 @@
             {
               "instrument": "low_tom",
               "step": 7,
-              "velocity": 110
+              "velocity": 108
             }
           ]
         }
@@ -506,111 +414,12 @@
             {
               "step": 0,
               "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 7
-            },
-            {
-              "step": 2,
-              "offset": 10
-            },
-            {
-              "step": 3,
-              "offset": 12
+              "velocity": 89
             },
             {
               "step": 4,
-              "offset": 10
-            },
-            {
-              "step": 5,
-              "offset": 7
-            },
-            {
-              "step": 6,
-              "offset": 5
-            },
-            {
-              "step": 7,
-              "offset": 3
-            }
-          ]
-        },
-        {
-          "bar": 3,
-          "notes": [
-            {
-              "step": 0,
-              "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 3
-            },
-            {
-              "step": 2,
-              "offset": 5
-            },
-            {
-              "step": 3,
-              "offset": 7
-            },
-            {
-              "step": 4,
-              "offset": 5
-            },
-            {
-              "step": 5,
-              "offset": 3
-            },
-            {
-              "step": 6,
-              "offset": 2
-            },
-            {
-              "step": 7,
-              "offset": 0
-            }
-          ]
-        },
-        {
-          "bar": 5,
-          "notes": [
-            {
-              "step": 0,
-              "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 7
-            },
-            {
-              "step": 2,
-              "offset": 10
-            },
-            {
-              "step": 3,
-              "offset": 12
-            },
-            {
-              "step": 4,
-              "offset": 10
-            },
-            {
-              "step": 5,
-              "offset": 7
-            },
-            {
-              "step": 6,
-              "offset": 5
-            },
-            {
-              "step": 7,
-              "offset": 3
+              "offset": 7,
+              "velocity": 79
             }
           ]
         },
@@ -620,35 +429,17 @@
             {
               "step": 0,
               "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 3
-            },
-            {
-              "step": 2,
-              "offset": 5
-            },
-            {
-              "step": 3,
-              "offset": 7
+              "velocity": 88
             },
             {
               "step": 4,
-              "offset": 5
-            },
-            {
-              "step": 5,
-              "offset": 3
-            },
-            {
-              "step": 6,
-              "offset": 2
+              "offset": 7,
+              "velocity": 81
             },
             {
               "step": 7,
-              "offset": 0
+              "offset": -2,
+              "velocity": 74
             }
           ]
         }
@@ -679,7 +470,71 @@
             {
               "instrument": "crash",
               "step": 0,
-              "velocity": 105
+              "velocity": 96
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 50
+            },
+            {
+              "instrument": "snare",
+              "step": 7,
+              "velocity": 46
+            },
+            {
+              "instrument": "mid_tom",
+              "step": 7,
+              "velocity": 75
+            }
+          ]
+        },
+        {
+          "bar": 8,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "high_tom",
+              "step": 5,
+              "velocity": 81
+            },
+            {
+              "instrument": "mid_tom",
+              "step": 6,
+              "velocity": 88
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 94
+            }
+          ]
+        },
+        {
+          "bar": 11,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 52
+            },
+            {
+              "instrument": "kick",
+              "step": 7,
+              "velocity": 90
             }
           ]
         },
@@ -693,7 +548,7 @@
             {
               "instrument": "mid_tom",
               "step": 4,
-              "velocity": 96
+              "velocity": 93
             },
             {
               "instrument": "mid_tom",
@@ -715,116 +570,17 @@
       ],
       "bass_riffs": [
         {
-          "bar": 4,
-          "notes": [
-            {
-              "step": 0,
-              "offset": 0,
-              "velocity": 93
-            },
-            {
-              "step": 1,
-              "offset": 0
-            },
-            {
-              "step": 2,
-              "offset": 7
-            },
-            {
-              "step": 3,
-              "offset": 9
-            },
-            {
-              "step": 4,
-              "offset": 10
-            },
-            {
-              "step": 5,
-              "offset": 9
-            },
-            {
-              "step": 6,
-              "offset": 7
-            },
-            {
-              "step": 7,
-              "offset": 5
-            }
-          ]
-        },
-        {
           "bar": 8,
           "notes": [
             {
               "step": 0,
               "offset": 0,
-              "velocity": 93
-            },
-            {
-              "step": 1,
-              "offset": 7
-            },
-            {
-              "step": 2,
-              "offset": 10
-            },
-            {
-              "step": 3,
-              "offset": 7
+              "velocity": 84
             },
             {
               "step": 4,
-              "offset": 5
-            },
-            {
-              "step": 5,
-              "offset": 3
-            },
-            {
-              "step": 6,
-              "offset": 2
-            },
-            {
-              "step": 7,
-              "offset": 0
-            }
-          ]
-        },
-        {
-          "bar": 10,
-          "notes": [
-            {
-              "step": 0,
-              "offset": 0,
-              "velocity": 93
-            },
-            {
-              "step": 1,
-              "offset": 0
-            },
-            {
-              "step": 2,
-              "offset": 7
-            },
-            {
-              "step": 3,
-              "offset": 9
-            },
-            {
-              "step": 4,
-              "offset": 10
-            },
-            {
-              "step": 5,
-              "offset": 9
-            },
-            {
-              "step": 6,
-              "offset": 7
-            },
-            {
-              "step": 7,
-              "offset": 5
+              "offset": 7,
+              "velocity": 78
             }
           ]
         },
@@ -834,35 +590,17 @@
             {
               "step": 0,
               "offset": 0,
-              "velocity": 94
-            },
-            {
-              "step": 1,
-              "offset": 7
-            },
-            {
-              "step": 2,
-              "offset": 10
-            },
-            {
-              "step": 3,
-              "offset": 7
+              "velocity": 88
             },
             {
               "step": 4,
-              "offset": 5
-            },
-            {
-              "step": 5,
-              "offset": 2
-            },
-            {
-              "step": 6,
-              "offset": 0
+              "offset": 5,
+              "velocity": 80
             },
             {
               "step": 7,
-              "offset": -2
+              "offset": -2,
+              "velocity": 77
             }
           ]
         }
@@ -889,7 +627,46 @@
             {
               "instrument": "crash",
               "step": 0,
-              "velocity": 105
+              "velocity": 97
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 49
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 77
+            }
+          ]
+        },
+        {
+          "bar": 7,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "kick",
+              "step": 7,
+              "velocity": 89
+            },
+            {
+              "instrument": "mid_tom",
+              "step": 5,
+              "velocity": 82
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 93
             }
           ]
         },
@@ -903,12 +680,12 @@
             {
               "instrument": "mid_tom",
               "step": 4,
-              "velocity": 96
+              "velocity": 90
             },
             {
               "instrument": "mid_tom",
               "step": 5,
-              "velocity": 96
+              "velocity": 94
             },
             {
               "instrument": "low_tom",
@@ -918,7 +695,7 @@
             {
               "instrument": "low_tom",
               "step": 7,
-              "velocity": 110
+              "velocity": 108
             }
           ]
         }
@@ -930,111 +707,12 @@
             {
               "step": 0,
               "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 7
-            },
-            {
-              "step": 2,
-              "offset": 10
-            },
-            {
-              "step": 3,
-              "offset": 12
+              "velocity": 89
             },
             {
               "step": 4,
-              "offset": 10
-            },
-            {
-              "step": 5,
-              "offset": 7
-            },
-            {
-              "step": 6,
-              "offset": 5
-            },
-            {
-              "step": 7,
-              "offset": 3
-            }
-          ]
-        },
-        {
-          "bar": 3,
-          "notes": [
-            {
-              "step": 0,
-              "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 3
-            },
-            {
-              "step": 2,
-              "offset": 5
-            },
-            {
-              "step": 3,
-              "offset": 7
-            },
-            {
-              "step": 4,
-              "offset": 5
-            },
-            {
-              "step": 5,
-              "offset": 3
-            },
-            {
-              "step": 6,
-              "offset": 2
-            },
-            {
-              "step": 7,
-              "offset": 0
-            }
-          ]
-        },
-        {
-          "bar": 5,
-          "notes": [
-            {
-              "step": 0,
-              "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 7
-            },
-            {
-              "step": 2,
-              "offset": 10
-            },
-            {
-              "step": 3,
-              "offset": 12
-            },
-            {
-              "step": 4,
-              "offset": 10
-            },
-            {
-              "step": 5,
-              "offset": 7
-            },
-            {
-              "step": 6,
-              "offset": 5
-            },
-            {
-              "step": 7,
-              "offset": 3
+              "offset": 7,
+              "velocity": 79
             }
           ]
         },
@@ -1044,35 +722,17 @@
             {
               "step": 0,
               "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 3
-            },
-            {
-              "step": 2,
-              "offset": 5
-            },
-            {
-              "step": 3,
-              "offset": 7
+              "velocity": 88
             },
             {
               "step": 4,
-              "offset": 5
-            },
-            {
-              "step": 5,
-              "offset": 3
-            },
-            {
-              "step": 6,
-              "offset": 2
+              "offset": 7,
+              "velocity": 81
             },
             {
               "step": 7,
-              "offset": 0
+              "offset": -2,
+              "velocity": 74
             }
           ]
         }
@@ -1103,7 +763,103 @@
             {
               "instrument": "crash",
               "step": 0,
-              "velocity": 105
+              "velocity": 96
+            }
+          ]
+        },
+        {
+          "bar": 2,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 49
+            },
+            {
+              "instrument": "high_tom",
+              "step": 7,
+              "velocity": 74
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 50
+            },
+            {
+              "instrument": "snare",
+              "step": 7,
+              "velocity": 46
+            },
+            {
+              "instrument": "mid_tom",
+              "step": 7,
+              "velocity": 75
+            }
+          ]
+        },
+        {
+          "bar": 6,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "mid_tom",
+              "step": 5,
+              "velocity": 77
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 85
+            }
+          ]
+        },
+        {
+          "bar": 8,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "high_tom",
+              "step": 5,
+              "velocity": 81
+            },
+            {
+              "instrument": "mid_tom",
+              "step": 6,
+              "velocity": 88
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 94
+            }
+          ]
+        },
+        {
+          "bar": 11,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 52
+            },
+            {
+              "instrument": "kick",
+              "step": 7,
+              "velocity": 90
             }
           ]
         },
@@ -1117,7 +873,7 @@
             {
               "instrument": "mid_tom",
               "step": 4,
-              "velocity": 96
+              "velocity": 93
             },
             {
               "instrument": "mid_tom",
@@ -1139,116 +895,17 @@
       ],
       "bass_riffs": [
         {
-          "bar": 4,
-          "notes": [
-            {
-              "step": 0,
-              "offset": 0,
-              "velocity": 93
-            },
-            {
-              "step": 1,
-              "offset": 0
-            },
-            {
-              "step": 2,
-              "offset": 7
-            },
-            {
-              "step": 3,
-              "offset": 9
-            },
-            {
-              "step": 4,
-              "offset": 10
-            },
-            {
-              "step": 5,
-              "offset": 9
-            },
-            {
-              "step": 6,
-              "offset": 7
-            },
-            {
-              "step": 7,
-              "offset": 5
-            }
-          ]
-        },
-        {
           "bar": 8,
           "notes": [
             {
               "step": 0,
               "offset": 0,
-              "velocity": 93
-            },
-            {
-              "step": 1,
-              "offset": 7
-            },
-            {
-              "step": 2,
-              "offset": 10
-            },
-            {
-              "step": 3,
-              "offset": 7
+              "velocity": 84
             },
             {
               "step": 4,
-              "offset": 5
-            },
-            {
-              "step": 5,
-              "offset": 3
-            },
-            {
-              "step": 6,
-              "offset": 2
-            },
-            {
-              "step": 7,
-              "offset": 0
-            }
-          ]
-        },
-        {
-          "bar": 10,
-          "notes": [
-            {
-              "step": 0,
-              "offset": 0,
-              "velocity": 93
-            },
-            {
-              "step": 1,
-              "offset": 0
-            },
-            {
-              "step": 2,
-              "offset": 7
-            },
-            {
-              "step": 3,
-              "offset": 9
-            },
-            {
-              "step": 4,
-              "offset": 10
-            },
-            {
-              "step": 5,
-              "offset": 9
-            },
-            {
-              "step": 6,
-              "offset": 7
-            },
-            {
-              "step": 7,
-              "offset": 5
+              "offset": 7,
+              "velocity": 78
             }
           ]
         },
@@ -1258,35 +915,17 @@
             {
               "step": 0,
               "offset": 0,
-              "velocity": 94
-            },
-            {
-              "step": 1,
-              "offset": 7
-            },
-            {
-              "step": 2,
-              "offset": 10
-            },
-            {
-              "step": 3,
-              "offset": 7
+              "velocity": 88
             },
             {
               "step": 4,
-              "offset": 5
-            },
-            {
-              "step": 5,
-              "offset": 2
-            },
-            {
-              "step": 6,
-              "offset": 0
+              "offset": 5,
+              "velocity": 80
             },
             {
               "step": 7,
-              "offset": -2
+              "offset": -2,
+              "velocity": 77
             }
           ]
         }
@@ -1313,7 +952,46 @@
             {
               "instrument": "crash",
               "step": 0,
-              "velocity": 105
+              "velocity": 94
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 49
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 77
+            }
+          ]
+        },
+        {
+          "bar": 7,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "kick",
+              "step": 7,
+              "velocity": 89
+            },
+            {
+              "instrument": "mid_tom",
+              "step": 5,
+              "velocity": 82
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 93
             }
           ]
         },
@@ -1325,24 +1003,24 @@
           ],
           "hits": [
             {
-              "instrument": "mid_tom",
-              "step": 4,
-              "velocity": 96
+              "instrument": "crash",
+              "step": 0,
+              "velocity": 91
             },
             {
               "instrument": "mid_tom",
               "step": 5,
-              "velocity": 96
+              "velocity": 89
             },
             {
               "instrument": "low_tom",
               "step": 6,
-              "velocity": 102
+              "velocity": 96
             },
             {
               "instrument": "low_tom",
               "step": 7,
-              "velocity": 110
+              "velocity": 104
             }
           ]
         }
@@ -1354,111 +1032,12 @@
             {
               "step": 0,
               "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 7
-            },
-            {
-              "step": 2,
-              "offset": 10
-            },
-            {
-              "step": 3,
-              "offset": 12
+              "velocity": 89
             },
             {
               "step": 4,
-              "offset": 10
-            },
-            {
-              "step": 5,
-              "offset": 7
-            },
-            {
-              "step": 6,
-              "offset": 5
-            },
-            {
-              "step": 7,
-              "offset": 3
-            }
-          ]
-        },
-        {
-          "bar": 3,
-          "notes": [
-            {
-              "step": 0,
-              "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 3
-            },
-            {
-              "step": 2,
-              "offset": 5
-            },
-            {
-              "step": 3,
-              "offset": 7
-            },
-            {
-              "step": 4,
-              "offset": 5
-            },
-            {
-              "step": 5,
-              "offset": 3
-            },
-            {
-              "step": 6,
-              "offset": 2
-            },
-            {
-              "step": 7,
-              "offset": 0
-            }
-          ]
-        },
-        {
-          "bar": 5,
-          "notes": [
-            {
-              "step": 0,
-              "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 7
-            },
-            {
-              "step": 2,
-              "offset": 10
-            },
-            {
-              "step": 3,
-              "offset": 12
-            },
-            {
-              "step": 4,
-              "offset": 10
-            },
-            {
-              "step": 5,
-              "offset": 7
-            },
-            {
-              "step": 6,
-              "offset": 5
-            },
-            {
-              "step": 7,
-              "offset": 3
+              "offset": 7,
+              "velocity": 79
             }
           ]
         },
@@ -1468,35 +1047,17 @@
             {
               "step": 0,
               "offset": 0,
-              "velocity": 98
-            },
-            {
-              "step": 1,
-              "offset": 3
-            },
-            {
-              "step": 2,
-              "offset": 5
-            },
-            {
-              "step": 3,
-              "offset": 7
+              "velocity": 88
             },
             {
               "step": 4,
-              "offset": 5
-            },
-            {
-              "step": 5,
-              "offset": 3
-            },
-            {
-              "step": 6,
-              "offset": 2
+              "offset": 7,
+              "velocity": 80
             },
             {
               "step": 7,
-              "offset": 0
+              "offset": 0,
+              "velocity": 78
             }
           ]
         }
@@ -1509,26 +1070,86 @@
       "role": "drums",
       "channel": 9,
       "velocity": 98,
-      "groove_preset": "blues-shuffle",
-      "instrument_intent": "Dry, big acoustic kit with snare backbeat, heavy kick and simple section-ending tom fills"
+      "instrument_intent": "Heavy slightly-swung blues-rock kit: two anchored kicks per bar, backbeat snare, quiet hats, and original varied tom/ghost-note fills around phrase boundaries.",
+      "groove": {
+        "subdivision": 8,
+        "swing": 0.2,
+        "humanize_ms": 8,
+        "velocity_variance": 5,
+        "seed": 1083,
+        "count_in": "click",
+        "instruments": {
+          "kick": {
+            "steps": [
+              0,
+              4
+            ],
+            "velocity": 104,
+            "accent_steps": [
+              0
+            ],
+            "accent_velocity": 113
+          },
+          "snare": {
+            "steps": [
+              2,
+              6
+            ],
+            "velocity": 104,
+            "accent_steps": [
+              2,
+              6
+            ],
+            "accent_velocity": 116
+          },
+          "closed_hat": {
+            "steps": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "velocity": 48,
+            "accent_steps": [
+              0,
+              4
+            ],
+            "accent_velocity": 67
+          },
+          "open_hat": {
+            "steps": [],
+            "velocity": 74,
+            "variation": {
+              "every_bars": 4,
+              "steps": [
+                7
+              ]
+            }
+          }
+        }
+      }
     },
     {
       "name": "Bass",
       "role": "bass",
       "channel": 0,
       "program": 34,
-      "velocity": 90,
+      "velocity": 82,
       "bass": {
         "style": "kick-root-fifth",
-        "gate_percent": 82,
+        "gate_percent": 88,
         "follow_kick_velocity": true
       },
-      "instrument_intent": "Warm slightly gritty electric bass; kick-root-fifth between authored section-specific G-vamp figures, melodic verse response bars and turnaround riffs."
+      "instrument_intent": "Sparse warm electric bass: two kick-locked anchors per bar, brief 2-3-note G riff answers and chord-root turnarounds; stays out of the guitar/vocal phrasing."
     }
   ],
   "provenance": {
     "type": "original",
-    "notes": "Original shortened video arrangement inspired by the general riff/vamp-versus-blues-form contrast. 8-bar riff and 12-bar verse units are editable arranging choices, not an independently verified transcription of the 1969 Led Zeppelin performance. No commercial riff or audio reproduced. Verse bass response cells are original chord-root-relative practice phrases and are not derived from a commercial transcription."
+    "notes": "Original shortened video arrangement inspired by the general riff/vamp-versus-blues-form contrast. 8-bar riff and 12-bar verse units are editable arranging choices, not an independently verified transcription of the 1969 Led Zeppelin performance. No commercial riff or audio reproduced. Verse bass response cells are original chord-root-relative practice phrases and are not derived from a commercial transcription. 2026-10-19 production revision reduces kicks and bass to a two-beat pocket, reduces swing and hat prominence, and adds distinctive fill pickups rather than the repetitive turnarounds. All authored notes are original."
   },
   "outputs": {
     "midi": "generated/backing-tracks/riverside-blues-video-g-108.mid",

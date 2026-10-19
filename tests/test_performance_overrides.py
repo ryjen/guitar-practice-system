@@ -14,16 +14,53 @@ MANIFEST = json.loads((ROOT / "backing-tracks/riverside-blues-video/manifest.jso
 
 
 def _parsed(manifest: dict = MANIFEST) -> tuple[groove.GrooveSpec, performance.Performance]:
-    preset = groove.get_preset(CATALOG, "blues-shuffle")
-    drum = groove.parse_groove(preset["groove"], meter=manifest["meter"])
+    drum_config = backing.resolve_track(
+        manifest["tracks"][0], manifest["meter"], CATALOG
+    )["groove"]
+    drum = groove.parse_groove(drum_config, meter=manifest["meter"])
     return drum, performance.parse(manifest, groove_spec=drum, has_bass=True)
 
 
 class PerformanceOverrideTests(unittest.TestCase):
     def test_section_indices_are_musical_bars_and_not_count_in(self) -> None:
         _, value = _parsed()
-        self.assertEqual({0, 7, 8, 19, 20, 27, 28, 39, 40, 47, 48, 59, 60, 67}, set(value.drum_fills))
-        self.assertEqual({0, 2, 4, 6, 11, 15, 17, 19, 20, 22, 24, 26, 31, 35, 37, 39, 40, 42, 44, 46, 51, 55, 57, 59, 60, 62, 64, 66}, set(value.bass_riffs))
+        expected_drums = []
+        expected_bass = []
+        offset = 0
+        for section in MANIFEST["sections"]:
+            if "RIFF" in section["name"]:
+                drum_bars, bass_bars = (1, 4, 7, 8), (1, 7)
+            elif "SOLO" in section["name"]:
+                drum_bars, bass_bars = (1, 2, 4, 6, 8, 11, 12), (8, 12)
+            else:
+                drum_bars, bass_bars = (1, 4, 8, 11, 12), (8, 12)
+            expected_drums.extend(offset + bar - 1 for bar in drum_bars)
+            expected_bass.extend(offset + bar - 1 for bar in bass_bars)
+            offset += section["bars"]
+        self.assertEqual(set(expected_drums), set(value.drum_fills))
+        self.assertEqual(set(expected_bass), set(value.bass_riffs))
+        self.assertGreaterEqual(len(value.drum_fills), 25)
+
+    def test_sparse_production_pocket_and_fill_density(self) -> None:
+        groove_config = MANIFEST["tracks"][0]["groove"]
+        self.assertEqual([0, 4], groove_config["instruments"]["kick"]["steps"])
+        self.assertLessEqual(groove_config["swing"], 0.25)
+        self.assertLessEqual(groove_config["instruments"]["closed_hat"]["velocity"], 55)
+        self.assertEqual(33, sum(len(s["drum_fills"]) for s in MANIFEST["sections"]))
+        self.assertEqual(14, sum(len(s["bass_riffs"]) for s in MANIFEST["sections"]))
+        self.assertEqual(
+            35,
+            sum(
+                len(item["notes"])
+                for section in MANIFEST["sections"]
+                for item in section["bass_riffs"]
+            ),
+        )
+        self.assertLessEqual(
+            max(len(item["notes"]) for section in MANIFEST["sections"]
+                for item in section["bass_riffs"]),
+            3,
+        )
 
     def test_riff_vamps_and_blues_verses_are_distinct_sections(self) -> None:
         lengths = [section["bars"] for section in MANIFEST["sections"]]
@@ -38,11 +75,12 @@ class PerformanceOverrideTests(unittest.TestCase):
 
     def test_blues_verses_have_distinct_bass_responses(self) -> None:
         _, overrides = _parsed()
-        self.assertEqual([11, 15, 17, 19], [bar for bar in sorted(overrides.bass_riffs) if 8 <= bar < 20])
-        self.assertEqual([31, 35, 37, 39], [bar for bar in sorted(overrides.bass_riffs) if 28 <= bar < 40])
-        self.assertEqual([51, 55, 57, 59], [bar for bar in sorted(overrides.bass_riffs) if 48 <= bar < 60])
-        self.assertNotEqual(overrides.bass_riffs[11], overrides.bass_riffs[15])
-        self.assertNotEqual(overrides.bass_riffs[19], overrides.bass_riffs[11])
+        self.assertEqual([15, 19], [bar for bar in sorted(overrides.bass_riffs) if 8 <= bar < 20])
+        self.assertEqual([35, 39], [bar for bar in sorted(overrides.bass_riffs) if 28 <= bar < 40])
+        self.assertEqual([55, 59], [bar for bar in sorted(overrides.bass_riffs) if 48 <= bar < 60])
+        self.assertNotEqual(overrides.bass_riffs[15], overrides.bass_riffs[19])
+        self.assertEqual(2, len(overrides.bass_riffs[15]))
+        self.assertEqual(3, len(overrides.bass_riffs[19]))
 
     def test_fill_replaces_hats_but_preserves_kick_and_snare(self) -> None:
         spec, value = _parsed()
@@ -65,7 +103,7 @@ class PerformanceOverrideTests(unittest.TestCase):
         in_d = performance.render_bass_riff(value.bass_riffs[19], chord="D7", **kwargs)
         in_g = performance.render_bass_riff(value.bass_riffs[19], chord="G7", **kwargs)
         self.assertEqual([hit.tick for hit in in_d], [hit.tick for hit in in_g])
-        self.assertEqual(8, len(in_d))
+        self.assertEqual(3, len(in_d))
         self.assertEqual(midi.chord_notes("D7")[0] - 12, in_d[0].note)
         self.assertEqual(midi.chord_notes("G7")[0] - 12, in_g[0].note)
         for earlier, later in zip(in_d, in_d[1:]):
@@ -99,10 +137,9 @@ class PerformanceOverrideTests(unittest.TestCase):
 
     def test_groove_count_in_never_gets_section_one_fill(self) -> None:
         manifest = copy.deepcopy(MANIFEST)
-        resolved_groove = groove.get_preset(CATALOG, "blues-shuffle")["groove"]
+        resolved_groove = copy.deepcopy(manifest["tracks"][0]["groove"])
         resolved_groove["count_in"] = "groove"
         drum = manifest["tracks"][0]
-        drum.pop("groove_preset")
         drum["groove"] = resolved_groove
 
         groove_spec = groove.parse_groove(resolved_groove, meter=manifest["meter"])
@@ -211,7 +248,7 @@ class PerformanceOverrideTests(unittest.TestCase):
 
     def test_rejects_missing_groove_and_bass_roles(self) -> None:
         missing_groove = copy.deepcopy(MANIFEST)
-        missing_groove["tracks"][0].pop("groove_preset")
+        missing_groove["tracks"][0].pop("groove")
         with self.assertRaisesRegex(midi.ManifestError, "requires exactly one groove-aware"):
             backing.validate_manifest(missing_groove, CATALOG)
 
