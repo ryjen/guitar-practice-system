@@ -72,6 +72,20 @@ guitarctl midi validate \
   generated/backing-tracks/slide-slow-blues-a-60.mid
 ```
 
+For a manifest with `groove`, `groove_preset`, `bass`, `arrangement`,
+`drum_fills`, or `bass_riffs`, single-file `guitarctl midi generate`
+routes through the same enhanced backing engine as `guitarctl backing generate`.
+Its groove catalog is read through the configured workspace document store.
+Missing catalogs or malformed performance events **fail closed** before
+writing an output; the generator never substitutes generic kick/bass notes.
+
+`guitarctl midi validate` verifies not only MIDI structure but the exact
+deterministic generated content for these enriched manifests, so a legacy
+generic render with the same markers cannot masquerade as a valid rendition.
+For legacy manifests without enhanced fields, the historic format/marker
+validation contract remains unchanged; imported/DAW-edited MIDI is not
+expected to match a deterministic enhanced-manifest render byte-for-byte.
+
 Generate and validate the entire committed backing-track catalog:
 
 ```bash
@@ -200,6 +214,14 @@ The riff-based sections use a G7 harmonic placeholder because the current
 manifest only represents one chord per bar; brief passing harmonies are
 instead implied by authored bass motion. Exact performance alignment
 requires measure-by-measure listening or an authorized score/Score IR import.
+
+**Riverside production revision:** the G/108 source uses a localized,
+gently swung (not full triplet-bounce) drum groove, a heavy two-beat kick
+anchor, quieter hats, 33 distinct section-level fill placements, and sparse
+chord-root bass with only 14 authored two- or three-note response bars.
+The rhythm section is intended to leave the main syncopation to the live
+guitar and vocal. These values define the original shortened performance
+arrangement and do not claim a transcription of a commercial recording.
 
 See the [Riverside video cue map and reference audit](recordings/riverside-video-cue-map.md)
 for the calculated 108-BPM section start times, evidence status, and
