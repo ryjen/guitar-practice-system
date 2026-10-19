@@ -172,6 +172,43 @@ class PerformanceOverrideTests(unittest.TestCase):
         self.assertNotIn("maximum", drum_step)
         self.assertNotIn("maximum", bass_step)
 
+    def test_override_bar_129_valid_when_section_is_longer_than_128(self) -> None:
+        # Runtime derives the bar bound from each section, not a constant.
+        manifest = copy.deepcopy(MANIFEST)
+        long_section = manifest["sections"][0]
+        long_section["bars"] = 129
+        long_section["chords"] = ["G7"] * 129
+        long_section["drum_fills"] = [
+            {
+                "bar": 129,
+                "hits": [{"instrument": "low_tom", "step": 7, "velocity": 90}],
+            }
+        ]
+        long_section["bass_riffs"] = [
+            {"bar": 129, "notes": [{"step": 0, "offset": 0}]}
+        ]
+        parsed_groove, values = _parsed(manifest)
+        self.assertIsNotNone(parsed_groove)
+        self.assertIn(128, values.drum_fills)
+        self.assertIn(128, values.bass_riffs)
+        backing.validate_manifest(manifest, CATALOG)
+
+        schema = json.loads(
+            (ROOT / "contracts/backing-tracks/backing-track-spec.schema.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        for role in ("drum_fills", "bass_riffs"):
+            bar = schema["$defs"]["section"]["properties"][role]["items"]["properties"]["bar"]
+            self.assertEqual(1, bar["minimum"])
+            self.assertNotIn("maximum", bar)
+
+        rejected = copy.deepcopy(manifest)
+        rejected["sections"][0]["bars"] = 128
+        rejected["sections"][0]["chords"] = ["G7"] * 128
+        with self.assertRaisesRegex(midi.ManifestError, "section.drum_fills.bar"):
+            backing.validate_manifest(rejected, CATALOG)
+
     def test_rejects_missing_groove_and_bass_roles(self) -> None:
         missing_groove = copy.deepcopy(MANIFEST)
         missing_groove["tracks"][0].pop("groove_preset")
