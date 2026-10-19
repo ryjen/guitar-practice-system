@@ -162,7 +162,7 @@
               "bar": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 128
+                "description": "1-based section-local bar number; upper bound equals section.bars and is enforced by the deterministic manifest parser."
               },
               "replace": {
                 "type": "array",
@@ -245,7 +245,7 @@
               "bar": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 128
+                "description": "1-based section-local bar number; upper bound equals section.bars and is enforced by the deterministic manifest parser."
               },
               "notes": {
                 "type": "array",
