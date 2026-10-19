@@ -5,11 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from guitar_practice.application.generation import DEFAULT_GROOVE_CATALOG
 from guitar_practice.application.ports import BinaryArtifactStore, JsonDocumentStore
 from guitar_practice.domain import backing, midi
-
-
-DEFAULT_GROOVE_CATALOG = "catalogs/grooves/catalog.json"
 
 
 def render_canonical(
