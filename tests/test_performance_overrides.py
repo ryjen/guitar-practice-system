@@ -24,32 +24,27 @@ def _parsed(manifest: dict = MANIFEST) -> tuple[groove.GrooveSpec, performance.P
 class PerformanceOverrideTests(unittest.TestCase):
     def test_section_indices_are_musical_bars_and_not_count_in(self) -> None:
         _, value = _parsed()
-        expected_drums = []
-        expected_bass = []
+        expected_drums = set()
+        expected_bass = set()
         offset = 0
         for section in MANIFEST["sections"]:
-            if "RIFF" in section["name"]:
-                drum_bars, bass_bars = (1, 4, 7, 8), (1, 7)
-            elif "SOLO" in section["name"]:
-                drum_bars, bass_bars = (1, 2, 4, 6, 8, 11, 12), (8, 12)
-            else:
-                drum_bars, bass_bars = (1, 4, 8, 11, 12), (8, 12)
-            expected_drums.extend(offset + bar - 1 for bar in drum_bars)
-            expected_bass.extend(offset + bar - 1 for bar in bass_bars)
+            expected_drums.update(offset + fill["bar"] - 1 for fill in section["drum_fills"])
+            expected_bass.update(offset + riff["bar"] - 1 for riff in section["bass_riffs"])
             offset += section["bars"]
-        self.assertEqual(set(expected_drums), set(value.drum_fills))
-        self.assertEqual(set(expected_bass), set(value.bass_riffs))
-        self.assertGreaterEqual(len(value.drum_fills), 25)
+        self.assertEqual(expected_drums, set(value.drum_fills))
+        self.assertEqual(expected_bass, set(value.bass_riffs))
+        self.assertEqual(0, min(expected_drums))
+        self.assertEqual(67, max(expected_drums))
 
     def test_sparse_production_pocket_and_fill_density(self) -> None:
         groove_config = MANIFEST["tracks"][0]["groove"]
         self.assertEqual([0, 4], groove_config["instruments"]["kick"]["steps"])
         self.assertLessEqual(groove_config["swing"], 0.25)
         self.assertLessEqual(groove_config["instruments"]["closed_hat"]["velocity"], 55)
-        self.assertEqual(33, sum(len(s["drum_fills"]) for s in MANIFEST["sections"]))
-        self.assertEqual(14, sum(len(s["bass_riffs"]) for s in MANIFEST["sections"]))
+        self.assertEqual(44, sum(len(s["drum_fills"]) for s in MANIFEST["sections"]))
+        self.assertEqual(37, sum(len(s["bass_riffs"]) for s in MANIFEST["sections"]))
         self.assertEqual(
-            35,
+            104,
             sum(
                 len(item["notes"])
                 for section in MANIFEST["sections"]
@@ -61,6 +56,7 @@ class PerformanceOverrideTests(unittest.TestCase):
                 for item in section["bass_riffs"]),
             3,
         )
+        self.assertIn("seed 1082026", MANIFEST["provenance"]["notes"])
 
     def test_riff_vamps_and_blues_verses_are_distinct_sections(self) -> None:
         lengths = [section["bars"] for section in MANIFEST["sections"]]
@@ -73,14 +69,97 @@ class PerformanceOverrideTests(unittest.TestCase):
         self.assertEqual(["G7", "C7", "D7"], [verse[0], verse[4], verse[8]])
         self.assertIn("not an independently verified transcription", MANIFEST["provenance"]["notes"])
 
-    def test_blues_verses_have_distinct_bass_responses(self) -> None:
+    def test_blues_verses_have_quarter_note_pickups_and_answers(self) -> None:
         _, overrides = _parsed()
-        self.assertEqual([15, 19], [bar for bar in sorted(overrides.bass_riffs) if 8 <= bar < 20])
-        self.assertEqual([35, 39], [bar for bar in sorted(overrides.bass_riffs) if 28 <= bar < 40])
-        self.assertEqual([55, 59], [bar for bar in sorted(overrides.bass_riffs) if 48 <= bar < 60])
+        self.assertEqual(
+            [11, 12, 13, 14, 15, 16, 17, 19],
+            [bar for bar in sorted(overrides.bass_riffs) if 8 <= bar < 20],
+        )
+        self.assertEqual(
+            [29, 31, 33, 35, 36, 37, 39],
+            [bar for bar in sorted(overrides.bass_riffs) if 28 <= bar < 40],
+        )
+        self.assertEqual(
+            [51, 52, 53, 54, 55, 56, 57, 59],
+            [bar for bar in sorted(overrides.bass_riffs) if 48 <= bar < 60],
+        )
+        for bar in (11, 12, 13, 14, 16, 29, 31, 33, 36, 51, 52, 53, 54, 56):
+            self.assertEqual({0, 4, 6} if len(overrides.bass_riffs[bar]) == 3 and overrides.bass_riffs[bar][-1].step==6 else {0,2,4}, {n.step for n in overrides.bass_riffs[bar]})
         self.assertNotEqual(overrides.bass_riffs[15], overrides.bass_riffs[19])
-        self.assertEqual(2, len(overrides.bass_riffs[15]))
-        self.assertEqual(3, len(overrides.bass_riffs[19]))
+
+    def test_quarter_note_double_drum_accents_preserve_steady_backbeat(self) -> None:
+        spec, parsed = _parsed()
+        note_numbers = groove.GENERAL_MIDI_DRUMS
+        bars_with_doubles = 0
+        for bar, fill in parsed.drum_fills.items():
+            quarter_accents = [
+                hit for hit in fill.hits
+                if hit.note in {note_numbers["kick"], note_numbers["snare"]}
+                and hit.tick in (0, 480, 960, 1440)
+            ]
+            if not quarter_accents:
+                continue
+            bars_with_doubles += 1
+            baseline = groove.render_bar(
+                spec, bar_index=bar, meter=MANIFEST["meter"],
+                bar_ticks=1920, tempo_bpm=108,
+            )
+            combined = performance.apply_drum_fill(baseline, fill)
+            for accent in quarter_accents:
+                # A second kick/snare on an adjacent quarter pairs with the
+                # existing groove pulse, rather than replacing the backbeat.
+                neighbor = (
+                    accent.tick - 480 if accent.tick in (480, 1440)
+                    else accent.tick + 480
+                )
+                self.assertTrue(
+                    any(
+                        hit.note == accent.note
+                        and abs(hit.tick - neighbor) <= 12
+                        for hit in combined
+                    ),
+                    msg=f"no neighboring quarter for bar {bar + 1}",
+                )
+        self.assertGreaterEqual(bars_with_doubles, 10)
+
+    def test_chromatic_quarter_pickups_resolve_at_next_chord_root(self) -> None:
+        spec, _ = _parsed()
+        sections = [
+            section for section in MANIFEST["sections"]
+            if section["name"] in ("VERSE-1", "VERSE-2", "SOLO-BLUES")
+        ]
+        verified = 0
+        for section in sections:
+            riff_by_bar = {entry["bar"]: entry["notes"] for entry in section["bass_riffs"]}
+            for bar, notes in riff_by_bar.items():
+                if bar >= section["bars"]:
+                    continue
+                chord = section["chords"][bar - 1]
+                next_chord = section["chords"][bar]
+                if chord == next_chord:
+                    continue
+                pickup = next((note for note in notes if note["step"] == 6), None)
+                if pickup is None:
+                    continue
+                # The beat-4 note is a chromatic approach above/below the
+                # NEXT chord's bass root, not a random out-of-key jump.
+                position = midi.chord_notes(chord)[0] - 12 + pickup["offset"]
+                next_root = midi.chord_notes(next_chord)[0] - 12
+                self.assertEqual(1, abs(position - next_root))
+                realized = performance.render_bass_riff(
+                    tuple(performance.RiffNote(
+                        step=note["step"],
+                        offset=note["offset"],
+                        velocity=note.get("velocity"),
+                    ) for note in notes),
+                    chord=chord, groove_spec=spec,
+                    meter=MANIFEST["meter"], bar_ticks=1920,
+                    base_velocity=82,
+                )
+                self.assertEqual(1440, realized[-1].tick)
+                self.assertLessEqual(realized[-1].tick + realized[-1].duration, 1920)
+                verified += 1
+        self.assertGreaterEqual(verified, 6)
 
     def test_fill_replaces_hats_but_preserves_kick_and_snare(self) -> None:
         spec, value = _parsed()

@@ -4,6 +4,10 @@
 **Reference:** Led Zeppelin, BBC Maida Vale recording, 24 June 1969; 1990 promo uses that performance.  
 **Working key / meter / tempo:** G, 4/4, 108 quarter-note BPM. Guitar reference is often played in open G (DGDGBD), but the MIDI backing does not impose a guitar tuning.  
 **Backline priority:** separately editable drums and bass; live guitar and vocals omitted.
+**Variation revision:** occasional lead-in/lead-out quarter-note bass movement and
+quarter-beat drum doubles are seeded and committed in the manifest, so section
+timestamps do not change and the track can be overdubbed repeatedly.
+This is original accompaniment movement, not a transcription.
 
 ## Verified structural observations versus unverified bar counts
 
