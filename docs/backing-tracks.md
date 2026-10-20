@@ -205,7 +205,7 @@ performance audio or copying artist-specific recordings.
   manifest. Import MIDI into REAPER or GarageBand to select drum/bass
   instruments and refine the mix.
 
-Original example: [Riverside G/108 blues-rock video bed](../backing-tracks/riverside-blues-video/manifest.json),
+Original example: [Riverside G/92 blues-rock video bed](../backing-tracks/riverside-blues-video/manifest.json),
 with seven named sections (8-bar G riff vamps alternating with 12-bar
 blues verse/solo sections), a dry drum/bass arrangement, tom fills, and
 chord-relative bass turnarounds. These section lengths are **original video
@@ -215,28 +215,30 @@ manifest only represents one chord per bar; brief passing harmonies are
 instead implied by authored bass motion. Exact performance alignment
 requires measure-by-measure listening or an authorized score/Score IR import.
 
-**Riverside production revision:** the G/108 source uses a localized,
-gently swung (not full triplet-bounce) drum groove, a heavy two-beat kick
-anchor, quieter hats, 33 distinct section-level fill placements, and sparse
-chord-root bass with only 14 authored two- or three-note response bars.
-The rhythm section is intended to leave the main syncopation to the live
-guitar and vocal. These values define the original shortened performance
-arrangement and do not claim a transcription of a commercial recording.
+**Riverside production revision:** the G/92 source keeps the steady
+two-anchor kick/snare backbeat, quieter hats, 44 section-local drum
+fill placements, and 37 brief bass-riff bars. The variation positions
+were selected with seed `1082026` and committed as explicit notes;
+repeated runs play exactly the same accompaniment.
 
-**Quarter-note pickup/double-beat variant:** the Riverside manifest now
-contains occasional bass notes on beats 2/4, with chromatic beat-4
-approaches into changed chord roots and short beat-2 answers after changes.
-Selected drum bars add a second adjacent quarter-note kick or soft snare
-ghost accent alongside the stable backbeat. These positions were selected
-once with pseudorandom seed `1082026` and stored as explicit section
-overrides, rather than introducing nondeterministic output into `guitarctl`.
-Repeated renders and video takes therefore retain the same phrasing, markers
-and sync. All accents use the existing MIDI instrument/step contract;
-the regular count-in is untouched. Adjust the committed note steps or
-velocities to customize the recording without changing a shared preset.
+**Late-triplet upbeat variation:** earlier straight-quarter drum doubles
+were shifted to swung eighth-note upbeats. With an eighth-note step grid,
+`swing=1/3` delays odd step indices to about **two thirds of a quarter
+beat**, i.e. the third eighth-note-triplet position. Kick follow-up at
+step 1/5 and snare ghost at step 3 are therefore distinguishable from
+main downbeats at steps 0/4 and backbeats at 2/6. Short bass anticipations
+similarly land on offbeat steps 3/5 (and occasional step 7), approaching
+the next chord by a semitone when applicable. These are **triplet-feel
+offbeats**, not three-note triplet rolls. The MIDI maintains the
+two-bar count-in and the original shortened seven-section form.
+
+**Reference tempo:** 92 BPM is an approximate constant-tempo rehearsal
+choice informed by independent estimates for the BBC recording
+(91.4–92 BPM), not a verified bar-by-bar tempo map.
+This original arrangement is not an exact transcription.
 
 See the [Riverside video cue map and reference audit](recordings/riverside-video-cue-map.md)
-for the calculated 108-BPM section start times, evidence status, and
+for the calculated 92-BPM section start times, evidence status, and
 REAPER reference-audition checklist. Treat the beat grid as our original
 shortened arrangement, not verified timestamps from Zeppelin's recording.
 
@@ -247,7 +249,7 @@ nix develop
 guitarctl backing generate
 ```
 
-The output is `generated/backing-tracks/riverside-blues-video-g-108.mid`.
+The output is `generated/backing-tracks/riverside-blues-video-g-92.mid`.
 Record guitar and vocals separately so the MIDI's drum and bass roles remain
 mixable and the video can be synchronized to the fixed backing.
 
