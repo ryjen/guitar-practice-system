@@ -119,14 +119,42 @@ def parse(
                     hits = []
                     seen = set()
                     for item in _items(obj.get("hits"), "drum_fills.hits"):
-                        h = _object(item, "drum fill hit", frozenset({"instrument", "step", "velocity"}))
+                        h = _object(
+                            item,
+                            "drum fill hit",
+                            frozenset({"instrument", "step", "triplet_step", "velocity"}),
+                        )
                         note = _instrument(h.get("instrument"), "drum_fills.hits.instrument")
-                        step = _integer(h.get("step"), "drum_fills.hits.step", 0, steps - 1)
-                        velocity = _integer(h.get("velocity"), "drum_fills.hits.velocity", MIN_VELOCITY, MAX_VELOCITY)
-                        if (note, step) in seen:
-                            raise midi.ManifestError("duplicate drum hit at one instrument/step")
-                        seen.add((note, step))
-                        hits.append(groove.GrooveHit(_tick(step, steps=steps, bar_ticks=bar_ticks, swing=groove_spec.swing), note, velocity))
+                        if ("step" in h) == ("triplet_step" in h):
+                            raise midi.ManifestError(
+                                "drum_fills.hits requires exactly one of step or triplet_step"
+                            )
+                        if "triplet_step" in h:
+                            triplet_step = _integer(
+                                h["triplet_step"], "drum_fills.hits.triplet_step",
+                                0, meter[0] * 3 - 1,
+                            )
+                            if beat_ticks % 3:
+                                raise midi.ManifestError(
+                                    "triplet timing cannot align with MIDI resolution"
+                                )
+                            tick = triplet_step * (beat_ticks // 3)
+                        else:
+                            step = _integer(h["step"], "drum_fills.hits.step", 0, steps - 1)
+                            tick = _tick(
+                                step, steps=steps, bar_ticks=bar_ticks,
+                                swing=groove_spec.swing,
+                            )
+                        velocity = _integer(
+                            h.get("velocity"), "drum_fills.hits.velocity",
+                            MIN_VELOCITY, MAX_VELOCITY,
+                        )
+                        if (note, tick) in seen:
+                            raise midi.ManifestError(
+                                "duplicate drum hit at one instrument/tick"
+                            )
+                        seen.add((note, tick))
+                        hits.append(groove.GrooveHit(tick, note, velocity))
                     fills[absolute] = DrumFill(frozenset(replace_notes), tuple(hits))
                 else:
                     notes = []

@@ -196,6 +196,14 @@ performance audio or copying artist-specific recordings.
   `velocity` is optional and `step` uses the selected groove's subdivision.
   Authored riffs replace, rather than double, the normal bass accompaniment
   on that bar.
+- Drum-fill hits normally use `step`, the groove-subdivision grid. For
+  exact three-part drum figures a hit may instead use `triplet_step`:
+  0–11 in 4/4, counted as 3 slots per notated beat. These hits **ignore
+  swing** and land exactly one-third of a beat apart (160 MIDI ticks in
+  4/4 at 480 PPQN), allowing real hand/foot triplets rather than swung
+  eighth-note approximations. Provide exactly one of `step` and
+  `triplet_step`. Duplicate kit-voice hits at the same resulting tick
+  are invalid, even if they used different input grids.
 - Drum and bass override timing uses the active groove's swing. The
   `count_in_bars` are excluded from section indexing; global accompaniment
   mutes still take precedence. Out-of-range steps, duplicate bars, duplicate
@@ -252,6 +260,24 @@ guitarctl backing generate
 The output is `generated/backing-tracks/riverside-blues-video-g-92.mid`.
 Record guitar and vocals separately so the MIDI's drum and bass roles remain
 mixable and the video can be synchronized to the fixed backing.
+
+### Heavy blues-rock rhythm-section alternate
+
+The independent [Riverside heavy-rhythm G/92 manifest](../backing-tracks/riverside-heavy-rhythm/manifest.json)
+is an original alternate rhythm section on the same 68-bar G/92 video form.
+Compared with the quieter baseline it uses a larger kick/snare dynamic range,
+a low-volume hat, soft snare ghost notes, intentional offbeat foot answers,
+and exact three-part tom/tom/kick triplets at section boundaries. The bass
+moves between grounded roots, minor-third/fifth/flat-seven colors, octave
+answers and restrained chromatic approaches into chord changes. Individual
+parts remain editable in the DAW; the reference song arrangement is not
+claimed to be measure-for-measure accurate.
+
+Regenerate with `guitarctl backing generate`, producing
+`generated/backing-tracks/riverside-heavy-rhythm-g-92.mid` alongside the
+existing `riverside-blues-video-g-92.mid`. Drum and bass tracks contain
+only original authored notes; they do not reproduce any Led Zeppelin
+performance, sample, or published tab.
 
 ## Trade-offs
 
