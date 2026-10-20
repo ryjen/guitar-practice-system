@@ -223,6 +223,18 @@ The rhythm section is intended to leave the main syncopation to the live
 guitar and vocal. These values define the original shortened performance
 arrangement and do not claim a transcription of a commercial recording.
 
+**Quarter-note pickup/double-beat variant:** the Riverside manifest now
+contains occasional bass notes on beats 2/4, with chromatic beat-4
+approaches into changed chord roots and short beat-2 answers after changes.
+Selected drum bars add a second adjacent quarter-note kick or soft snare
+ghost accent alongside the stable backbeat. These positions were selected
+once with pseudorandom seed `1082026` and stored as explicit section
+overrides, rather than introducing nondeterministic output into `guitarctl`.
+Repeated renders and video takes therefore retain the same phrasing, markers
+and sync. All accents use the existing MIDI instrument/step contract;
+the regular count-in is untouched. Adjust the committed note steps or
+velocities to customize the recording without changing a shared preset.
+
 See the [Riverside video cue map and reference audit](recordings/riverside-video-cue-map.md)
 for the calculated 108-BPM section start times, evidence status, and
 REAPER reference-audition checklist. Treat the beat grid as our original
