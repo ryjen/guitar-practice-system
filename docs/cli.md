@@ -45,10 +45,10 @@ guitarctl midi validate \
 # Enhanced backing manifests preserve authored fills and bass riffs:
 guitarctl midi generate \
   backing-tracks/riverside-blues-video/manifest.json \
-  generated/backing-tracks/riverside-blues-video-g-108.mid
+  generated/backing-tracks/riverside-blues-video-g-92.mid
 guitarctl midi validate \
   backing-tracks/riverside-blues-video/manifest.json \
-  generated/backing-tracks/riverside-blues-video-g-108.mid
+  generated/backing-tracks/riverside-blues-video-g-92.mid
 guitarctl midi generate-exercises
 
 guitarctl score init --title "Blue Thing" > blue-thing.score.json

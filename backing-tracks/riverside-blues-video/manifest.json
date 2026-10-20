@@ -1,6 +1,6 @@
 {
-  "id": "riverside-blues-video-g-108",
-  "title": "Riverside Blues — Original Riff-and-Verse Blues-Rock Video Bed in G",
+  "id": "riverside-blues-video-g-92",
+  "title": "Riverside Blues — Original Offbeat Triplet-Feel Video Bed in G",
   "purpose": "Original video backing for a G blues-rock performance with heavy swung drums, varied phrase-end fills and deliberately sparse bass. Not a transcription of any recorded arrangement.",
   "linked_techniques": [
     "blues-phrasing",
@@ -8,12 +8,12 @@
   ],
   "linked_songs": [],
   "key_signature": "G",
-  "tempo_bpm": 108,
+  "tempo_bpm": 92,
   "meter": [
     4,
     4
   ],
-  "feel": "Heavy G blues-rock with lightly swung eighths; reproducibly scattered quarter-beat drum doubles and melodic bass lead-in/lead-out transitions.",
+  "feel": "G blues-rock pocket at approximately BBC reference tempo, shuffled late-eighth (triplet-feel) pickups and differentiated offbeat kick/snare doubles.",
   "count_in_bars": 2,
   "loop": {
     "start_marker": "INTRO-RIFF",
@@ -51,7 +51,7 @@
           "hits": [
             {
               "instrument": "kick",
-              "step": 2,
+              "step": 1,
               "velocity": 87
             }
           ]
@@ -62,7 +62,7 @@
           "hits": [
             {
               "instrument": "kick",
-              "step": 2,
+              "step": 1,
               "velocity": 76
             },
             {
@@ -83,7 +83,7 @@
           "hits": [
             {
               "instrument": "snare",
-              "step": 4,
+              "step": 3,
               "velocity": 62
             }
           ]
@@ -166,12 +166,12 @@
               "velocity": 85
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 78
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": -2,
               "velocity": 69
             }
@@ -234,7 +234,7 @@
           "hits": [
             {
               "instrument": "kick",
-              "step": 2,
+              "step": 1,
               "velocity": 86
             }
           ]
@@ -247,7 +247,7 @@
           "hits": [
             {
               "instrument": "kick",
-              "step": 2,
+              "step": 1,
               "velocity": 76
             },
             {
@@ -275,7 +275,7 @@
           "hits": [
             {
               "instrument": "kick",
-              "step": 2,
+              "step": 1,
               "velocity": 77
             },
             {
@@ -353,12 +353,12 @@
               "velocity": 88
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 79
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": -6,
               "velocity": 73
             }
@@ -373,12 +373,12 @@
               "velocity": 85
             },
             {
-              "step": 2,
+              "step": 3,
               "offset": 7,
               "velocity": 75
             },
             {
-              "step": 4,
+              "step": 5,
               "offset": 0,
               "velocity": 76
             }
@@ -393,12 +393,12 @@
               "velocity": 88
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 79
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": 6,
               "velocity": 77
             }
@@ -413,12 +413,12 @@
               "velocity": 85
             },
             {
-              "step": 2,
+              "step": 3,
               "offset": 7,
               "velocity": 77
             },
             {
-              "step": 4,
+              "step": 5,
               "offset": 0,
               "velocity": 76
             }
@@ -448,13 +448,13 @@
               "velocity": 85
             },
             {
-              "step": 2,
+              "step": 3,
               "offset": 7,
               "velocity": 73
             },
             {
-              "step": 4,
-              "offset": 0,
+              "step": 5,
+              "offset": -1,
               "velocity": 76
             }
           ]
@@ -468,13 +468,13 @@
               "velocity": 85
             },
             {
-              "step": 2,
+              "step": 3,
               "offset": 7,
               "velocity": 76
             },
             {
-              "step": 4,
-              "offset": 0,
+              "step": 5,
+              "offset": 6,
               "velocity": 76
             }
           ]
@@ -532,7 +532,7 @@
           "hits": [
             {
               "instrument": "kick",
-              "step": 6,
+              "step": 5,
               "velocity": 78
             }
           ]
@@ -559,7 +559,7 @@
           "hits": [
             {
               "instrument": "snare",
-              "step": 4,
+              "step": 3,
               "velocity": 61
             }
           ]
@@ -642,12 +642,12 @@
               "velocity": 85
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 78
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": -1,
               "velocity": 69
             }
@@ -662,12 +662,12 @@
               "velocity": 85
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 78
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": -1,
               "velocity": 69
             }
@@ -730,12 +730,12 @@
           "hits": [
             {
               "instrument": "kick",
-              "step": 2,
+              "step": 1,
               "velocity": 73
             },
             {
               "instrument": "snare",
-              "step": 4,
+              "step": 3,
               "velocity": 49
             }
           ]
@@ -792,7 +792,7 @@
           "hits": [
             {
               "instrument": "snare",
-              "step": 4,
+              "step": 3,
               "velocity": 63
             }
           ]
@@ -855,12 +855,12 @@
               "velocity": 85
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 78
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": -1,
               "velocity": 69
             }
@@ -875,12 +875,12 @@
               "velocity": 88
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 79
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": -6,
               "velocity": 73
             }
@@ -895,12 +895,12 @@
               "velocity": 88
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 79
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": 6,
               "velocity": 74
             }
@@ -930,12 +930,12 @@
               "velocity": 88
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 79
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": -1,
               "velocity": 76
             }
@@ -950,12 +950,12 @@
               "velocity": 88
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 79
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": 6,
               "velocity": 76
             }
@@ -1014,7 +1014,7 @@
           "hits": [
             {
               "instrument": "kick",
-              "step": 2,
+              "step": 1,
               "velocity": 80
             }
           ]
@@ -1025,7 +1025,7 @@
           "hits": [
             {
               "instrument": "kick",
-              "step": 2,
+              "step": 1,
               "velocity": 75
             },
             {
@@ -1118,12 +1118,12 @@
               "velocity": 85
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 78
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": -1,
               "velocity": 69
             }
@@ -1204,7 +1204,7 @@
           "hits": [
             {
               "instrument": "kick",
-              "step": 2,
+              "step": 1,
               "velocity": 85
             },
             {
@@ -1214,7 +1214,7 @@
             },
             {
               "instrument": "kick",
-              "step": 6,
+              "step": 5,
               "velocity": 75
             },
             {
@@ -1251,12 +1251,12 @@
           "hits": [
             {
               "instrument": "snare",
-              "step": 4,
+              "step": 3,
               "velocity": 59
             },
             {
               "instrument": "kick",
-              "step": 6,
+              "step": 5,
               "velocity": 81
             }
           ]
@@ -1290,7 +1290,7 @@
           "hits": [
             {
               "instrument": "kick",
-              "step": 6,
+              "step": 5,
               "velocity": 80
             }
           ]
@@ -1353,12 +1353,12 @@
               "velocity": 88
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 79
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": -6,
               "velocity": 76
             }
@@ -1373,12 +1373,12 @@
               "velocity": 85
             },
             {
-              "step": 2,
+              "step": 3,
               "offset": 7,
               "velocity": 75
             },
             {
-              "step": 4,
+              "step": 5,
               "offset": 0,
               "velocity": 76
             }
@@ -1393,12 +1393,12 @@
               "velocity": 88
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 79
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": 6,
               "velocity": 77
             }
@@ -1413,12 +1413,12 @@
               "velocity": 85
             },
             {
-              "step": 2,
+              "step": 3,
               "offset": 7,
               "velocity": 78
             },
             {
-              "step": 4,
+              "step": 5,
               "offset": 0,
               "velocity": 76
             }
@@ -1448,12 +1448,12 @@
               "velocity": 88
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 79
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": -1,
               "velocity": 73
             }
@@ -1468,13 +1468,13 @@
               "velocity": 85
             },
             {
-              "step": 2,
+              "step": 3,
               "offset": 7,
               "velocity": 74
             },
             {
-              "step": 4,
-              "offset": 0,
+              "step": 5,
+              "offset": 6,
               "velocity": 76
             }
           ]
@@ -1548,7 +1548,7 @@
           "hits": [
             {
               "instrument": "snare",
-              "step": 4,
+              "step": 3,
               "velocity": 55
             }
           ]
@@ -1631,12 +1631,12 @@
               "velocity": 85
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 78
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": -2,
               "velocity": 69
             }
@@ -1651,12 +1651,12 @@
               "velocity": 85
             },
             {
-              "step": 4,
+              "step": 3,
               "offset": 7,
               "velocity": 78
             },
             {
-              "step": 6,
+              "step": 5,
               "offset": -2,
               "velocity": 69
             }
@@ -1691,10 +1691,10 @@
       "role": "drums",
       "channel": 9,
       "velocity": 98,
-      "instrument_intent": "Heavy blues-rock kick/snare with restrained quarter-beat double accents on selected bars, 2-beat anchors, ghost-note answers and varied tom fills.",
+      "instrument_intent": "Heavy G blues-rock at 92 BPM, stable onbeat kick/snare and softly accented late-swung eighths immediately following selected quarter-note beats. Not a straight double-beat on quarter pulses.",
       "groove": {
         "subdivision": 8,
-        "swing": 0.2,
+        "swing": 0.3333333333333333,
         "humanize_ms": 8,
         "velocity_variance": 5,
         "seed": 1083,
@@ -1765,15 +1765,15 @@
         "gate_percent": 88,
         "follow_kick_velocity": true
       },
-      "instrument_intent": "Sparse electric bass anchored on beats 1 and 3, with occasional quarter-beat pickup/lead-out notes approaching the next chord root and short answering notes after changes."
+      "instrument_intent": "Sparse root/fifth bass with selected swung upbeat chromatic lead-ins and answering notes between quarter beats; avoids constant eighth-note walking."
     }
   ],
   "provenance": {
     "type": "original",
-    "notes": "Original shortened video arrangement inspired by the general riff/vamp-versus-blues-form contrast. 8-bar riff and 12-bar verse units are editable arranging choices, not an independently verified transcription of the 1969 Led Zeppelin performance. No commercial riff or audio reproduced. Verse bass response cells are original chord-root-relative practice phrases and are not derived from a commercial transcription. 2026-10-19 production revision reduces kicks and bass to a two-beat pocket, reduces swing and hat prominence, and adds distinctive fill pickups rather than the repetitive turnarounds. All authored notes are original. Quarter-note pickup/answer and drum double-beat placements were authored with stable pseudorandom seed 1082026; committed notes are the complete deterministic source, not regenerated randomly at each playback."
+    "notes": "Original shortened video arrangement inspired by the general riff/vamp-versus-blues-form contrast. 8-bar riff and 12-bar verse units are editable arranging choices, not an independently verified transcription of the 1969 Led Zeppelin performance. No commercial riff or audio reproduced. Verse bass response cells are original chord-root-relative practice phrases and are not derived from a commercial transcription. 2026-10-19 production revision reduces kicks and bass to a two-beat pocket, reduces swing and hat prominence, and adds distinctive fill pickups rather than the repetitive turnarounds. All authored notes are original. Quarter-note pickup/answer and drum double-beat placements were authored with stable pseudorandom seed 1082026; committed notes are the complete deterministic source, not regenerated randomly at each playback. 2026-10-19 revision adjusts the previous seed-chosen straight quarter doubles into late-triplet-eighth offbeats (1,3,5,7 on swung eighth grid), preserves base backbeat and original form, and lowers fixed working tempo from 108 to approximately 92 BPM based on 1969 BBC recording beat analyses (not a master-tape tempo map)."
   },
   "outputs": {
-    "midi": "generated/backing-tracks/riverside-blues-video-g-108.mid",
+    "midi": "generated/backing-tracks/riverside-blues-video-g-92.mid",
     "audio": null,
     "daw_project": null
   }
