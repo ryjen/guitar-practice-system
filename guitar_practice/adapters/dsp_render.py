@@ -49,6 +49,9 @@ class SubprocessDspAudioRenderer:
             raise DspAudioRenderError(
                 "DSP engine unavailable: build ryjen/dsp and use --engine /path/to/dsp"
             )
+        # which() may return a relative candidate (including relative PATH
+        # entries). Fix its identity before subprocess cwd changes to workspace.
+        executable = str(Path(executable).resolve(strict=True))
 
         with tempfile.TemporaryDirectory(prefix="guitarctl-dsp-") as directory:
             argv = [
