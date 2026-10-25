@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import io
+import os
 import json
 import sys
 import tempfile
@@ -122,6 +123,22 @@ class DspRenderCliTests(unittest.TestCase):
             self.assertIn("escapes workspace", error)
         finally:
             outside.unlink(missing_ok=True)
+
+    def test_relative_engine_path_is_anchored_before_workspace_change(self) -> None:
+        previous = Path.cwd()
+        try:
+            os.chdir(self.workspace.parent)
+            relative = f"./{self.workspace.name}/stub-dsp"
+            code, out, error = self.cli(
+                "render", "input.wav", "--output", "relative.wav",
+                "--engine", relative,
+            )
+        finally:
+            os.chdir(previous)
+        self.assertEqual(0, code, error)
+        self.assertEqual("", error)
+        self.assertEqual("relative.wav", json.loads(out)["output"])
+        self.assertTrue((self.workspace / "relative.wav").is_file())
 
     def test_missing_engine_is_explicit_unavailable(self) -> None:
         code, out, error = self.cli(
