@@ -417,3 +417,36 @@ guitarctl dsp preset canonicalize contracts/dsp/fixtures/jazz-blues-preset-v1.js
 Validation rejects unknown fields, unknown parameter IDs, unsupported versions, and out-of-range controls. Canonicalization emits the exact byte-stable v1 wire JSON with no trailing newline.
 
 The v1 contract, parameter semantics, scaled-integer representation, and independent consumer boundary with **ryjen/dsp#7** are documented in **docs/dsp-preset-contract.md**. There is intentionally no device/send command in v1.
+
+## Render a recorded WAV using portable DSP
+
+The actual delay/tremolo processing lives in [ryjen/dsp](https://github.com/ryjen/dsp),
+which must be built separately. `guitarctl` is an optional, local-first
+orchestrator; it neither compiles nor embeds DSP algorithms.
+
+```bash
+# Build once from a checkout of ryjen/dsp:
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target dsp_render_cli
+
+# Invoke from Guitar Practice System (or installed guitarctl):
+guitarctl --workspace /path/to/recordings render guitar.wav \
+  --preset practice.preset \
+  --effects tremolo,delay \
+  --tremolo-depth 0.75 \
+  --output guitar-processed.wav \
+  --engine /path/to/dsp/build/dsp
+```
+
+The aliases `guitarctl render` and `guitarctl dsp render` accept the
+same options. Recording, preset and output paths are relative to the
+explicit `--workspace` and symlink-checked. The preset is first
+validated and canonicalized as frozen `guitar-dsp.preset` v1, then
+passed to the separate native executable. An existing output is not
+overwritten and missing engines fail with an availability error.
+Use `guitarctl render --help` to see all options.
+
+Supported input/output is little-endian RIFF WAV PCM16, mono or stereo,
+8–192 kHz, max 64 MiB PCM. This is an offline effect, **not** a
+realtime pedal or verified RC-3 file export; keep the existing
+`guitarctl drums export --target boss-rc3` path for drum loops.
