@@ -1,0 +1,68 @@
+name: Validate Native DSP Bridge
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/validate-dsp-integration.yml"
+      - "guitar_practice/adapters/dsp_render.py"
+      - "guitar_practice/application/dsp_render.py"
+      - "guitar_practice/interfaces/cli/dsp_handlers.py"
+      - "guitar_practice/interfaces/cli/commands.py"
+      - "guitar_practice/domain/dsp_preset.py"
+      - "contracts/dsp/**"
+      - "tests/test_dsp_real_binary_bridge.py"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/validate-dsp-integration.yml"
+      - "guitar_practice/adapters/dsp_render.py"
+      - "guitar_practice/application/dsp_render.py"
+      - "guitar_practice/interfaces/cli/dsp_handlers.py"
+      - "guitar_practice/interfaces/cli/commands.py"
+      - "guitar_practice/domain/dsp_preset.py"
+      - "contracts/dsp/**"
+      - "tests/test_dsp_real_binary_bridge.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-native-dsp-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bridge:
+    name: guitarctl → pinned DSP
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout guitarctl
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Checkout pinned DSP implementation
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ryjen/dsp
+          ref: 750f8801cf42a1815ac0a43ca400a89ede721182 # PR #32; replace with squash SHA after merge
+          path: .deps/dsp
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          github_access_token: ${{ github.token }}
+
+      - name: Build DSP from its pinned flake package
+        run: nix build ./.deps/dsp#dsp-render --no-write-lock-file --print-build-logs -o "$RUNNER_TEMP/dsp-render"
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+
+      - name: Exercise real guitarctl → DSP WAV contract
+        env:
+          DSP_RENDER_BINARY: ${{ runner.temp }}/dsp-render/bin/dsp
+        run: PYTHONPATH=. python -m unittest discover -s tests -p 'test_dsp_real_binary_bridge.py' -v
