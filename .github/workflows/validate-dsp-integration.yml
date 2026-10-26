@@ -45,7 +45,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ryjen/dsp
-          ref: 750f8801cf42a1815ac0a43ca400a89ede721182 # PR #32; replace with squash SHA after merge
+          ref: 6938e1c8995d7031a522b4c692f5075b0fc71b53 # DSP PR #32 merged package
           path: .deps/dsp
           persist-credentials: false
 
