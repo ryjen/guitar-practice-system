@@ -420,6 +420,24 @@ The v1 contract, parameter semantics, scaled-integer representation, and indepen
 
 ## Render a recorded WAV using portable DSP
 
+On NixOS or another machine with Nix, the easiest installation is:
+
+```bash
+nix profile install github:ryjen/dsp#dsp-render
+# Open a shell with the newly installed profile available on PATH.
+guitarctl --workspace /path/to/recordings render guitar.wav \
+  --output guitar-processed.wav --effects tremolo,delay
+```
+
+The DSP executable is an **independent** Nix package, not a
+`guitar-practice-system` source-tree dependency. The gated cross-repo
+integration CI builds the actual native DSP from immutable merge commit
+`6938e1c8995d7031a522b4c692f5075b0fc71b53`, rather than only
+mocking the subprocess interface. The pin is changed deliberately
+when a newer DSP release has passed its own checks.
+
+
+
 The actual delay/tremolo processing lives in [ryjen/dsp](https://github.com/ryjen/dsp),
 which must be built separately. `guitarctl` is an optional, local-first
 orchestrator; it neither compiles nor embeds DSP algorithms.
