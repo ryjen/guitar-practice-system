@@ -276,7 +276,10 @@ def _generate_groove_drum_track(
                     note=hit.note,
                     velocity=hit.velocity,
                     start=start + hit.tick,
-                    duration=note_duration,
+                    duration=(
+                        min(note_duration, hit.max_duration_ticks, bar_ticks - hit.tick)
+                        if hit.max_duration_ticks is not None else note_duration
+                    ),
                 )
             )
     return midi.track_bytes(events)
