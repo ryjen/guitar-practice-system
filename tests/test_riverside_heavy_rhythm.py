@@ -128,6 +128,58 @@ class HeavyRhythmTests(unittest.TestCase):
         self.assertEqual(2, len(hits["oneOf"]))
         self.assertIn("triplet_step", hits["properties"])
 
+    def test_triplet_note_off_precedes_next_bar_in_six_eight(self) -> None:
+        # Regression for the 6/8, subdivision-4 case: the native groove
+        # duration is 90 ticks, but exact beat triplets are 80 ticks apart.
+        from unittest.mock import patch
+
+        meter = [6, 8]
+        bar_ticks = 6 * (midi.TPQN // 2)
+        beat_ticks = midi.TPQN // 2
+        config = {
+            "subdivision": 4,
+            "count_in": "none",
+            "instruments": {"kick": {"steps": [0], "velocity": 96}},
+        }
+        spec = groove.parse_groove(config, meter=meter)
+        source = {
+            "meter": meter,
+            "sections": [
+                {"bars": 2, "drum_fills": [
+                    {"bar": 1, "replace": ["kick"], "hits": [
+                        {"instrument": "kick", "triplet_step": 16, "velocity": 90},
+                        {"instrument": "kick", "triplet_step": 17, "velocity": 100},
+                    ]}
+                ]},
+            ],
+        }
+        fills = performance.parse(source, groove_spec=spec, has_bass=False).drum_fills
+        self.assertEqual([80, 80], [hit.max_duration_ticks for hit in fills[0].hits])
+
+        with patch.object(midi, "note_events", wraps=midi.note_events) as emit:
+            track = backing._generate_groove_drum_track(
+                {"name": "Drums", "role": "drums", "groove": config},
+                total_bars=2,
+                count_in_bars=0,
+                meter=meter,
+                bar_ticks=bar_ticks,
+                beat_ticks=beat_ticks,
+                tempo_bpm=92,
+                muted_bars=set(),
+                drum_fills=fills,
+            )
+        self.assertTrue(track.startswith(b"MTrk"))
+        kick = groove.GENERAL_MIDI_DRUMS["kick"]
+        calls = [
+            (call.kwargs["start"], call.kwargs["duration"], call.kwargs["note"])
+            for call in emit.call_args_list
+        ]
+        self.assertIn((16 * 80, 80, kick), calls)
+        self.assertIn((17 * 80, 80, kick), calls)
+        # Subsequent ordinary groove notes retain the historical 90 ticks.
+        self.assertIn((bar_ticks, 90, kick), calls)
+        self.assertLessEqual(17 * 80 + 80, bar_ticks)
+
     def test_melodic_bass_answers_approach_changes_and_avoid_excess(self) -> None:
         spec = groove.parse_groove(
             ALTERNATE["tracks"][0]["groove"], meter=ALTERNATE["meter"]
