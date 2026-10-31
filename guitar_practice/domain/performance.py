@@ -154,7 +154,12 @@ def parse(
                                 "duplicate drum hit at one instrument/tick"
                             )
                         seen.add((note, tick))
-                        hits.append(groove.GrooveHit(tick, note, velocity))
+                        hits.append(
+                            groove.GrooveHit(
+                                tick, note, velocity,
+                                max_duration_ticks=(beat_ticks // 3 if "triplet_step" in h else None),
+                            )
+                        )
                     fills[absolute] = DrumFill(frozenset(replace_notes), tuple(hits))
                 else:
                     notes = []
