@@ -60,6 +60,9 @@ class GrooveHit:
     tick: int
     note: int
     velocity: int
+    # Optional maximum note length for authored subdivisions finer than the
+    # normal groove grid. Generated groove hits keep their historical duration.
+    max_duration_ticks: int | None = None
 
 
 def steps_per_bar(meter: list[int] | tuple[int, int], subdivision: int) -> int:
