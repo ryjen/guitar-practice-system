@@ -16,7 +16,7 @@ M1 practice/progression contracts, M2 evidence/assessment contracts, and the ini
 
 The previous engineering dependencies are complete: **#83/#89** established modal and common validation foundations; **#94/#97/#100** completed the stable package-native `guitarctl` migration; and **#108/#110–#114** established the canonical Score IR-derived import, notation, playback, and editing workflows; the older #109 draft was closed without remaining as a pending dependency. The deprecated scheduling v1 compatibility path remains deliberately isolated.
 
-The bounded **M5 music-artifact software baseline** now includes score-backed MIDI/RC-3 workflows, the independently conformed guitar-DSP preset v1 contract (**#152/#158**), and deterministic versioned release packaging (**#67**, PR #163). The release machinery is implemented, **but no versioned GitHub Release has been published**. Neither software completion nor reproducible MIDI establishes actual musical usefulness; M3 remains the controlling practice milestone.
+The bounded **M5 music-artifact software baseline** now includes score-backed MIDI/RC-3 workflows, the independently conformed guitar-DSP preset v1 contract (**#152/#158**), the offline PCM16 WAV effects renderer through separately packaged `ryjen/dsp` (**guitar PR #174 / DSP PRs #31–#32**), an exact-commit pinned real-binary integration check (**guitar PR #175**), and deterministic versioned release packaging (**#67**, PR #163). The release machinery is implemented, **but no versioned GitHub Release has been published**. Neither software completion nor reproducible MIDI establishes actual musical usefulness; M3 remains the controlling practice milestone.
 
 ## Near-term sequence
 
@@ -24,8 +24,8 @@ The bounded **M5 music-artifact software baseline** now includes score-backed MI
 2. Continue **#87** with the documented wah (**#5**) and E-Bow (**#6**) run sheets. Exercise evidence → assessment → explicit approval decision → scheduling at least once. Do not infer outcomes from unplayed run sheets.
 3. Reconcile recorded M3 friction under **#22** and the relevant technique issues. Expand seven-mode practical coverage (**#85**) only after validating the existing Dorian/Mixolydian examples by ear and in playing context.
 4. Keep optional bounded DSP measurement ingestion (**#162**) deferred until a real session identifies a measurement that cannot be captured adequately with the current manual evidence path.
-5. Reconcile completed-work documentation (**#164**) and review flake-first CI/runner trust and cost alignment (**#165**) independently of physical practice work. Preserve the existing verified checks until an equivalent replacement is proven.
-6. Decide whether to create the first versioned GitHub Release when a public distribution need exists. The tag-triggered release pipeline is ready; publication is an explicit follow-up, not an M3 prerequisite.
+5. Keep this roadmap and CLI documentation aligned with the merged Score IR, `guitarctl`, and independently packaged DSP rendering boundaries. Review flake-first CI/runner trust and cost alignment (**#165**) independently of physical practice work. Preserve existing verified checks until an equivalent replacement is proven.
+6. Qualify proposed Riverside heavy-rhythm alternates by deterministic MIDI tests **and** actual audition; automated tests alone do not qualify musical feel. For physical pedals, keep Daisy/Hothouse (**dsp #6**) and pi-Stomp LV2 (**dsp #26**) hardware gates separate from CI/cross-builds. Create the first versioned GitHub Release only when a public distribution need exists; publication is not an M3 prerequisite.
 
 ## Milestones
 
@@ -123,11 +123,16 @@ Implemented baseline includes:
 - canonical Score IR authoring, Guitar Pro/MusicXML import, deterministic MusicXML/MIDI export, guided editing, and bounded playback;
 - score-derived no-guitar backing and BOSS RC-3 drum-loop export;
 - independently validated `guitar-dsp.preset` v1 producer with a shared 199-byte fixture;
+- separately packaged native `dsp render` executable applying tremolo/delay to bounded PCM16 WAV; `guitarctl render` delegates via a workspace-scoped subprocess adapter without importing DSP source code;
+- a pinned cross-repository CI contract test invoking the real DSP executable to verify preset validation, effect ordering, dry pass-through, and refusal to overwrite outputs (PR #175);
 - deterministic versioned bundle preparation and verification, with tag-triggered publication automation (not yet exercised on a public release).
 
 Remaining evidence and candidate integrations include:
 
 - actual slide, wah, and E-Bow practice sessions with comparable recorded takes under #87, and additional real DAW/play-through verification where the generated assets are used;
+- Riverside heavy-rhythm drum/bass alternate: MIDI/schema review and actual audition before promotion; preserve existing arrangement and distinguish original composed patterns from any reference recording;
+- physical Daisy/Hothouse validation under `ryjen/dsp#6` and optional pi-Stomp LV2/mod-host validation under `ryjen/dsp#26`; native and ARM64 CI are software evidence only;
+- optional Dubnium/supervisor proposals limited to versioned `BackingTrackRequest` parameters, with deterministic validation/rendering and human approval before canonical writes; no model shell, filesystem, MIDI-device, or practice-state authority;
 - broader user-workflow compatibility observations from MuseScore, MusicXML, and Guitar Pro sources beyond deterministic fixtures;
 - local recording references and calendar-compatible schedule export only when practice friction justifies them;
 - first tagged GitHub Release publication when deliberately authorized and useful to consumers.
@@ -145,7 +150,7 @@ Definition of done for any promoted integration:
 The repository should keep validation layered and risk-based:
 
 - fast deterministic unit/component tests at the base;
-- targeted contract/integration tests at scheduling, assessment, discovery, request/catalog, and MIDI boundaries;
+- targeted contract/integration tests at scheduling, assessment, discovery, request/catalog, MIDI, and independently pinned DSP executable boundaries;
 - small real-workflow checks for DAW import, actual practice sessions, and public Pages behavior where automation cannot prove usefulness;
 - static analysis and the existing consistent CI trust baseline delivered by #89; flake-first ownership, runner placement and cost reconciliation are separately tracked by #165.
 
