@@ -3,6 +3,8 @@ name: Validate Repository
 on:
   pull_request:
     paths:
+      - "backing-tracks/**"
+      - "midi/**"
       - "catalogs/**"
       - "contracts/**"
       - "docs/**"
@@ -21,6 +23,8 @@ on:
     branches:
       - main
     paths:
+      - "backing-tracks/**"
+      - "midi/**"
       - "catalogs/**"
       - "contracts/**"
       - "docs/**"
