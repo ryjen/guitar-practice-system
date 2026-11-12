@@ -2,7 +2,7 @@
 # mise is only a task entrypoint; no duplicated [tools] versions.
 [tasks.test]
 description = "Run the canonical guitarctl repository validation in the Nix shell"
-run = "nix develop --command guitarctl validate repo"
+run = "nix develop --no-write-lock-file --command guitarctl validate repo"
 
 [tasks.check]
 description = "Run all pinned Nix flake checks"
