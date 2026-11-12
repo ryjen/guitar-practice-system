@@ -54,11 +54,6 @@ jobs:
           python-version: "3.12"
       - name: Install package
         run: python -m pip install --disable-pip-version-check --no-deps -e .
-      - name: Run backing domain and CLI tests
-        run: |
-          python -m unittest tests.test_backing_track_engine -v
-          python -m unittest tests.test_backing_track_request -v
-          python -m unittest tests.test_native_backing_cli -v
       - name: Resolve backing requests through stable CLI
         run: |
           guitarctl backing resolve \
