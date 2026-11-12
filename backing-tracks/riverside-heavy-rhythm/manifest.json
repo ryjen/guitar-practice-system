@@ -1,0 +1,1839 @@
+{
+  "id": "riverside-heavy-rhythm-g-92",
+  "title": "Riverside Blues \u2014 Original Heavy Blues-Rock Rhythm Section in G",
+  "purpose": "Original 92-BPM backing alternate with spacious explosive blues-rock drums and complementary melodic syncopated electric bass for live guitar/voice; inspired by rhythm-section techniques, not a Led Zeppelin transcription.",
+  "linked_techniques": [
+    "blues-phrasing",
+    "rhythm-pocket"
+  ],
+  "linked_songs": [],
+  "key_signature": "G",
+  "tempo_bpm": 92,
+  "meter": [
+    4,
+    4
+  ],
+  "feel": "Deep laid-back swung pocket, strong snare and moving kick, quiet ghost notes, occasional hand-foot tom replies, melodic bass counterpoint that locks to the drums.",
+  "count_in_bars": 2,
+  "loop": {
+    "start_marker": "INTRO-RIFF",
+    "end_marker": "END"
+  },
+  "sections": [
+    {
+      "name": "INTRO-RIFF",
+      "bars": 8,
+      "chords": [
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7"
+      ],
+      "drum_fills": [
+        {
+          "bar": 1,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "crash",
+              "step": 0,
+              "velocity": 106
+            },
+            {
+              "instrument": "kick",
+              "step": 5,
+              "velocity": 89
+            }
+          ]
+        },
+        {
+          "bar": 3,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 1,
+              "velocity": 50
+            },
+            {
+              "instrument": "kick",
+              "step": 3,
+              "velocity": 87
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 54
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 99
+            }
+          ]
+        },
+        {
+          "bar": 8,
+          "replace": [
+            "open_hat",
+            "closed_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "mid_tom",
+              "triplet_step": 9,
+              "velocity": 94
+            },
+            {
+              "instrument": "low_tom",
+              "triplet_step": 10,
+              "velocity": 102
+            },
+            {
+              "instrument": "kick",
+              "triplet_step": 11,
+              "velocity": 111
+            }
+          ]
+        }
+      ],
+      "bass_riffs": [
+        {
+          "bar": 1,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 87
+            },
+            {
+              "step": 2,
+              "offset": 12,
+              "velocity": 73
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 82
+            }
+          ]
+        },
+        {
+          "bar": 2,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 90
+            },
+            {
+              "step": 3,
+              "offset": 10,
+              "velocity": 77
+            },
+            {
+              "step": 5,
+              "offset": 7,
+              "velocity": 83
+            },
+            {
+              "step": 7,
+              "offset": 5,
+              "velocity": 73
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 94
+            },
+            {
+              "step": 3,
+              "offset": 3,
+              "velocity": 81
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 85
+            },
+            {
+              "step": 7,
+              "offset": 10,
+              "velocity": 75
+            }
+          ]
+        },
+        {
+          "bar": 5,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 92
+            },
+            {
+              "step": 2,
+              "offset": 12,
+              "velocity": 78
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 87
+            }
+          ]
+        },
+        {
+          "bar": 7,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 94
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 87
+            },
+            {
+              "step": 7,
+              "offset": 3,
+              "velocity": 73
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "VERSE-1",
+      "bars": 12,
+      "chords": [
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "C7",
+        "C7",
+        "G7",
+        "G7",
+        "D7",
+        "C7",
+        "G7",
+        "G7"
+      ],
+      "drum_fills": [
+        {
+          "bar": 1,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "crash",
+              "step": 0,
+              "velocity": 105
+            },
+            {
+              "instrument": "kick",
+              "step": 5,
+              "velocity": 88
+            }
+          ]
+        },
+        {
+          "bar": 3,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 1,
+              "velocity": 46
+            },
+            {
+              "instrument": "kick",
+              "step": 3,
+              "velocity": 90
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 55
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 92
+            }
+          ]
+        },
+        {
+          "bar": 7,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "kick",
+              "step": 3,
+              "velocity": 95
+            },
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 53
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 96
+            }
+          ]
+        },
+        {
+          "bar": 12,
+          "replace": [
+            "open_hat",
+            "closed_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "mid_tom",
+              "triplet_step": 9,
+              "velocity": 94
+            },
+            {
+              "instrument": "low_tom",
+              "triplet_step": 10,
+              "velocity": 102
+            },
+            {
+              "instrument": "kick",
+              "triplet_step": 11,
+              "velocity": 111
+            }
+          ]
+        }
+      ],
+      "bass_riffs": [
+        {
+          "bar": 2,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 2,
+              "offset": 12,
+              "velocity": 76
+            },
+            {
+              "step": 4,
+              "offset": 10,
+              "velocity": 82
+            },
+            {
+              "step": 7,
+              "offset": 7,
+              "velocity": 78
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 90
+            },
+            {
+              "step": 3,
+              "offset": 3,
+              "velocity": 76
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 84
+            },
+            {
+              "step": 7,
+              "offset": -6,
+              "velocity": 71
+            }
+          ]
+        },
+        {
+          "bar": 5,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 91
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 84
+            }
+          ]
+        },
+        {
+          "bar": 6,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 90
+            },
+            {
+              "step": 3,
+              "offset": 7,
+              "velocity": 76
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 84
+            },
+            {
+              "step": 7,
+              "offset": 6,
+              "velocity": 71
+            }
+          ]
+        },
+        {
+          "bar": 8,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 91
+            },
+            {
+              "step": 3,
+              "offset": 3,
+              "velocity": 77
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 85
+            },
+            {
+              "step": 7,
+              "offset": -4,
+              "velocity": 72
+            }
+          ]
+        },
+        {
+          "bar": 10,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 94
+            },
+            {
+              "step": 3,
+              "offset": 7,
+              "velocity": 80
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 88
+            },
+            {
+              "step": 7,
+              "offset": 6,
+              "velocity": 75
+            }
+          ]
+        },
+        {
+          "bar": 12,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 3,
+              "offset": 3,
+              "velocity": 79
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 85
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RIFF-REFRAIN-1",
+      "bars": 8,
+      "chords": [
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7"
+      ],
+      "drum_fills": [
+        {
+          "bar": 1,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "crash",
+              "step": 0,
+              "velocity": 107
+            },
+            {
+              "instrument": "kick",
+              "step": 5,
+              "velocity": 86
+            }
+          ]
+        },
+        {
+          "bar": 3,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 1,
+              "velocity": 50
+            },
+            {
+              "instrument": "kick",
+              "step": 3,
+              "velocity": 92
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 49
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 92
+            }
+          ]
+        },
+        {
+          "bar": 8,
+          "replace": [
+            "open_hat",
+            "closed_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "mid_tom",
+              "triplet_step": 9,
+              "velocity": 94
+            },
+            {
+              "instrument": "low_tom",
+              "triplet_step": 10,
+              "velocity": 102
+            },
+            {
+              "instrument": "kick",
+              "triplet_step": 11,
+              "velocity": 111
+            }
+          ]
+        }
+      ],
+      "bass_riffs": [
+        {
+          "bar": 1,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 89
+            },
+            {
+              "step": 2,
+              "offset": 12,
+              "velocity": 75
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 84
+            }
+          ]
+        },
+        {
+          "bar": 2,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 90
+            },
+            {
+              "step": 3,
+              "offset": 10,
+              "velocity": 77
+            },
+            {
+              "step": 5,
+              "offset": 7,
+              "velocity": 83
+            },
+            {
+              "step": 7,
+              "offset": 5,
+              "velocity": 73
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 90
+            },
+            {
+              "step": 3,
+              "offset": 3,
+              "velocity": 77
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 81
+            },
+            {
+              "step": 7,
+              "offset": 10,
+              "velocity": 71
+            }
+          ]
+        },
+        {
+          "bar": 5,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 87
+            },
+            {
+              "step": 2,
+              "offset": 12,
+              "velocity": 73
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 82
+            }
+          ]
+        },
+        {
+          "bar": 7,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 90
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 83
+            },
+            {
+              "step": 7,
+              "offset": 3,
+              "velocity": 69
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "VERSE-2",
+      "bars": 12,
+      "chords": [
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "C7",
+        "C7",
+        "G7",
+        "G7",
+        "D7",
+        "C7",
+        "G7",
+        "G7"
+      ],
+      "drum_fills": [
+        {
+          "bar": 1,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "crash",
+              "step": 0,
+              "velocity": 105
+            },
+            {
+              "instrument": "kick",
+              "step": 5,
+              "velocity": 88
+            }
+          ]
+        },
+        {
+          "bar": 3,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 1,
+              "velocity": 55
+            },
+            {
+              "instrument": "kick",
+              "step": 3,
+              "velocity": 91
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 48
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 97
+            }
+          ]
+        },
+        {
+          "bar": 7,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "kick",
+              "step": 3,
+              "velocity": 93
+            },
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 54
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 96
+            }
+          ]
+        },
+        {
+          "bar": 12,
+          "replace": [
+            "open_hat",
+            "closed_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "mid_tom",
+              "triplet_step": 9,
+              "velocity": 94
+            },
+            {
+              "instrument": "low_tom",
+              "triplet_step": 10,
+              "velocity": 102
+            },
+            {
+              "instrument": "kick",
+              "triplet_step": 11,
+              "velocity": 111
+            }
+          ]
+        }
+      ],
+      "bass_riffs": [
+        {
+          "bar": 2,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 89
+            },
+            {
+              "step": 2,
+              "offset": 12,
+              "velocity": 72
+            },
+            {
+              "step": 4,
+              "offset": 10,
+              "velocity": 78
+            },
+            {
+              "step": 7,
+              "offset": 7,
+              "velocity": 74
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 91
+            },
+            {
+              "step": 3,
+              "offset": 3,
+              "velocity": 77
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 85
+            },
+            {
+              "step": 7,
+              "offset": -6,
+              "velocity": 72
+            }
+          ]
+        },
+        {
+          "bar": 5,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 92
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 85
+            }
+          ]
+        },
+        {
+          "bar": 6,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 91
+            },
+            {
+              "step": 3,
+              "offset": 7,
+              "velocity": 77
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 85
+            },
+            {
+              "step": 7,
+              "offset": 6,
+              "velocity": 72
+            }
+          ]
+        },
+        {
+          "bar": 8,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 92
+            },
+            {
+              "step": 3,
+              "offset": 3,
+              "velocity": 78
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 86
+            },
+            {
+              "step": 7,
+              "offset": -4,
+              "velocity": 73
+            }
+          ]
+        },
+        {
+          "bar": 10,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 3,
+              "offset": 7,
+              "velocity": 79
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 87
+            },
+            {
+              "step": 7,
+              "offset": 6,
+              "velocity": 74
+            }
+          ]
+        },
+        {
+          "bar": 12,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 92
+            },
+            {
+              "step": 3,
+              "offset": 3,
+              "velocity": 78
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 84
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RIFF-REFRAIN-2",
+      "bars": 8,
+      "chords": [
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7"
+      ],
+      "drum_fills": [
+        {
+          "bar": 1,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "crash",
+              "step": 0,
+              "velocity": 107
+            },
+            {
+              "instrument": "kick",
+              "step": 5,
+              "velocity": 85
+            }
+          ]
+        },
+        {
+          "bar": 3,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 1,
+              "velocity": 51
+            },
+            {
+              "instrument": "kick",
+              "step": 3,
+              "velocity": 92
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 47
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 91
+            }
+          ]
+        },
+        {
+          "bar": 8,
+          "replace": [
+            "open_hat",
+            "closed_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "mid_tom",
+              "triplet_step": 9,
+              "velocity": 94
+            },
+            {
+              "instrument": "low_tom",
+              "triplet_step": 10,
+              "velocity": 102
+            },
+            {
+              "instrument": "kick",
+              "triplet_step": 11,
+              "velocity": 111
+            }
+          ]
+        }
+      ],
+      "bass_riffs": [
+        {
+          "bar": 1,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 92
+            },
+            {
+              "step": 2,
+              "offset": 12,
+              "velocity": 78
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 87
+            }
+          ]
+        },
+        {
+          "bar": 2,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 88
+            },
+            {
+              "step": 3,
+              "offset": 10,
+              "velocity": 75
+            },
+            {
+              "step": 5,
+              "offset": 7,
+              "velocity": 81
+            },
+            {
+              "step": 7,
+              "offset": 5,
+              "velocity": 71
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 3,
+              "offset": 3,
+              "velocity": 80
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 84
+            },
+            {
+              "step": 7,
+              "offset": 10,
+              "velocity": 74
+            }
+          ]
+        },
+        {
+          "bar": 5,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 89
+            },
+            {
+              "step": 2,
+              "offset": 12,
+              "velocity": 75
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 84
+            }
+          ]
+        },
+        {
+          "bar": 7,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 86
+            },
+            {
+              "step": 7,
+              "offset": 3,
+              "velocity": 72
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SOLO-BLUES",
+      "bars": 12,
+      "chords": [
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "C7",
+        "C7",
+        "G7",
+        "G7",
+        "D7",
+        "C7",
+        "G7",
+        "G7"
+      ],
+      "drum_fills": [
+        {
+          "bar": 1,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "crash",
+              "step": 0,
+              "velocity": 106
+            },
+            {
+              "instrument": "kick",
+              "step": 5,
+              "velocity": 84
+            }
+          ]
+        },
+        {
+          "bar": 3,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 1,
+              "velocity": 50
+            },
+            {
+              "instrument": "kick",
+              "step": 3,
+              "velocity": 90
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 49
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 92
+            }
+          ]
+        },
+        {
+          "bar": 7,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "kick",
+              "step": 3,
+              "velocity": 96
+            },
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 52
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 98
+            }
+          ]
+        },
+        {
+          "bar": 9,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "high_tom",
+              "triplet_step": 6,
+              "velocity": 87
+            },
+            {
+              "instrument": "low_tom",
+              "triplet_step": 7,
+              "velocity": 99
+            },
+            {
+              "instrument": "kick",
+              "triplet_step": 8,
+              "velocity": 108
+            }
+          ]
+        },
+        {
+          "bar": 12,
+          "replace": [
+            "open_hat",
+            "closed_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "mid_tom",
+              "triplet_step": 9,
+              "velocity": 94
+            },
+            {
+              "instrument": "low_tom",
+              "triplet_step": 10,
+              "velocity": 102
+            },
+            {
+              "instrument": "kick",
+              "triplet_step": 11,
+              "velocity": 111
+            }
+          ]
+        }
+      ],
+      "bass_riffs": [
+        {
+          "bar": 2,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 92
+            },
+            {
+              "step": 2,
+              "offset": 12,
+              "velocity": 75
+            },
+            {
+              "step": 4,
+              "offset": 10,
+              "velocity": 81
+            },
+            {
+              "step": 7,
+              "offset": 7,
+              "velocity": 77
+            }
+          ]
+        },
+        {
+          "bar": 3,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 88
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 81
+            },
+            {
+              "step": 7,
+              "offset": 10,
+              "velocity": 70
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 94
+            },
+            {
+              "step": 3,
+              "offset": 3,
+              "velocity": 80
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 88
+            },
+            {
+              "step": 7,
+              "offset": -6,
+              "velocity": 75
+            }
+          ]
+        },
+        {
+          "bar": 5,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 86
+            }
+          ]
+        },
+        {
+          "bar": 6,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 92
+            },
+            {
+              "step": 3,
+              "offset": 7,
+              "velocity": 78
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 86
+            },
+            {
+              "step": 7,
+              "offset": 6,
+              "velocity": 73
+            }
+          ]
+        },
+        {
+          "bar": 7,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 90
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 83
+            }
+          ]
+        },
+        {
+          "bar": 8,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 92
+            },
+            {
+              "step": 3,
+              "offset": 3,
+              "velocity": 78
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 86
+            },
+            {
+              "step": 7,
+              "offset": -4,
+              "velocity": 73
+            }
+          ]
+        },
+        {
+          "bar": 9,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 90
+            },
+            {
+              "step": 3,
+              "offset": 7,
+              "velocity": 76
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 84
+            },
+            {
+              "step": 7,
+              "offset": -1,
+              "velocity": 71
+            }
+          ]
+        },
+        {
+          "bar": 10,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 91
+            },
+            {
+              "step": 3,
+              "offset": 7,
+              "velocity": 77
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 85
+            },
+            {
+              "step": 7,
+              "offset": 6,
+              "velocity": 72
+            }
+          ]
+        },
+        {
+          "bar": 12,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 93
+            },
+            {
+              "step": 3,
+              "offset": 3,
+              "velocity": 79
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 85
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "OUTRO-RIFF",
+      "bars": 8,
+      "chords": [
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7",
+        "G7"
+      ],
+      "drum_fills": [
+        {
+          "bar": 1,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "crash",
+              "step": 0,
+              "velocity": 107
+            },
+            {
+              "instrument": "kick",
+              "step": 5,
+              "velocity": 85
+            }
+          ]
+        },
+        {
+          "bar": 3,
+          "replace": [],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 1,
+              "velocity": 51
+            },
+            {
+              "instrument": "kick",
+              "step": 3,
+              "velocity": 88
+            }
+          ]
+        },
+        {
+          "bar": 4,
+          "replace": [
+            "open_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "snare",
+              "step": 5,
+              "velocity": 53
+            },
+            {
+              "instrument": "low_tom",
+              "step": 7,
+              "velocity": 92
+            }
+          ]
+        },
+        {
+          "bar": 8,
+          "replace": [
+            "open_hat",
+            "closed_hat"
+          ],
+          "hits": [
+            {
+              "instrument": "mid_tom",
+              "triplet_step": 9,
+              "velocity": 94
+            },
+            {
+              "instrument": "low_tom",
+              "triplet_step": 10,
+              "velocity": 102
+            },
+            {
+              "instrument": "kick",
+              "triplet_step": 11,
+              "velocity": 111
+            }
+          ]
+        }
+      ],
+      "bass_riffs": [
+        {
+          "bar": 1,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 88
+            },
+            {
+              "step": 2,
+              "offset": 12,
+              "velocity": 74
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 83
+            }
+          ]
+        },
+        {
+          "bar": 3,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 91
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 84
+            },
+            {
+              "step": 7,
+              "offset": 3,
+              "velocity": 70
+            }
+          ]
+        },
+        {
+          "bar": 5,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 90
+            },
+            {
+              "step": 2,
+              "offset": 12,
+              "velocity": 76
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 85
+            }
+          ]
+        },
+        {
+          "bar": 7,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 89
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 82
+            },
+            {
+              "step": 7,
+              "offset": 3,
+              "velocity": 68
+            }
+          ]
+        },
+        {
+          "bar": 8,
+          "notes": [
+            {
+              "step": 0,
+              "offset": 0,
+              "velocity": 90
+            },
+            {
+              "step": 3,
+              "offset": 3,
+              "velocity": 77
+            },
+            {
+              "step": 4,
+              "offset": 7,
+              "velocity": 81
+            },
+            {
+              "step": 7,
+              "offset": 10,
+              "velocity": 71
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tracks": [
+    {
+      "name": "Drums",
+      "role": "drums",
+      "channel": 9,
+      "velocity": 98,
+      "instrument_intent": "Wide room-drum sound, powerful kick/snare pulse, barely-there hi-hat, low-velocity ghost snares, syncopated foot answers and tom-led phrase endings; occasional late swung eighth kick-and-tom figures. Actual three-note hand/tom/foot triplet figures (not merely shuffled eighth-note accents) on section endings.",
+      "groove": {
+        "subdivision": 8,
+        "swing": 0.3333333333333333,
+        "humanize_ms": 10,
+        "velocity_variance": 4,
+        "seed": 920231,
+        "count_in": "click",
+        "instruments": {
+          "kick": {
+            "steps": [
+              0,
+              4
+            ],
+            "velocity": 107,
+            "accent_steps": [
+              0
+            ],
+            "accent_velocity": 119
+          },
+          "snare": {
+            "steps": [
+              2,
+              6
+            ],
+            "velocity": 104,
+            "accent_steps": [
+              2,
+              6
+            ],
+            "accent_velocity": 117
+          },
+          "closed_hat": {
+            "steps": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "velocity": 43,
+            "accent_steps": [
+              0,
+              4
+            ],
+            "accent_velocity": 59
+          },
+          "open_hat": {
+            "steps": [],
+            "velocity": 67,
+            "variation": {
+              "every_bars": 4,
+              "steps": [
+                7
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Bass",
+      "role": "bass",
+      "channel": 0,
+      "program": 33,
+      "velocity": 89,
+      "bass": {
+        "style": "kick-root-fifth",
+        "gate_percent": 82,
+        "follow_kick_velocity": false
+      },
+      "instrument_intent": "Warm rounded fingerstyle electric bass; sturdy roots tied to the kick, blues-scale counter-melodies, octave answers, varied syncopated pickups and deliberate pauses under guitar/vocals."
+    }
+  ],
+  "provenance": {
+    "type": "original",
+    "notes": "Original technique-inspired rhythm-section arrangement developed without transcribing or sampling John Bonham, John Paul Jones, or Led Zeppelin recordings. New original drum and bass figures use a fixed generation seed 920231, explicitly stored as bounded section overrides for repeatable performance, not stochastic playback. Seven-section shortened G/92 backing form is an approximation for video rehearsal and not a verified song transcription. The dedicated triplet_step schema explicitly records exact three-per-meter-beat fills; notes are newly authored patterns."
+  },
+  "outputs": {
+    "midi": "generated/backing-tracks/riverside-heavy-rhythm-g-92.mid",
+    "audio": null,
+    "daw_project": null
+  }
+}
