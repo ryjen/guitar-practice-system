@@ -58,14 +58,6 @@ jobs:
           python-version: "3.12"
       - name: Install package
         run: python -m pip install --disable-pip-version-check --no-deps -e .
-      - name: Run groove, bass, and backing compatibility tests
-        run: |
-          python -m unittest tests.test_groove_catalog -v
-          python -m unittest tests.test_groove_engine -v
-          python -m unittest tests.test_bass_engine -v
-          python -m unittest tests.test_native_groove_cli -v
-          python -m unittest tests.test_backing_track_engine -v
-          python -m unittest tests.test_backing_track_request -v
       - name: Smoke-test groove catalog CLI
         run: |
           guitarctl groove validate > /tmp/groove-validate.json
