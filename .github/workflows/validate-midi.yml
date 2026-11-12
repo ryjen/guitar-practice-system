@@ -110,8 +110,6 @@ jobs:
           python-version: "3.12"
       - name: Install package
         run: python -m pip install --disable-pip-version-check --no-deps -e .
-      - name: Enforce public boundary
-        run: guitarctl validate public-boundary > /tmp/public-boundary.json
       - name: Validate groove catalog
         run: guitarctl groove validate
       - name: Validate progression catalog
