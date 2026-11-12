@@ -87,7 +87,7 @@ Constraints:
 Resolve or render the checked-in request through the ordinary backing-track path:
 
 ```bash
-python scripts/resolve_backing_track_request.py examples/backing-tracks/g-mixolydian-request.json
+guitarctl backing resolve examples/backing-tracks/g-mixolydian-request.json
 ```
 
 The deterministic form should resolve to:
