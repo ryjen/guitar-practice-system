@@ -89,7 +89,7 @@ The aim is for B to sound intentional while **D remains home**.
 Resolve or render the checked-in request through the ordinary backing-track path:
 
 ```bash
-python scripts/resolve_backing_track_request.py examples/backing-tracks/d-dorian-request.json
+guitarctl backing resolve examples/backing-tracks/d-dorian-request.json
 ```
 
 The deterministic form should resolve to:

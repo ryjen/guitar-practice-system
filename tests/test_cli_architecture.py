@@ -78,7 +78,6 @@ class CommandRegistryTests(unittest.TestCase):
             "scripts/resolve_backing_track_request.py",
             "scripts/scheduling.py",
             "scripts/scheduling_v2.py",
-            "scripts/timing.py",
             "scripts/validate_repo.py",
             "tools/generate_midi.py",
         }

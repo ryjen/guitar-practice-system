@@ -16,7 +16,7 @@ The first three bars define the harmonic identity. The repeated tonic bar gives 
 Resolve one key directly:
 
 ```bash
-python3 scripts/progression_catalog.py resolve progression-jazz-major-ii-v-i C
+guitarctl progression resolve progression-jazz-major-ii-v-i C
 ```
 
 ## Traversal strategy
@@ -30,7 +30,7 @@ python3 scripts/progression_catalog.py resolve progression-jazz-major-ii-v-i C
 Generate the first four tonic positions:
 
 ```bash
-python3 scripts/progression_catalog.py fourths \
+guitarctl progression fourths \
   progression-jazz-major-ii-v-i \
   --start-key C \
   --count 4

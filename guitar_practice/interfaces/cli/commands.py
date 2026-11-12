@@ -107,7 +107,6 @@ COMPATIBILITY_SHIMS = frozenset(
         "scripts/scheduling_v2.py",
         "scripts/assessment_core.py",
         "scripts/progression_catalog.py",
-        "scripts/timing.py",
         "scripts/midi_workflow.py",
         "scripts/groove_catalog.py",
         "scripts/groove_engine.py",
