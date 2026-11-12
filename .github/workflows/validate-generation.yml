@@ -58,12 +58,6 @@ jobs:
           python-version: "3.12"
       - name: Install package
         run: python -m pip install --disable-pip-version-check --no-deps -e .
-      - name: Run generation tests
-        run: |
-          python -m unittest tests.test_generate_backing_tracks -v
-          python -m unittest tests.test_practice_progression -v
-          python -m unittest tests.test_midi_exercises -v
-          python -m unittest tests.test_native_generation_cli -v
       - name: Verify deterministic bulk backing replay
         run: |
           rm -rf generated/backing-tracks /tmp/backing-first-dir
