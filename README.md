@@ -118,6 +118,12 @@ The same snapshot, state revision, ruleset version, clock value, and timezone pr
 
 ## Quick start
 
+For the pinned Nix environment, use `nix develop`. If mise is installed,
+`mise run test` invokes the canonical `guitarctl validate repo` command inside
+that shell, and `mise run check` runs the full flake checks. mise does not pin a
+second Python toolchain.
+
+
 No runtime is required for the documentation workflow. Optional standard-library Python helpers validate and generate repository assets. The packaged `guitarctl` command is the preferred machine-facing interface.
 
 ```bash

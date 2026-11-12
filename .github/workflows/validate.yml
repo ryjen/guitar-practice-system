@@ -18,6 +18,7 @@ on:
       - "requirements-dev.txt"
       - "flake.nix"
       - "flake.lock"
+      - "mise.toml"
       - ".github/workflows/**"
   push:
     branches:
@@ -38,6 +39,7 @@ on:
       - "requirements-dev.txt"
       - "flake.nix"
       - "flake.lock"
+      - "mise.toml"
       - ".github/workflows/**"
 
 permissions:
